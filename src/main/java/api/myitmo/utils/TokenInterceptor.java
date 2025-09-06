@@ -26,12 +26,15 @@ public class TokenInterceptor implements Interceptor {
 
         Storage storage = myItmo.getStorage();
         long currentTime = System.currentTimeMillis();
+
         // try to update token
         if (storage.getAccessToken() == null || storage.getAccessExpiresAt() < currentTime) {
             if (storage.getRefreshToken() == null) {
                 throw new RuntimeException("Cannot refresh access token: no refresh token present");
             }
-            if (storage.getRefreshExpiresAt() < currentTime) {
+
+            // if refreshTokenExpiration time is not set, ignore it
+            if (storage.getRefreshExpiresAt() != 0 && storage.getRefreshExpiresAt() < currentTime) {
                 throw new RuntimeException("Cannot refresh access token: refresh token expired");
             }
 

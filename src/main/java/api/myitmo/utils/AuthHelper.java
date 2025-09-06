@@ -116,7 +116,7 @@ public class AuthHelper {
 
         return new Request.Builder()
                 .post(formBody2)
-                .url( "\thttps://id.itmo.ru/auth/realms/itmo/protocol/openid-connect/token")
+                .url( "https://id.itmo.ru/auth/realms/itmo/protocol/openid-connect/token")
                 .build();
     }
 
