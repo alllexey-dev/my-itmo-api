@@ -6,7 +6,7 @@
 
     <groupId>io.github.alllexey123</groupId>
     <artifactId>my-itmo-api</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
 
     <name>my-itmo-api</name>
     <description>An interface for MyITMO service</description>

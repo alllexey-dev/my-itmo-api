@@ -29,7 +29,7 @@ public interface Storage {
         setAccessToken(response.getAccessToken());
         setAccessExpiresAt(currentMillis + response.getExpiresIn());
         setRefreshToken(response.getRefreshToken());
-        setRefreshExpiresAt(currentMillis + response.getExpiresIn());
+        setRefreshExpiresAt(currentMillis + response.getRefreshExpiresIn());
         setIdToken(response.getIdToken());
     }
 }
