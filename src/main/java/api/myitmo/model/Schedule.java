@@ -2,8 +2,10 @@ package api.myitmo.model;
 
 import com.google.gson.annotations.SerializedName;
 import lombok.Data;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 public class Schedule {
@@ -16,10 +18,12 @@ public class Schedule {
 
     private LocalDate date;
 
+    @Nullable
     private String note;
 
-    private String type;
+    private List<Lesson> lessons;
 
-    // todo: intersections
+    // private ? type;
+
     // private List<?> intersections
 }
