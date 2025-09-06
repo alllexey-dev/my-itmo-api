@@ -20,4 +20,6 @@ public interface MyItmoApi {
     @GET("/api/record_book/{specialization_id}/{semester}")
     Call<ResultResponse<List<RecordBookEntry>>> getRecordBook(@Path("specialization_id") int specializationId, @Path("semester") int semester);
 
+    @GET("/api/record_book/{record_book_entry_id}")
+    Call<ResultResponse<List<ControlEntry>>> getControlEntries(@Path("record_book_entry_id") int recordBookEntryId);
 }
