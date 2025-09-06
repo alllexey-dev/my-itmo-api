@@ -9,7 +9,7 @@ import api.myitmo.utils.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.Setter;
-import okhttp3.*;
+import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -67,7 +67,6 @@ public class MyItmo {
     public OkHttpClient getOkHttpClient() {
         if (okHttpClient == null) {
             okHttpClient = new OkHttpClient.Builder()
-//                    .addInterceptor(new HttpLoggingInterceptor(System.out::println).setLevel(HttpLoggingInterceptor.Level.HEADERS)) // debug
                     .addInterceptor(new TokenInterceptor(this))
                     .cookieJar(new RuntimeCookieJar()) // needed for authentication
                     .followRedirects(false) // needed for authentication
