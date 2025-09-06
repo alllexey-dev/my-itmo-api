@@ -27,9 +27,9 @@ public interface Storage {
     default void update(TokenResponse response) {
         long currentMillis = System.currentTimeMillis();
         setAccessToken(response.getAccessToken());
-        setAccessExpiresAt(currentMillis + response.getExpiresIn());
+        setAccessExpiresAt(currentMillis + response.getExpiresIn() * 1000);
         setRefreshToken(response.getRefreshToken());
-        setRefreshExpiresAt(currentMillis + response.getRefreshExpiresIn());
+        setRefreshExpiresAt(currentMillis + response.getRefreshExpiresIn() * 1000);
         setIdToken(response.getIdToken());
     }
 }
