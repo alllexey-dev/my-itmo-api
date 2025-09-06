@@ -13,12 +13,11 @@
 Добавьте в pom.xml:
 
 ```xml
-
 <dependencies>
     <dependency>
         <groupId>io.github.alllexey123</groupId>
         <artifactId>my-itmo-api</artifactId>
-        <version>1.0.0</version>
+        <version>1.1.0</version>
     </dependency>
 </dependencies>
 ```
