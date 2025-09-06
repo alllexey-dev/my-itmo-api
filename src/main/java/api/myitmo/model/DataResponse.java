@@ -3,7 +3,7 @@ package api.myitmo.model;
 import lombok.Data;
 
 @Data
-public class MyItmoResponse<T> {
+public class DataResponse<T> {
 
     private int code;
 
