@@ -1,11 +1,9 @@
 package api.myitmo;
 
-import api.myitmo.model.DataResponse;
-import api.myitmo.model.ResultResponse;
-import api.myitmo.model.Schedule;
-import api.myitmo.model.Specialization;
+import api.myitmo.model.*;
 import retrofit2.Call;
 import retrofit2.http.GET;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 import java.time.LocalDate;
@@ -18,4 +16,8 @@ public interface MyItmoApi {
 
     @GET("/api/record_book/specializations")
     Call<ResultResponse<List<Specialization>>> getSpecializations();
+
+    @GET("/api/record_book/{specialization_id}/{semester}")
+    Call<ResultResponse<List<RecordBookEntry>>> getRecordBook(@Path("specialization_id") int specializationId, @Path("semester") int semester);
+
 }
