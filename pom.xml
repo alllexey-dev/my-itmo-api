@@ -5,8 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>api.myitmo</groupId>
-    <artifactId>MyItmoApi</artifactId>
+    <artifactId>my-itmo-api</artifactId>
     <version>1.0.0</version>
+
+    <name>my-itmo-api</name>
+    <description>An interface for MyITMO service</description>
+    <url>https://github.com/alllexey123/my-itmo-api</url>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -15,11 +19,6 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>logging-interceptor</artifactId>
-            <version>5.1.0</version>
-        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -43,7 +42,7 @@
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
-            <version>5.1.0</version>
+            <version>4.9.3</version>
         </dependency>
     </dependencies>
 </project>
