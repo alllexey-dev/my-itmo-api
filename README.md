@@ -1,8 +1,6 @@
 <h1 align = "center">Java MyITMO API</h1>
 <p align = "center">Интерфейс для сервиса MyITMO на Java</p>
 
-**В стадии разработки...**
-
 ## Зависимости
 - `Retrofit`
 - `OkHttp`
@@ -41,5 +39,5 @@ MyItmo myItmo = new MyItmo();
 myItmo.setStorage(storageWithTokens); // или получите токены любым способом выше
 LocalDate now = LocalDate.now();
 MyItmoResponse<List<Schedule>> r = myItmo.api().getPersonalSchedule(now, now.plusDays(1)).execute().body();
-List<Schedule> = r.getData();
+List<Schedule> schedules = r.getData();
 ```
