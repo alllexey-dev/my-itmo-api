@@ -22,4 +22,10 @@ public interface MyItmoApi {
 
     @GET("/api/record_book/{record_book_entry_id}")
     Call<ResultResponse<List<ControlEntry>>> getControlEntries(@Path("record_book_entry_id") int recordBookEntryId);
+
+    @GET("/api/schedule/meta/time_slots")
+    Call<DataResponse<List<TimeSlot>>> getTimeSlots();
+
+    @GET("/api/election/students/selected_flow_chains")
+    Call<ResultResponse<FlowChainsWrapper>> getSelectedFlowChains();
 }
