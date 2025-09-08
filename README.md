@@ -17,7 +17,7 @@
     <dependency>
         <groupId>io.github.alllexey123</groupId>
         <artifactId>my-itmo-api</artifactId>
-        <version>1.1.2</version>
+        <version>1.2.0</version>
     </dependency>
 </dependencies>
 ```
@@ -64,4 +64,15 @@ setStorage(storageWithTokens); // или получите токены любы�
 LocalDate now = LocalDate.now();
 MyItmoResponse<List<Schedule>> r = myItmo.api().getPersonalSchedule(now, now.plusDays(1)).execute().body();
 List<Schedule> schedules = r.getData();
+```
+
+### QR
+
+Генерировать QR-код 1-в-1 как приложение можно с помощью [io.nayuki/qrcodegen](https://central.sonatype.com/artifact/io.nayuki/qrcodegen) таким образом:
+
+```java
+String qrHex = "12345ABC";
+QrSegment segment = QrSegment.makeBytes(qrHex.getBytes(StandardCharsets.ISO_8859_1));
+QrCode qr = QrCode.encodeSegments(Collections.singletonList(segment), QrCode.Ecc.LOW, 1, 1, 5, false);
+
 ```
