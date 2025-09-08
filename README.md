@@ -43,9 +43,7 @@
 
 ```java
 MyItmo myItmo = new MyItmo();
-myItmo.
-
-setStorage(customStorageImpl);
+myItmo.setStorage(customStorageImpl);
 ```
 
 Время жизни refreshToken - 30 дней, accessToken - 30мин; если он устареет - токены обновятся.
@@ -57,9 +55,7 @@ setStorage(customStorageImpl);
 
 ```java
 MyItmo myItmo = new MyItmo();
-myItmo.
-
-setStorage(storageWithTokens); // или получите токены любым способом выше
+myItmo.setStorage(storageWithTokens); // или получите токены любым способом выше
 
 LocalDate now = LocalDate.now();
 MyItmoResponse<List<Schedule>> r = myItmo.api().getPersonalSchedule(now, now.plusDays(1)).execute().body();
