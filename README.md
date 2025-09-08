@@ -74,5 +74,4 @@ List<Schedule> schedules = r.getData();
 String qrHex = "12345ABC";
 QrSegment segment = QrSegment.makeBytes(qrHex.getBytes(StandardCharsets.ISO_8859_1));
 QrCode qr = QrCode.encodeSegments(Collections.singletonList(segment), QrCode.Ecc.LOW, 1, 1, 5, false);
-
 ```
