@@ -28,4 +28,7 @@ public interface MyItmoApi {
 
     @GET("/api/election/students/selected_flow_chains")
     Call<ResultResponse<FlowChainsWrapper>> getSelectedFlowChains();
+
+    @GET("https://qr.itmo.su/v1/user/pass")
+    Call<SimpleResponse<QrData>> getQrCode();
 }

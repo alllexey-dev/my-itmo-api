@@ -7,8 +7,12 @@ import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 public class TokenInterceptor implements Interceptor {
+
+    private final List<String> hostsToIntercept = Arrays.asList(MyItmo.MY_ITMO_HOST, "qr.itmo.su");
 
     private final MyItmo myItmo;
 
@@ -19,8 +23,8 @@ public class TokenInterceptor implements Interceptor {
     @NotNull
     @Override
     public Response intercept(@NotNull Chain chain) throws IOException {
-        // we intercept only MyITMO requests
-        if (!chain.request().url().host().equals(MyItmo.MY_ITMO_HOST)) {
+        // we intercept only MyITMO (and some other) requests
+        if (!hostsToIntercept.contains(chain.request().url().host())) {
             return chain.proceed(chain.request());
         }
 
