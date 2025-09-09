@@ -78,7 +78,7 @@ public class MyItmo {
     public Gson getGson() {
         if (gson == null) {
             gson = new GsonBuilder()
-                    .setPrettyPrinting()
+//                    .setPrettyPrinting()
                     .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
                     .create();
         }
