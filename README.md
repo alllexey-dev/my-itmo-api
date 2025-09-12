@@ -17,7 +17,7 @@
     <dependency>
         <groupId>io.github.alllexey123</groupId>
         <artifactId>my-itmo-api</artifactId>
-        <version>1.2.0</version>
+        <version>1.2.2</version>
     </dependency>
 </dependencies>
 ```
