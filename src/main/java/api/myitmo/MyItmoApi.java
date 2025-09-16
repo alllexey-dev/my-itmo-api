@@ -31,4 +31,10 @@ public interface MyItmoApi {
 
     @GET("https://qr.itmo.su/v1/user/pass")
     Call<SimpleResponse<QrData>> getQrCode();
+
+    @GET("/api/personalities/persons/{personId}")
+    Call<ResultResponse<Personality>> getPersonality(@Path("personId") int personId);
+
+    @GET("/api/personalities/persons")
+    Call<ResultResponse<CountWrapper<List<PersonalityMin>>>> searchPersonalities(@Query("limit") int limit, @Query("offset") int offset, @Query("q") String query);
 }
