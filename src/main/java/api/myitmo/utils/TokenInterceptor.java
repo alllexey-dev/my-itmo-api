@@ -34,12 +34,12 @@ public class TokenInterceptor implements Interceptor {
         // try to update token
         if (storage.getAccessToken() == null || storage.getAccessExpiresAt() < currentTime) {
             if (storage.getRefreshToken() == null) {
-                throw new RuntimeException("Cannot refresh access token: no refresh token present");
+                throw new IOException("Cannot refresh access token: no refresh token present");
             }
 
             // if refreshTokenExpiration time is not set, ignore it
             if (storage.getRefreshExpiresAt() != 0 && storage.getRefreshExpiresAt() < currentTime) {
-                throw new RuntimeException("Cannot refresh access token: refresh token expired");
+                throw new IOException("Cannot refresh access token: refresh token expired");
             }
 
             myItmo.refreshTokens(storage.getRefreshToken());
@@ -48,7 +48,7 @@ public class TokenInterceptor implements Interceptor {
         String accessToken = myItmo.getStorage().getAccessToken();
         // this should not happen
         if (accessToken == null) {
-            throw new RuntimeException("Cannot get access token: access token is null after refresh");
+            throw new IOException("Cannot get access token: access token is null after refresh");
         }
 
         return chain.proceed(chain.request().newBuilder().addHeader("Authorization", "Bearer " + accessToken).build());
