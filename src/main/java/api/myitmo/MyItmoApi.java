@@ -1,6 +1,7 @@
 package api.myitmo;
 
 import api.myitmo.model.*;
+import org.jetbrains.annotations.Nullable;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
@@ -29,12 +30,24 @@ public interface MyItmoApi {
     @GET("/api/election/students/selected_flow_chains")
     Call<ResultResponse<FlowChainsWrapper>> getSelectedFlowChains();
 
-    @GET("https://qr.itmo.su/v1/user/pass")
-    Call<SimpleResponse<QrData>> getQrCode();
-
     @GET("/api/personalities/persons/{personId}")
     Call<ResultResponse<Personality>> getPersonality(@Path("personId") int personId);
 
     @GET("/api/personalities/persons")
     Call<ResultResponse<CountWrapper<List<PersonalityMin>>>> searchPersonalities(@Query("limit") int limit, @Query("offset") int offset, @Query("q") String query);
+
+    @GET("/api/sport/sport_types")
+    Call<ResultResponse<List<IdValuePair>>> getSportTypes();
+
+    @GET("/api/sport/sign/schedule/filters")
+    Call<ResultResponse<SportFilters>> getSportFilters();
+
+    @GET("/api/sport/sign/schedule")
+    Call<ResultResponse<List<SportSchedule>>> getSportSchedule(@Query("date_start") LocalDate dateStart, @Query("date_end") LocalDate dateEnd,
+                                                         @Query("building_id") Long buildingId, @Query("sport_type_id") @Nullable List<Long> sportTypeIds,
+                                                         @Query("teacher_isu") @Nullable List<Long> teacherIsu);
+
+    @GET("https://qr.itmo.su/v1/user/pass")
+    Call<SimpleResponse<QrData>> getQrCode();
+
 }

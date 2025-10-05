@@ -1,6 +1,7 @@
 package api.myitmo;
 
 import api.myitmo.adapters.LocalDateAdapter;
+import api.myitmo.adapters.OffsetDateTimeAdapter;
 import api.myitmo.model.TokenResponse;
 import api.myitmo.storage.RuntimeCookieJar;
 import api.myitmo.storage.RuntimeStorage;
@@ -14,6 +15,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 
 @Setter
 public class MyItmo {
@@ -80,6 +82,7 @@ public class MyItmo {
             gson = new GsonBuilder()
 //                    .setPrettyPrinting()
                     .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
+                    .registerTypeAdapter(OffsetDateTime.class, new OffsetDateTimeAdapter())
                     .create();
         }
         return gson;
