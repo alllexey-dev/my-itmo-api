@@ -32,7 +32,8 @@ public class TokenInterceptor implements Interceptor {
         long currentTime = System.currentTimeMillis();
 
         // try to update token
-        if (storage.getAccessToken() == null || storage.getAccessExpiresAt() < currentTime) {
+        // if accessTokenExpiration time is not set, ignore it
+        if (storage.getAccessToken() == null || (storage.getAccessExpiresAt() != 0 && storage.getAccessExpiresAt() < currentTime)) {
             if (storage.getRefreshToken() == null) {
                 throw new IOException("Cannot refresh access token: no refresh token present");
             }
