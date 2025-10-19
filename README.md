@@ -15,9 +15,9 @@
 ```xml
 <dependencies>
     <dependency>
-        <groupId>io.github.alllexey123</groupId>
+        <groupId>dev.alllexey</groupId>
         <artifactId>my-itmo-api</artifactId>
-        <version>1.3.0</version>
+        <version>1.3.1</version>
     </dependency>
 </dependencies>
 ```

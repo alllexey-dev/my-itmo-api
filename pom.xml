@@ -4,13 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.github.alllexey123</groupId>
+    <groupId>dev.alllexey</groupId>
     <artifactId>my-itmo-api</artifactId>
-    <version>1.3.0</version>
+    <version>1.3.1</version>
 
     <name>my-itmo-api</name>
     <description>An interface for MyITMO service</description>
-    <url>https://github.com/alllexey123/my-itmo-api</url>
+    <url>https://github.com/alllexey-dev/my-itmo-api</url>
 
     <licenses>
         <license>
@@ -22,15 +22,15 @@
     <developers>
         <developer>
             <name>Aleksey Makarov</name>
-            <organization>io.github.alllexey123</organization>
+            <organization>dev.alllexey</organization>
             <organizationUrl>https://github.com/alllexey123</organizationUrl>
         </developer>
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/alllexey123/my-itmo-api.git</connection>
-        <developerConnection>scm:git:ssh://github.com:alllexey123/my-itmo-api.git</developerConnection>
-        <url>https://github.com/alllexey123/my-itmo-api/</url>
+        <connection>scm:git:git://github.com/alllexey-dev/my-itmo-api.git</connection>
+        <developerConnection>scm:git:ssh://github.com:alllexey-dev/my-itmo-api.git</developerConnection>
+        <url>https://github.com/alllexey-dev/my-itmo-api/</url>
     </scm>
 
     <properties>
