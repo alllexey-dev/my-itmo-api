@@ -55,7 +55,6 @@ public class MyItmo {
 
     public TokenResponse getOrRefreshTokens() {
         long currentTime = System.currentTimeMillis();
-
         if (isAccessTokenExpired()) {
             synchronized (tokenLock) {
                 if (isAccessTokenExpired()) {
@@ -71,7 +70,6 @@ public class MyItmo {
                     return forceRefreshTokens();
                 }
             }
-            return forceRefreshTokens();
         }
 
         return storage.toTokenResponse();
