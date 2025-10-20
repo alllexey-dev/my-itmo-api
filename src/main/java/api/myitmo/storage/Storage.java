@@ -32,4 +32,13 @@ public interface Storage {
         setRefreshExpiresAt(currentMillis + response.getRefreshExpiresIn() * 1000);
         setIdToken(response.getIdToken());
     }
+
+    // expiresIn field are not set
+    default TokenResponse toTokenResponse() {
+        TokenResponse tokenResponse = new TokenResponse();
+        tokenResponse.setAccessToken(getAccessToken());
+        tokenResponse.setRefreshToken(getRefreshToken());
+        tokenResponse.setIdToken(getIdToken());
+        return tokenResponse;
+    }
 }

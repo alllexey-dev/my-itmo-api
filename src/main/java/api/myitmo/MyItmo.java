@@ -41,9 +41,47 @@ public class MyItmo {
         getStorage().update(response);
     }
 
-    public void refreshTokens(String refreshToken) {
-        TokenResponse response = getAuthHelper().refreshTokens(refreshToken);
-        getStorage().update(response);
+    public TokenResponse forceRefreshTokens() {
+        try {
+            TokenResponse response = getAuthHelper().refreshTokens(storage.getRefreshToken());
+            getStorage().update(response);
+            return response;
+        } catch (Exception e) {
+            throw new TokenRefreshException("Could not force refresh tokens", e);
+        }
+    }
+
+    private final Object tokenLock = new Object();
+
+    public TokenResponse getOrRefreshTokens() {
+        long currentTime = System.currentTimeMillis();
+
+        if (isAccessTokenExpired()) {
+            synchronized (tokenLock) {
+                if (isAccessTokenExpired()) {
+                    if (storage.getRefreshToken() == null) {
+                        throw new TokenRefreshException("Cannot refresh access token: no refresh token present");
+                    }
+
+                    // if refreshTokenExpiration time is not set, ignore it
+                    if (storage.getRefreshExpiresAt() != 0 && storage.getRefreshExpiresAt() < currentTime) {
+                        throw new TokenRefreshException("Cannot refresh access token: refresh token expired");
+                    }
+
+                    return forceRefreshTokens();
+                }
+            }
+            return forceRefreshTokens();
+        }
+
+        return storage.toTokenResponse();
+    }
+
+    private boolean isAccessTokenExpired() {
+        long currentTime = System.currentTimeMillis();
+
+        // if accessTokenExpiration time is not set, ignore it
+        return storage.getAccessToken() == null || (storage.getAccessExpiresAt() != 0 && storage.getAccessExpiresAt() < currentTime);
     }
 
     // default getters

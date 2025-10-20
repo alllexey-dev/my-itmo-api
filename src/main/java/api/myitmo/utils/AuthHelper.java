@@ -155,8 +155,10 @@ public class AuthHelper {
                 .build();
 
         try (Response response = myItmo.getOkHttpClient().newCall(request).execute()) {
-            String body = response.body().string();
-            return myItmo.getGson().fromJson(body, TokenResponse.class);
+            ResponseBody body = response.body();
+            if (body == null) throw new NullPointerException("Response body is null");
+            String bodyString = body.string();
+            return myItmo.getGson().fromJson(bodyString, TokenResponse.class);
         } catch (Exception e) {
             throw new RuntimeException("Could not refresh tokens", e);
         }
