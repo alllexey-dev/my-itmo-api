@@ -42,8 +42,14 @@ public class MyItmo {
     }
 
     public TokenResponse forceRefreshTokens() {
+        final String refreshToken = storage.getRefreshToken();
+
+        if (refreshToken == null) {
+            throw new TokenRefreshException("Cannot force refresh: no refresh token is available in storage.");
+        }
+
         try {
-            TokenResponse response = getAuthHelper().refreshTokens(storage.getRefreshToken());
+            TokenResponse response = getAuthHelper().refreshTokens(refreshToken);
             getStorage().update(response);
             return response;
         } catch (Exception e) {
@@ -53,17 +59,15 @@ public class MyItmo {
 
     private final Object tokenLock = new Object();
 
-    public TokenResponse getOrRefreshTokens() {
-        long currentTime = System.currentTimeMillis();
-        if (isAccessTokenExpired()) {
+    public TokenResponse getValidTokens() {
+        if (needsRefresh()) {
             synchronized (tokenLock) {
-                if (isAccessTokenExpired()) {
-                    if (storage.getRefreshToken() == null) {
+                if (needsRefresh()) {
+                    if (!hasRefreshToken()) {
                         throw new TokenRefreshException("Cannot refresh access token: no refresh token present");
                     }
 
-                    // if refreshTokenExpiration time is not set, ignore it
-                    if (storage.getRefreshExpiresAt() != 0 && storage.getRefreshExpiresAt() < currentTime) {
+                    if (isRefreshTokenExpired()) {
                         throw new TokenRefreshException("Cannot refresh access token: refresh token expired");
                     }
 
@@ -75,11 +79,26 @@ public class MyItmo {
         return storage.toTokenResponse();
     }
 
-    private boolean isAccessTokenExpired() {
-        long currentTime = System.currentTimeMillis();
+    public boolean needsRefresh() {
+        return !hasAccessToken() || isAccessTokenExpired();
+    }
 
-        // if accessTokenExpiration time is not set, ignore it
-        return storage.getAccessToken() == null || (storage.getAccessExpiresAt() != 0 && storage.getAccessExpiresAt() < currentTime);
+    public boolean hasAccessToken() {
+        return storage.getAccessToken() != null;
+    }
+
+    public boolean hasRefreshToken() {
+        return storage.getRefreshToken() != null;
+    }
+
+    public boolean isAccessTokenExpired() {
+        long currentTime = System.currentTimeMillis();
+        return storage.getAccessExpiresAt() < currentTime;
+    }
+
+    public boolean isRefreshTokenExpired() {
+        long currentTime = System.currentTimeMillis();
+        return storage.getRefreshExpiresAt() < currentTime;
     }
 
     // default getters
