@@ -29,7 +29,7 @@ public class TokenInterceptor implements Interceptor {
         }
 
         try {
-            TokenResponse tokens = myItmo.getOrRefreshTokens();
+            TokenResponse tokens = myItmo.getValidTokens();
             return chain.proceed(chain.request().newBuilder().addHeader("Authorization", "Bearer " + tokens.getAccessToken()).build());
         } catch (Exception e) {
             throw new IOException(e);
