@@ -32,7 +32,9 @@
 * Логин через refresh_token (можно получить через F12 -> cookies в браузере)
   ```java
   MyItmo myItmo = new MyItmo();
-  myItmo.refreshTokens("big_refresh_token");
+  myItmo.getStorage().setRefreshToken("long_refresh_token");
+  myItmo.getStorage().setRefreshExpiresAt(Long.MAX_VALUE);
+  myItmo.forceRefreshTokens();
   ```
 * Своя реализация Storage (далее)
 
@@ -46,7 +48,7 @@ MyItmo myItmo = new MyItmo();
 myItmo.setStorage(customStorageImpl);
 ```
 
-Время жизни refreshToken - 30 дней, accessToken - 30мин; если он устареет - токены обновятся.
+Время жизни refreshToken - 30 дней, accessToken - 30 минут; если он устареет - токены обновятся.
 
 ### API
 
