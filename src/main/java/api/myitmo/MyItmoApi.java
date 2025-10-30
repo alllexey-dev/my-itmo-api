@@ -25,7 +25,7 @@ public interface MyItmoApi {
     Call<ResultResponse<List<ControlEntry>>> getControlEntries(@Path("record_book_entry_id") int recordBookEntryId);
 
     @GET("/api/schedule/meta/time_slots")
-    Call<DataResponse<List<TimeSlot>>> getTimeSlots();
+    Call<DataResponse<List<ExtendedTimeSlot>>> getTimeSlots();
 
     @GET("/api/election/students/selected_flow_chains")
     Call<ResultResponse<FlowChainsWrapper>> getSelectedFlowChains();
@@ -35,6 +35,9 @@ public interface MyItmoApi {
 
     @GET("/api/personalities/persons")
     Call<ResultResponse<CountWrapper<List<PersonalityMin>>>> searchPersonalities(@Query("limit") int limit, @Query("offset") int offset, @Query("q") String query);
+
+    @GET("/api/sport/time_slots")
+    Call<ResultResponse<List<TimeSlot>>> getSportTimeSlots();
 
     @GET("/api/sport/sport_types")
     Call<ResultResponse<List<IdValuePair>>> getSportTypes();
