@@ -8,7 +8,7 @@ import java.util.List;
 @Data
 public class Personality {
 
-    private int isu;
+    private long isu;
 
     private String fio;
 

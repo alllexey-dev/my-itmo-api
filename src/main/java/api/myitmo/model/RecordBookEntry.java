@@ -9,10 +9,10 @@ public class RecordBookEntry {
     private String name;
 
     @SerializedName("discipline_id")
-    private int disciplineId;
+    private long disciplineId;
 
     @SerializedName("est_id")
-    private int estId;
+    private long estId;
 
     // private ? currentScore
 
@@ -24,7 +24,7 @@ public class RecordBookEntry {
     private String controlType;
 
     @SerializedName("control_type_id")
-    private int controlTypeId;
+    private long controlTypeId;
 
     // private ? examDate
 

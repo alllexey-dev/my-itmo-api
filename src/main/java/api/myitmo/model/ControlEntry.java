@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 public class ControlEntry {
 
-    private int id;
+    private long id;
 
     @SerializedName("control_name")
     private String controlName;

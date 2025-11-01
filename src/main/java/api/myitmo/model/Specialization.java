@@ -9,7 +9,7 @@ import java.util.List;
 public class Specialization {
 
     @SerializedName("main_plan")
-    private int mainPlan;
+    private long mainPlan;
 
     @SerializedName("specialization_name")
     private String specializationName;

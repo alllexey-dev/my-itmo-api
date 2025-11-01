@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class IdValuePair {
 
-    private int id;
+    private long id;
 
     private String value;
 }

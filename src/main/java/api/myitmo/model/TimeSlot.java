@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 public class TimeSlot {
-    private int id;
+    private long id;
 
     @SerializedName("time_start")
     private String timeStart;
