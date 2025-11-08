@@ -50,6 +50,9 @@ public interface MyItmoApi {
                                                          @Query("building_id") Long buildingId, @Query("sport_type_id") @Nullable List<Long> sportTypeIds,
                                                          @Query("teacher_isu") @Nullable List<Long> teacherIsu);
 
+    @GET("/api/sport/personal/score")
+    Call<ResultResponse<SportScore>> getSportScore(@Query("semester_id") Long semesterId);
+
     @GET("https://qr.itmo.su/v1/user/pass")
     Call<SimpleResponse<QrData>> getQrCode();
 
