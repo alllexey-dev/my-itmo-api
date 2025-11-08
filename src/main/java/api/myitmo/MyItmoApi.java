@@ -12,8 +12,17 @@ import java.util.List;
 
 public interface MyItmoApi {
 
+    // region schedule
+
     @GET("/api/schedule/schedule/personal")
     Call<DataResponse<List<Schedule>>> getPersonalSchedule(@Query("date_start") LocalDate dateStart, @Query("date_end") LocalDate dateEnd);
+
+    @GET("/api/schedule/meta/time_slots")
+    Call<DataResponse<List<ExtendedTimeSlot>>> getTimeSlots();
+
+    // endregion schedule
+
+    // region record book
 
     @GET("/api/record_book/specializations")
     Call<ResultResponse<List<Specialization>>> getSpecializations();
@@ -24,17 +33,22 @@ public interface MyItmoApi {
     @GET("/api/record_book/{record_book_entry_id}")
     Call<ResultResponse<List<ControlEntry>>> getControlEntries(@Path("record_book_entry_id") int recordBookEntryId);
 
-    @GET("/api/schedule/meta/time_slots")
-    Call<DataResponse<List<ExtendedTimeSlot>>> getTimeSlots();
-
     @GET("/api/election/students/selected_flow_chains")
     Call<ResultResponse<FlowChainsWrapper>> getSelectedFlowChains();
+
+    // endregion record boot
+
+    // region personalities
 
     @GET("/api/personalities/persons/{personId}")
     Call<ResultResponse<Personality>> getPersonality(@Path("personId") int personId);
 
     @GET("/api/personalities/persons")
     Call<ResultResponse<CountWrapper<List<PersonalityMin>>>> searchPersonalities(@Query("limit") int limit, @Query("offset") int offset, @Query("q") String query);
+
+    // endregion personalities
+
+    // region sport
 
     @GET("/api/sport/time_slots")
     Call<ResultResponse<List<TimeSlot>>> getSportTimeSlots();
@@ -53,7 +67,12 @@ public interface MyItmoApi {
     @GET("/api/sport/personal/score")
     Call<ResultResponse<SportScore>> getSportScore(@Query("semester_id") Long semesterId);
 
+    // endregion sport
+
+    // region other
+
     @GET("https://qr.itmo.su/v1/user/pass")
     Call<SimpleResponse<QrData>> getQrCode();
 
+    // endregion other
 }
