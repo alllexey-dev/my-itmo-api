@@ -67,6 +67,9 @@ public interface MyItmoApi {
     @GET("/api/sport/personal/score")
     Call<ResultResponse<SportScore>> getSportScore(@Query("semester_id") Long semesterId);
 
+    @GET("/api/sport/personal/have_attempts")
+    Call<ResultResponse<SportAttempts>> getSportAttempts();
+
     // endregion sport
 
     // region other
