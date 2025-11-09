@@ -13,9 +13,7 @@ import api.myitmo.model.schedule.Schedule;
 import api.myitmo.model.sport.*;
 import org.jetbrains.annotations.Nullable;
 import retrofit2.Call;
-import retrofit2.http.GET;
-import retrofit2.http.Path;
-import retrofit2.http.Query;
+import retrofit2.http.*;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -86,6 +84,12 @@ public interface MyItmoApi {
 
     @GET("/api/sport/sign/chosen")
     Call<ResultResponse<List<ChosenSportSection>>> getChosenSportSections();
+
+    @POST("/api/sport/sign/schedule/lessons")
+    Call<ResultResponse<List<Long>>> signInLessons(@Body List<Long> lessonIds);
+
+    @DELETE("/api/sport/sign/schedule/lessons")
+    Call<ResultResponse<List<Long>>> signOutLessons(@Body List<Long> lessonIds);
 
     // endregion sport
 
