@@ -2,7 +2,7 @@ package api.myitmo;
 
 import api.myitmo.adapters.LocalDateAdapter;
 import api.myitmo.adapters.OffsetDateTimeAdapter;
-import api.myitmo.model.TokenResponse;
+import api.myitmo.model.other.TokenResponse;
 import api.myitmo.storage.RuntimeCookieJar;
 import api.myitmo.storage.RuntimeStorage;
 import api.myitmo.storage.Storage;

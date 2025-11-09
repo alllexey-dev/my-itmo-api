@@ -1,4 +1,4 @@
-package api.myitmo.model;
+package api.myitmo.model.sport;
 
 import lombok.Data;
 

@@ -1,6 +1,16 @@
 package api.myitmo;
 
 import api.myitmo.model.*;
+import api.myitmo.model.other.QrData;
+import api.myitmo.model.personality.Personality;
+import api.myitmo.model.personality.PersonalityMin;
+import api.myitmo.model.recordbook.ControlEntry;
+import api.myitmo.model.recordbook.FlowChainsWrapper;
+import api.myitmo.model.recordbook.RecordBookEntry;
+import api.myitmo.model.recordbook.Specialization;
+import api.myitmo.model.schedule.ExtendedTimeSlot;
+import api.myitmo.model.schedule.Schedule;
+import api.myitmo.model.sport.*;
 import org.jetbrains.annotations.Nullable;
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -61,8 +71,8 @@ public interface MyItmoApi {
 
     @GET("/api/sport/sign/schedule")
     Call<ResultResponse<List<SportSchedule>>> getSportSchedule(@Query("date_start") LocalDate dateStart, @Query("date_end") LocalDate dateEnd,
-                                                         @Query("building_id") Long buildingId, @Query("sport_type_id") @Nullable List<Long> sportTypeIds,
-                                                         @Query("teacher_isu") @Nullable List<Long> teacherIsu);
+                                                               @Query("building_id") Long buildingId, @Query("sport_type_id") @Nullable List<Long> sportTypeIds,
+                                                               @Query("teacher_isu") @Nullable List<Long> teacherIsu);
 
     @GET("/api/sport/personal/score")
     Call<ResultResponse<SportScore>> getSportScore(@Query("semester_id") Long semesterId);

@@ -1,6 +1,6 @@
 package api.myitmo.storage;
 
-import api.myitmo.model.TokenResponse;
+import api.myitmo.model.other.TokenResponse;
 
 public interface Storage {
 

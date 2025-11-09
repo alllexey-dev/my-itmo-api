@@ -1,7 +1,7 @@
 package api.myitmo.utils;
 
 import api.myitmo.MyItmo;
-import api.myitmo.model.TokenResponse;
+import api.myitmo.model.other.TokenResponse;
 import okhttp3.Interceptor;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;

@@ -1,5 +1,6 @@
-package api.myitmo.model;
+package api.myitmo.model.sport;
 
+import api.myitmo.model.IdValuePair;
 import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 

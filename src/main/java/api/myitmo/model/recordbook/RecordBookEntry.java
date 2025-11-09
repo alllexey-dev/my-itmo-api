@@ -1,4 +1,4 @@
-package api.myitmo.model;
+package api.myitmo.model.recordbook;
 
 import com.google.gson.annotations.SerializedName;
 import lombok.Data;
