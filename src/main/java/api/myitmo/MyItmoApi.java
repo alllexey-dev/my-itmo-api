@@ -84,6 +84,9 @@ public interface MyItmoApi {
     @GET("/api/sport/sign/schedule/limits")
     Call<ResultResponse<HashMap<Long, HashMap<Long, SportSignLimit>>>> getSportSignLimits();
 
+    @GET("/api/sport/sign/chosen")
+    Call<ResultResponse<List<ChosenSportSection>>> getChosenSportSections();
+
     // endregion sport
 
     // region other
