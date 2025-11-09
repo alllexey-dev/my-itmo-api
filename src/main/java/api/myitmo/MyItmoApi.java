@@ -18,6 +18,7 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 
 public interface MyItmoApi {
@@ -79,6 +80,9 @@ public interface MyItmoApi {
 
     @GET("/api/sport/personal/have_attempts")
     Call<ResultResponse<SportAttempts>> getSportAttempts();
+
+    @GET("/api/sport/sign/schedule/limits")
+    Call<ResultResponse<HashMap<Long, HashMap<Long, SportSignLimit>>>> getSportSignLimits();
 
     // endregion sport
 
