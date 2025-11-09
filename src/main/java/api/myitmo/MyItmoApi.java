@@ -88,7 +88,7 @@ public interface MyItmoApi {
     @POST("/api/sport/sign/schedule/lessons")
     Call<ResultResponse<List<Long>>> signInLessons(@Body List<Long> lessonIds);
 
-    @DELETE("/api/sport/sign/schedule/lessons")
+    @HTTP(method = "DELETE", path = "/api/sport/sign/schedule/lessons", hasBody = true)
     Call<ResultResponse<List<Long>>> signOutLessons(@Body List<Long> lessonIds);
 
     // endregion sport
