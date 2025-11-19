@@ -6,7 +6,7 @@
 
     <groupId>dev.alllexey</groupId>
     <artifactId>my-itmo-api</artifactId>
-    <version>1.4.0</version>
+    <version>1.4.1</version>
 
     <name>my-itmo-api</name>
     <description>An interface for MyITMO service</description>

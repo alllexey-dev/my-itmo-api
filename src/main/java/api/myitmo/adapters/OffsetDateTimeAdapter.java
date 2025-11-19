@@ -14,7 +14,13 @@ public class OffsetDateTimeAdapter extends TypeAdapter<OffsetDateTime> {
     }
 
     @Override
-    public OffsetDateTime read(JsonReader jsonReader) throws IOException {
-        return OffsetDateTime.parse(jsonReader.nextString());
+    public OffsetDateTime read(JsonReader in) throws IOException {
+        if (in.peek() == com.google.gson.stream.JsonToken.NULL) {
+            in.nextNull();
+            return null;
+        }
+
+        String dateString = in.nextString();
+        return OffsetDateTime.parse(dateString);
     }
 }

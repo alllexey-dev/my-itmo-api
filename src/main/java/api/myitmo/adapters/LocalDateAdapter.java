@@ -6,6 +6,8 @@ import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public class LocalDateAdapter extends TypeAdapter<LocalDate> {
     @Override
@@ -14,7 +16,13 @@ public class LocalDateAdapter extends TypeAdapter<LocalDate> {
     }
 
     @Override
-    public LocalDate read(JsonReader jsonReader) throws IOException {
-        return LocalDate.parse(jsonReader.nextString());
+    public LocalDate read(JsonReader in) throws IOException {
+        if (in.peek() == com.google.gson.stream.JsonToken.NULL) {
+            in.nextNull();
+            return null;
+        }
+
+        String dateString = in.nextString();
+        return LocalDate.parse(dateString);
     }
 }
