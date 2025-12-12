@@ -1,5 +1,5 @@
 <h1 align = "center">Java MyITMO API</h1>
-<p align = "center">Интерфейс для сервиса MyITMO на Java</p>
+<p align = "center"><strong>Интерфейс для сервиса <a href="https://my.itmo.ru">MyITMO</a> на Java</strong></p>
 
 ### 🌟 Текущие возможности
 - **Вход по логину/паролю ITMO ID**
