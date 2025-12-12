@@ -77,7 +77,7 @@ List<Schedule> schedules = r.getData();
 
 #### QR
 
-Генерировать QR-код 1-в-1 как приложение можно с помощью [io.nayuki/qrcodegen](https://central.sonatype.com/artifact/io.nayuki/qrcodegen) таким образом:
+Генерировать QR-код (почти) 1-в-1 как приложение можно с помощью [io.nayuki/qrcodegen](https://central.sonatype.com/artifact/io.nayuki/qrcodegen) таким образом:
 
 ```java
 String qrHex = "12345ABC";
