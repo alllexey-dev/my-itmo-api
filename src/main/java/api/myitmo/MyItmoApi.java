@@ -101,6 +101,12 @@ public interface MyItmoApi {
 
     @POST("/api/election/students/order/change")
     Call<ResultResponse<ChangeResult>> changeSelectedFlows(@Body List<Long> flowIds);
+
+    @POST("/api/election/students/order/clear")
+    Call<ResultResponse<?>> clearAllSelectedFlows();
+
+    @POST("/api/election/students/order/")
+    Call<ResultResponse<ChangeResult>> changeSelectedDisciplines(@Body List<String> disciplineIds);
     // endregion election
 
     // region other
