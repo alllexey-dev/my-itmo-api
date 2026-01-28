@@ -9,6 +9,7 @@ import api.myitmo.storage.Storage;
 import api.myitmo.utils.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import lombok.Getter;
 import lombok.Setter;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
@@ -19,10 +20,6 @@ import java.time.OffsetDateTime;
 
 @Setter
 public class MyItmo {
-
-    public static final String MY_ITMO_HOST = "my.itmo.ru";
-
-    public static final String MY_ITMO_URL = "https://" +  MY_ITMO_HOST;
 
     private MyItmoApi api;
 
@@ -35,6 +32,17 @@ public class MyItmo {
     private AuthHelper authHelper;
 
     private Storage storage;
+
+    @Getter
+    private MyItmoConfiguration configuration;
+
+    public MyItmo() {
+        this(MyItmoConfiguration.DEFAULT);
+    }
+
+    public MyItmo(MyItmoConfiguration configuration) {
+        this.configuration = configuration;
+    }
 
     public void auth(String username, String password) {
         TokenResponse response = getAuthHelper().auth(username, password);
@@ -113,7 +121,7 @@ public class MyItmo {
     public Retrofit getRetrofit() {
         if (retrofit == null) {
             retrofit = new Retrofit.Builder()
-                    .baseUrl(MY_ITMO_URL)
+                    .baseUrl(configuration.getUrl())
                     .client(getOkHttpClient())
                     .addConverterFactory(GsonConverterFactory.create(getGson()))
                     .build();

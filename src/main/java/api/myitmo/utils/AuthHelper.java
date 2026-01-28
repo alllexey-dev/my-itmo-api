@@ -12,10 +12,6 @@ import java.util.Base64;
 
 public class AuthHelper {
 
-    public static final String AUTH_CLIENT_ID = "student-personal-cabinet";
-
-    public static final String AUTH_REDIRECT_URI = "https://my.itmo.ru/login/callback";
-
     private final MyItmo myItmo;
 
     public AuthHelper(MyItmo myItmo) {
@@ -75,9 +71,9 @@ public class AuthHelper {
                 .newBuilder()
                 .addEncodedQueryParameter("protocol", "oauth2")
                 .addEncodedQueryParameter("response_type", "code")
-                .addEncodedQueryParameter("client_id", AUTH_CLIENT_ID)
-                .addEncodedQueryParameter("redirect_uri", AUTH_REDIRECT_URI)
-                .addEncodedQueryParameter("scope", "openid")
+                .addEncodedQueryParameter("client_id", myItmo.getConfiguration().getAuthClientId())
+                .addEncodedQueryParameter("redirect_uri", myItmo.getConfiguration().getAuthRedirectUri())
+                .addEncodedQueryParameter("scope", "openid profile")
                 .addEncodedQueryParameter("state", "im_not_a_browser")
                 .addEncodedQueryParameter("code_challenge_method", "S256")
                 .addEncodedQueryParameter("code_challenge", codeChallenge)
@@ -107,8 +103,8 @@ public class AuthHelper {
     public Request getTokenRequest(String code, String codeVerifier) {
         FormBody formBody2 = new FormBody.Builder()
                 .add("code", code)
-                .add("client_id", AUTH_CLIENT_ID)
-                .add("redirect_uri", AUTH_REDIRECT_URI)
+                .add("client_id", myItmo.getConfiguration().getAuthClientId())
+                .add("redirect_uri", myItmo.getConfiguration().getAuthRedirectUri())
                 .add("response_type", "code")
                 .add("grant_type", "authorization_code")
                 .add("code_verifier", codeVerifier)
@@ -145,7 +141,7 @@ public class AuthHelper {
         FormBody formBody =  new FormBody.Builder()
                 .add("refresh_token", refreshToken)
                 .add("scopes", "openid profile")
-                .add("client_id", AUTH_CLIENT_ID)
+                .add("client_id", myItmo.getConfiguration().getAuthClientId())
                 .add("grant_type", "refresh_token")
                 .build();
 
