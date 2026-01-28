@@ -1,6 +1,7 @@
 package api.myitmo;
 
 import api.myitmo.model.*;
+import api.myitmo.model.election.ChangeResult;
 import api.myitmo.model.other.QrData;
 import api.myitmo.model.personality.Personality;
 import api.myitmo.model.personality.PersonalityMin;
@@ -98,6 +99,8 @@ public interface MyItmoApi {
     @GET("/api/election/students/chosen_flows")
     Call<ResultResponse<List<Long>>> getChosenFlows();
 
+    @POST("/api/election/students/order/change")
+    Call<ResultResponse<ChangeResult>> changeSelectedFlows(@Body List<Long> flowIds);
     // endregion election
 
     // region other
