@@ -28,7 +28,7 @@
     <dependency>
         <groupId>dev.alllexey</groupId>
         <artifactId>my-itmo-api</artifactId>
-        <version>1.4.1</version>
+        <version>1.4.2</version>
     </dependency>
 </dependencies>
 ```
