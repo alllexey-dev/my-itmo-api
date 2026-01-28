@@ -42,9 +42,6 @@ public interface MyItmoApi {
     @GET("/api/record_book/{record_book_entry_id}")
     Call<ResultResponse<List<ControlEntry>>> getControlEntries(@Path("record_book_entry_id") int recordBookEntryId);
 
-    @GET("/api/election/students/selected_flow_chains")
-    Call<ResultResponse<FlowChainsWrapper>> getSelectedFlowChains();
-
     // endregion record boot
 
     // region personalities
@@ -92,6 +89,16 @@ public interface MyItmoApi {
     Call<ResultResponse<List<Long>>> signOutLessons(@Body List<Long> lessonIds);
 
     // endregion sport
+
+    // region election
+
+    @GET("/api/election/students/selected_flow_chains")
+    Call<ResultResponse<FlowChainsWrapper>> getSelectedFlowChains();
+
+    @GET("/api/election/students/chosen_flows")
+    Call<ResultResponse<List<Long>>> getChosenFlows();
+
+    // endregion election
 
     // region other
 

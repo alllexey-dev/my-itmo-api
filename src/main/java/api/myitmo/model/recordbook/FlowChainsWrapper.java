@@ -8,7 +8,7 @@ import java.util.List;
 public class FlowChainsWrapper {
 
     // IDK what is this
-    private int selectedBy;
+    private Long selectedBy;
 
     private List<FlowChain> flowChains;
 }
