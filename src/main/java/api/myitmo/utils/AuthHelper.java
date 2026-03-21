@@ -19,6 +19,25 @@ public class AuthHelper {
     }
 
     // region auth
+
+    /**
+     * Выполняет полный OAuth2 Authorization Code Flow с PKCE.
+     *
+     * <p>Шаги:</p>
+     * <ol>
+     *     <li>Получение loginAction URL</li>
+     *     <li>Отправка логина и пароля</li>
+     *     <li>Получение authorization code из redirect</li>
+     *     <li>Обмен code на access и refresh токены</li>
+     * </ol>
+     *
+     * @param username логин пользователя
+     * @param password пароль пользователя
+     * @return {@link TokenResponse} с access и refresh токенами
+     *
+     * @throws RuntimeException если любой шаг аутентификации завершился ошибкой
+     */
+
     public TokenResponse auth(String username, String password) {
         OkHttpClient client = myItmo.getOkHttpClient();
 
@@ -65,7 +84,12 @@ public class AuthHelper {
         }
     }
 
-    // part 1
+    /**
+     * Формирует initial OAuth2 запрос (authorization endpoint).
+     *
+     * @param codeChallenge PKCE code challenge
+     * @return HTTP GET запрос
+     */
     public Request getInitialRequest(String codeChallenge) {
         HttpUrl url = HttpUrl.get("https://id.itmo.ru/auth/realms/itmo/protocol/openid-connect/auth")
                 .newBuilder()
@@ -85,7 +109,14 @@ public class AuthHelper {
                 .build();
     }
 
-    // part 2
+    /**
+     * Формирует POST-запрос с учётными данными пользователя.
+     *
+     * @param loginActionUrl URL формы логина
+     * @param username логин
+     * @param password пароль
+     * @return HTTP POST запрос
+     */
     public Request getAuthRequest(String loginActionUrl, String username, String password) {
         FormBody formBody = new FormBody.Builder()
                 .add("username", username)
@@ -99,7 +130,13 @@ public class AuthHelper {
                 .build();
     }
 
-    // part 3
+    /**
+     * Формирует запрос для обмена authorization code на токены.
+     *
+     * @param code authorization code
+     * @param codeVerifier PKCE verifier
+     * @return HTTP POST запрос
+     */
     public Request getTokenRequest(String code, String codeVerifier) {
         FormBody formBody2 = new FormBody.Builder()
                 .add("code", code)
@@ -116,6 +153,11 @@ public class AuthHelper {
                 .build();
     }
 
+    /**
+     * Генерирует случайный PKCE code verifier.
+     *
+     * @return base64url строка без padding
+     */
     public static String generateCodeVerifier() {
         SecureRandom secureRandom = new SecureRandom();
         byte[] codeVerifier = new byte[32];
@@ -123,6 +165,12 @@ public class AuthHelper {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(codeVerifier);
     }
 
+    /**
+     * Вычисляет PKCE code challenge (SHA-256).
+     *
+     * @param codeVerifier исходный verifier
+     * @return base64url SHA-256 hash
+     */
     public static String getCodeChallenge(String codeVerifier) {
         byte[] bytes = codeVerifier.getBytes(StandardCharsets.UTF_8);
         MessageDigest messageDigest;
@@ -134,9 +182,17 @@ public class AuthHelper {
         byte[] digest = messageDigest.digest(bytes);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
     }
+
     // endregion auth
 
-
+    /**
+     * Обновляет токены с использованием refresh token.
+     *
+     * @param refreshToken refresh token
+     * @return новый {@link TokenResponse}
+     *
+     * @throws RuntimeException если не удалось выполнить запрос или распарсить ответ
+     */
     public TokenResponse refreshTokens(String refreshToken) {
         FormBody formBody =  new FormBody.Builder()
                 .add("refresh_token", refreshToken)
@@ -158,6 +214,5 @@ public class AuthHelper {
         } catch (Exception e) {
             throw new RuntimeException("Could not refresh tokens", e);
         }
-
     }
 }

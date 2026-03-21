@@ -10,7 +10,6 @@ import api.myitmo.storage.Storage;
 import api.myitmo.utils.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import kotlin.Suppress;
 import lombok.Getter;
 import lombok.Setter;
 import okhttp3.OkHttpClient;
@@ -21,7 +20,6 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.IOException;
-import java.io.Reader;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
@@ -43,19 +41,52 @@ public class MyItmo {
     @Getter
     private MyItmoConfiguration configuration;
 
+    /**
+     * Создаёт экземпляр клиента MyITMO с конфигурацией по умолчанию.
+     *
+     * <p>Использует {@link MyItmoConfiguration#DEFAULT}.</p>
+     */
     public MyItmo() {
         this(MyItmoConfiguration.DEFAULT);
     }
 
+    /**
+     * Создаёт экземпляр клиента MyITMO с заданной конфигурацией.
+     *
+     * @param configuration конфигурация клиента (URL, OAuth параметры и т.д.)
+     */
     public MyItmo(MyItmoConfiguration configuration) {
         this.configuration = configuration;
     }
 
+    /**
+     * Выполняет аутентификацию пользователя через OAuth2 (PKCE flow).
+     *
+     * <p>После успешной аутентификации токены сохраняются в {@link Storage}.</p>
+     *
+     * @param username логин пользователя
+     * @param password пароль пользователя
+     *
+     * @throws RuntimeException если не удалось пройти процесс аутентификации
+     */
     public void auth(String username, String password) {
         TokenResponse response = getAuthHelper().auth(username, password);
         getStorage().update(response);
     }
 
+    /**
+     * Принудительно обновляет access и refresh токены.
+     *
+     * <p>Использует текущий refresh token из {@link Storage}.</p>
+     *
+     * @return новый {@link TokenResponse}
+     *
+     * @throws TokenRefreshException если:
+     * <ul>
+     *     <li>refresh token отсутствует</li>
+     *     <li>не удалось обновить токены</li>
+     * </ul>
+     */
     public TokenResponse forceRefreshTokens() {
         final String refreshToken = storage.getRefreshToken();
 
@@ -74,6 +105,20 @@ public class MyItmo {
 
     private final Object tokenLock = new Object();
 
+    /**
+     * Возвращает валидные токены, автоматически обновляя их при необходимости.
+     *
+     * <p>Обновление выполняется потокобезопасно.</p>
+     *
+     * @return актуальный {@link TokenResponse}
+     *
+     * @throws TokenRefreshException если:
+     * <ul>
+     *     <li>нет refresh token</li>
+     *     <li>refresh token истёк</li>
+     *     <li>не удалось обновить токены</li>
+     * </ul>
+     */
     public TokenResponse getValidTokens() {
         if (needsRefresh()) {
             synchronized (tokenLock) {
@@ -116,8 +161,7 @@ public class MyItmo {
         return storage.getRefreshExpiresAt() < currentTime;
     }
 
-    // default getters
-    public MyItmoApi api() {
+    public MyItmoApi getApi() {
         if (api == null) {
             api = getRetrofit()
                     .create(MyItmoApi.class);
@@ -165,12 +209,44 @@ public class MyItmo {
         return authHelper;
     }
 
+    /**
+     * Возвращает хранилище токенов.
+     *
+     * <p>По умолчанию используется {@link RuntimeStorage} (в памяти).</p>
+     *
+     * @return {@link Storage}
+     */
     public Storage getStorage() {
         if (storage == null) {
-            storage = new RuntimeStorage(); // store in memory by default
+            storage = new RuntimeStorage();
         }
         return storage;
     }
+
+    /**
+     * Выполняет синхронный HTTP-запрос к API MyITMO и обрабатывает ответ.
+     *
+     * <p>Поведение:</p>
+     * <ul>
+     *     <li>При HTTP 2xx возвращает десериализованный {@link ResultResponse}.</li>
+     *     <li>При HTTP 4xx/5xx пытается распарсить {@code errorBody} и выбрасывает {@link ApiException}.</li>
+     *     <li>При ошибках сети (IOException) выбрасывает {@link ApiException}.</li>
+     * </ul>
+     *
+     * <p>Важно: метод не проверяет {@code error_code} внутри {@link ResultResponse}.
+     * Если API возвращает ошибку с HTTP 200, её нужно обрабатывать отдельно.</p>
+     *
+     * @param call HTTP-вызов, созданный через {@link MyItmoApi}
+     * @param <T> тип данных в поле {@code result} ответа
+     * @return десериализованный {@link ResultResponse}
+     *
+     * @throws ApiException если:
+     * <ul>
+     *     <li>сервер вернул HTTP-ошибку (4xx/5xx)</li>
+     *     <li>не удалось распарсить тело ошибки</li>
+     *     <li>произошла ошибка сети</li>
+     * </ul>
+     */
 
     public <T> ResultResponse<T> execute(Call<ResultResponse<T>> call) {
         try {

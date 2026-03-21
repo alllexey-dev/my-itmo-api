@@ -83,9 +83,43 @@ public interface MyItmoApi {
     @GET("/api/sport/sign/chosen")
     Call<ResultResponse<List<ChosenSportSection>>> getChosenSportSections();
 
+    /**
+     * Записывает студента на указанные занятия.
+     *
+     * <p>API endpoint: {@code POST /api/sport/sign/schedule/lessons}</p>
+     *
+     * При невозможности записать студента возвращает {@code errorCode = 137} и перечисление причин.
+     * Формат перечисления: [нельзя записать студента: [причина 1], [причина 2], ...]
+     * <p>Возможные причины:</p>
+     * <ul>
+     *     <li>Выбрано 1 занятие в этот день</li>
+     *     <li>Есть запись на занятия в это время: [секция] в [дата]</li>
+     *     <li>Выбрано 2 занятия на неделе: [дата начала недели]</li>
+     *     <li>... и другие ошибки</li>
+     * </ul>
+     *
+     * @param lessonIds список ID занятий, на которые нужно записаться
+     * @return {@link ResultResponse}, содержащий список ID успешно добавленных записей
+     */
+
     @POST("/api/sport/sign/schedule/lessons")
     Call<ResultResponse<List<Long>>> signInLessons(@Body List<Long> lessonIds);
 
+    /**
+     * Отписывает студента от указанных занятий.
+     *
+     * <p>API endpoint: {@code DELETE /api/sport/sign/schedule/lessons}</p>
+     *
+     * При невозможности отписать студента возвращает {@code errorCode = 130} и перечисление причин.
+     * Формат перечисления: [нельзя отписать студента: [причина 1], [причина 2], ...]
+     * <p>Возможные причины:</p>
+     * <ul>
+     *     <li>Вы не записаны на это занятие</li>
+     * </ul>
+     *
+     * @param lessonIds список ID занятий, от которых нужно отписаться
+     * @return {@link ResultResponse}, содержащий список ID занятий, от которых успешно отписались
+     */
     @HTTP(method = "DELETE", path = "/api/sport/sign/schedule/lessons", hasBody = true)
     Call<ResultResponse<List<Long>>> signOutLessons(@Body List<Long> lessonIds);
 
