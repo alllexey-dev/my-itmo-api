@@ -9,6 +9,7 @@
   - **Расписание (как уроков, так и спорта)**
   - **QR-пропуск в корпуса (в HEX-формате)**
   - **Свои записи на спорт (а также редактировать их)**
+  - **Свои записи во время выборности (и изменять их)**
   - Зачётную книжку
   - Персоналии по ID (а также искать по ФИО)
 
@@ -28,7 +29,7 @@
     <dependency>
         <groupId>dev.alllexey</groupId>
         <artifactId>my-itmo-api</artifactId>
-        <version>1.4.3</version>
+        <version>1.5.0</version>
     </dependency>
 </dependencies>
 ```
@@ -40,7 +41,7 @@
   MyItmo myItmo = new MyItmo();
   myItmo.auth("my_cool_id", "my_strong_password");
   ```
-* Логин через refresh_token (можно получить через F12 -> cookies в браузере)
+* Логин через refresh_token (можно получить через F12 → cookies в браузере)
   ```java
   MyItmo myItmo = new MyItmo();
   myItmo.getStorage().setRefreshToken("long_refresh_token");
@@ -63,7 +64,7 @@ myItmo.setStorage(customStorageImpl);
 
 #### API
 
-Методы API доступны через **MyItmo#api()** <br>
+Методы API доступны через **MyItmo#getApi()** <br>
 Например, получение расписания на сегодня и завтра:
 
 ```java
@@ -71,7 +72,7 @@ MyItmo myItmo = new MyItmo();
 myItmo.setStorage(storageWithTokens); // или получите токены любым способом выше
 
 LocalDate now = LocalDate.now();
-MyItmoResponse<List<Schedule>> r = myItmo.api().getPersonalSchedule(now, now.plusDays(1)).execute().body();
+MyItmoResponse<List<Schedule>> r = myItmo.getApi().getPersonalSchedule(now, now.plusDays(1)).execute().body();
 List<Schedule> schedules = r.getData();
 ```
 

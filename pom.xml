@@ -6,7 +6,7 @@
 
     <groupId>dev.alllexey</groupId>
     <artifactId>my-itmo-api</artifactId>
-    <version>1.4.3</version>
+    <version>1.5.0</version>
 
     <name>my-itmo-api</name>
     <description>An interface for MyITMO service</description>
@@ -63,7 +63,7 @@
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
-            <version>4.9.3</version>
+            <version>4.12.0</version>
         </dependency>
     </dependencies>
 
