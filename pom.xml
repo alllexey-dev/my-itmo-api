@@ -166,7 +166,8 @@
                         </goals>
                         <configuration>
                             <gpgArguments>
-                                <arg>-v</arg>
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
                             </gpgArguments>
                         </configuration>
                     </execution>
