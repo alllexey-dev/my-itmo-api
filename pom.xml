@@ -165,6 +165,7 @@
                             <goal>sign</goal>
                         </goals>
                         <configuration>
+                            <passphrase>${env.MAVEN_GPG_PASSPHRASE}</passphrase>
                             <gpgArguments>
                                 <arg>--pinentry-mode</arg>
                                 <arg>loopback</arg>
