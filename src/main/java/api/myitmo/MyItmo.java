@@ -2,6 +2,7 @@ package api.myitmo;
 
 import api.myitmo.adapters.LocalDateAdapter;
 import api.myitmo.adapters.OffsetDateTimeAdapter;
+import api.myitmo.model.ResultResponse;
 import api.myitmo.model.other.TokenResponse;
 import api.myitmo.storage.RuntimeCookieJar;
 import api.myitmo.storage.RuntimeStorage;
@@ -9,12 +10,18 @@ import api.myitmo.storage.Storage;
 import api.myitmo.utils.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import kotlin.Suppress;
 import lombok.Getter;
 import lombok.Setter;
 import okhttp3.OkHttpClient;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import java.io.IOException;
+import java.io.Reader;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
@@ -163,5 +170,34 @@ public class MyItmo {
             storage = new RuntimeStorage(); // store in memory by default
         }
         return storage;
+    }
+
+    public <T> ResultResponse<T> execute(Call<ResultResponse<T>> call) {
+        try {
+            Response<ResultResponse<T>> response = call.execute();
+
+            if (response.isSuccessful()) {
+                return response.body();
+            }
+
+            try (ResponseBody errorBody = response.errorBody()) {
+                String errorJson = errorBody != null
+                        ? errorBody.string()
+                        : null;
+
+                if (errorJson != null && !errorJson.isEmpty()) {
+                    ResultResponse<?> error = gson.fromJson(errorJson, ResultResponse.class);
+
+                    throw new ApiException(
+                            error.getErrorCode(),
+                            error.getErrorMessage()
+                    );
+                }
+
+                throw new ApiException("HTTP " + response.code() + " without body", null);
+            }
+        } catch (IOException e) {
+            throw new ApiException("Network error", e);
+        }
     }
 }
