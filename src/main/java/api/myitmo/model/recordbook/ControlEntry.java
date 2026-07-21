@@ -3,6 +3,8 @@ package api.myitmo.model.recordbook;
 import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 
+import java.time.OffsetDateTime;
+
 @Data
 public class ControlEntry {
 
@@ -11,22 +13,23 @@ public class ControlEntry {
     @SerializedName("control_name")
     private String controlName;
 
-    // private ? parentId
+    @SerializedName("parent_id")
+    private Long parentId;
 
     @SerializedName("lower_value")
-    private int lowerValue;
+    private Double lowerValue;
 
     @SerializedName("max_value")
-    private int maxValue;
+    private Double maxValue;
 
     @SerializedName("min_value")
-    private int minValue;
+    private Double minValue;
 
     private boolean required;
 
-    // private ? rate
+    private Double rate;
 
-    // private ? date
+    private OffsetDateTime date;
 
-    // private ? teacher
+    private RecordBookTeacher teacher;
 }

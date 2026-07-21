@@ -3,6 +3,8 @@ package api.myitmo.model.recordbook;
 import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 
+import java.time.OffsetDateTime;
+
 @Data
 public class RecordBookEntry {
 
@@ -14,11 +16,12 @@ public class RecordBookEntry {
     @SerializedName("est_id")
     private long estId;
 
-    // private ? currentScore
+    @SerializedName("current_score")
+    private Double currentScore;
 
-    // private ? rate
+    private String rate;
 
-    // private ? attempt
+    private int attempt;
 
     @SerializedName("control_type")
     private String controlType;
@@ -26,12 +29,14 @@ public class RecordBookEntry {
     @SerializedName("control_type_id")
     private long controlTypeId;
 
-    // private ? examDate
+    @SerializedName("exam_date")
+    private OffsetDateTime examDate;
 
     @SerializedName("have_tree")
     private boolean haveTree;
 
-    // private ? lmsLink
+    @SerializedName("lms_link")
+    private String lmsLink;
 
-    // private ? teacher
+    private RecordBookTeacher teacher;
 }
