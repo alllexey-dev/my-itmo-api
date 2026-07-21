@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.time.OffsetDateTime;
 
+/** Конкретное будущее занятие внутри выбранной спортивной группы. */
 @Data
 public class ChosenSportLesson {
 
@@ -41,11 +42,13 @@ public class ChosenSportLesson {
     @SerializedName("type_id")
     private Long typeId;
 
+    /** Ссылка для дистанционного занятия; может отсутствовать. */
     @SerializedName("link_url")
     private String linkUrl;
 
     @Nullable
     private String comment;
 
+    /** Пересекается ли занятие с другим событием пользователя. */
     private boolean intersection;
 }

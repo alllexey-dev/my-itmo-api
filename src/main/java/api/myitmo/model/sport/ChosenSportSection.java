@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.util.List;
 
+/** Спортивная секция, выбранная пользователем. */
 @Data
 public class ChosenSportSection {
 

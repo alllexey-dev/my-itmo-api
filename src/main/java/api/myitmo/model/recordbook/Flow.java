@@ -2,6 +2,7 @@ package api.myitmo.model.recordbook;
 
 import lombok.Data;
 
+/** Краткое описание учебного потока. */
 @Data
 public class Flow {
 

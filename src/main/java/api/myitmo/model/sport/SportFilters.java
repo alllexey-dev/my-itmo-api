@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.util.List;
 
+/** Справочники значений фильтров расписания спорта. */
 @Data
 public class SportFilters {
 

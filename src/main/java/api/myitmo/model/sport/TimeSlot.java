@@ -3,6 +3,7 @@ package api.myitmo.model.sport;
 import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 
+/** Временной интервал спортивного занятия. */
 @Data
 public class TimeSlot {
     private long id;

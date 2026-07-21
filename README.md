@@ -1,87 +1,124 @@
-<h1 align = "center">Java MyITMO API</h1>
-<p align = "center"><strong>Интерфейс для сервиса <a href="https://my.itmo.ru">MyITMO</a> на Java</strong></p>
+<h1 align="center">Java MyITMO API</h1>
 
-### 🌟 Текущие возможности
-- **Вход по логину/паролю ITMO ID**
-- Вход по refresh_token MyITMO
-- Автоматическое обновление токенов
-- Можно получать:
-  - **Расписание (как уроков, так и спорта)**
-  - **QR-пропуск в корпуса (в HEX-формате)**
-  - **Свои записи на спорт (а также редактировать их)**
-  - **Свои записи во время выборности (и изменять их)**
-  - Зачётную книжку
-  - Персоналии по ID (а также искать по ФИО)
+<p align="center"><strong>Неофициальная Java-библиотека для работы с <a href="https://my.itmo.ru">MyITMO</a></strong></p>
 
-### 🛠️ Зависимости
+## Возможности
 
-- `Retrofit`
-- `OkHttp`
-- `Gson`
-- `Lombok`
+- Аутентификация через ITMO ID по логину и паролю или refresh token.
+- Автоматическое обновление access token.
+- Получение личного учебного расписания и временных слотов.
+- Получение зачётки и дерева контрольных мероприятий дисциплины.
+- Получение структуры учебного плана.
+- Просмотр и поиск персоналий.
+- Работа со спортом:
+  - расписание и фильтры;
+  - личный календарь и выбранные секции;
+  - запись на занятия и отмена записи;
+  - баллы, попытки, задолженность и медицинская группа;
+  - отборы, нормативы и специальные проекты.
+- Получение раскладки главного экрана, меню и каталога сервисов MyITMO.
+- Получение списка пользовательских заявок.
+- Получение суммарных выплат по категориям.
+- Просмотр и изменение выбора дисциплин и потоков.
+- Получение QR-пропуска в корпуса в HEX-формате.
 
-### 🚀 Использование
+## Требования
 
-Добавьте в pom.xml:
+- Java 8 или новее.
+- Maven или другая система сборки с поддержкой Maven Central.
+
+Основные зависимости библиотеки: Retrofit, OkHttp, Gson и Lombok.
+
+## Подключение
+
+Добавьте зависимость в `pom.xml`:
 
 ```xml
-<dependencies>
-    <dependency>
-        <groupId>dev.alllexey</groupId>
-        <artifactId>my-itmo-api</artifactId>
-        <version>1.5.0</version>
-    </dependency>
-</dependencies>
+<dependency>
+    <groupId>dev.alllexey</groupId>
+    <artifactId>my-itmo-api</artifactId>
+    <version>1.6.0</version>
+</dependency>
 ```
 
-#### Аутентификация
+## Аутентификация
 
-* Логин через почту/ID и пароль
-  ```java
-  MyItmo myItmo = new MyItmo();
-  myItmo.auth("my_cool_id", "my_strong_password");
-  ```
-* Логин через refresh_token (можно получить через F12 → cookies в браузере)
-  ```java
-  MyItmo myItmo = new MyItmo();
-  myItmo.getStorage().setRefreshToken("long_refresh_token");
-  myItmo.getStorage().setRefreshExpiresAt(Long.MAX_VALUE);
-  myItmo.forceRefreshTokens();
-  ```
-* Своя реализация Storage (далее)
-
-**Логины и пароли не сохраняются, и используются только один раз - при входе.**
-Подробнее: [AuthHelper.java](/src/main/java/api/myitmo/utils/AuthHelper.java)
-
-По умолчанию токены хранятся в памяти, рекомендуется создать свою реализацию Storage, чтобы хранить как-то иначе:
+### Логин и пароль
 
 ```java
 MyItmo myItmo = new MyItmo();
-myItmo.setStorage(customStorageImpl);
+myItmo.auth("my_cool_id", "my_strong_password");
 ```
 
-Время жизни refreshToken - 30 дней, accessToken - 30 минут; если он устареет - токены обновятся.
+Логин и пароль не сохраняются и используются только во время входа.
 
-#### API
-
-Методы API доступны через **MyItmo#getApi()** <br>
-Например, получение расписания на сегодня и завтра:
+### Refresh token
 
 ```java
 MyItmo myItmo = new MyItmo();
-myItmo.setStorage(storageWithTokens); // или получите токены любым способом выше
-
-LocalDate now = LocalDate.now();
-MyItmoResponse<List<Schedule>> r = myItmo.getApi().getPersonalSchedule(now, now.plusDays(1)).execute().body();
-List<Schedule> schedules = r.getData();
+myItmo.getStorage().setRefreshToken("long_refresh_token");
+myItmo.getStorage().setRefreshExpiresAt(Long.MAX_VALUE);
+myItmo.forceRefreshTokens();
 ```
 
-#### QR
+Токены по умолчанию хранятся только в памяти. Для постоянного хранения передайте собственную реализацию `Storage`:
 
-Генерировать QR-код (почти) 1-в-1 как приложение можно с помощью [io.nayuki/qrcodegen](https://central.sonatype.com/artifact/io.nayuki/qrcodegen) таким образом:
+```java
+MyItmo myItmo = new MyItmo();
+myItmo.setStorage(customStorage);
+```
+
+Не записывайте access token, refresh token, логин и пароль в логи или сообщения об ошибках.
+
+## Использование API
+
+Методы доступны через `MyItmo#getApi()` и возвращают Retrofit `Call`.
+
+### Учебное расписание
+
+```java
+MyItmo myItmo = new MyItmo();
+myItmo.setStorage(storageWithTokens);
+
+LocalDate today = LocalDate.now();
+DataResponse<List<Schedule>> response = myItmo.getApi()
+        .getPersonalSchedule(today, today.plusDays(1))
+        .execute()
+        .body();
+
+List<Schedule> schedules = response == null ? null : response.getData();
+```
+
+### Зачётка
+
+```java
+ResultResponse<List<Specialization>> response = myItmo.getApi()
+        .getSpecializations()
+        .execute()
+        .body();
+```
+
+Большинство методов использует `ResultResponse<T>`, где `errorCode == 0` означает успешный ответ. Старые сервисы расписания используют `DataResponse<T>` с аналогичным значением `code == 0`.
+
+Полный перечень методов и параметров находится в [`MyItmoApi.java`](src/main/java/api/myitmo/MyItmoApi.java).
+
+## QR-пропуск
+
+Полученный HEX можно преобразовать в QR-код, например с помощью [io.nayuki/qrcodegen](https://central.sonatype.com/artifact/io.nayuki/qrcodegen):
 
 ```java
 String qrHex = "12345ABC";
 QrSegment segment = QrSegment.makeBytes(qrHex.getBytes(StandardCharsets.ISO_8859_1));
-QrCode qr = QrCode.encodeSegments(Collections.singletonList(segment), QrCode.Ecc.LOW, 1, 1, -1, false);
+QrCode qr = QrCode.encodeSegments(
+        Collections.singletonList(segment),
+        QrCode.Ecc.LOW,
+        1,
+        1,
+        -1,
+        false
+);
 ```
+
+## Особенности
+
+MyITMO не предоставляет публичную документацию для всех используемых сервисов. Модели основаны на наблюдаемых ответах API, поэтому сервер может добавлять новые поля и справочные значения. Неизвестные, но подтверждённо присутствующие поля отмечены в моделях закомментированными объявлениями до уточнения их типов.

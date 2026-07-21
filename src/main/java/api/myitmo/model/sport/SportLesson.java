@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+/** Спортивное занятие, доступное для записи или присутствующее в персональном календаре. */
 @Data
 public class SportLesson {
 
@@ -23,15 +24,29 @@ public class SportLesson {
     @SerializedName("section_name")
     private String sectionName;
 
+    /**
+     * Уровень секции. Наблюдаемые значения:
+     * 1 — свободное посещение, 2 — секция с отбором.
+     */
     @SerializedName("section_level")
     private Long sectionLevel;
 
     @SerializedName("lesson_group_id")
     private Long lessonGroupId;
 
+    /**
+     * Уровень занятия. Наблюдаемые значения:
+     * 1 — открытое или свободное занятие, 2 — обучение,
+     * 3 — средний уровень, 4 — сборная.
+     */
     @SerializedName("lesson_level")
     private Long lessonLevel;
 
+    /**
+     * Тип занятия. Наблюдаемые значения:
+     * 1 — открытое занятие, 2 — свободное посещение, 5 — задолженность,
+     * 6 — нормативы, 7 — экстернат, 8 — дополнительное занятие.
+     */
     @SerializedName("type_id")
     private Long typeId;
 
@@ -44,8 +59,10 @@ public class SportLesson {
     @SerializedName("room_name")
     private String roomName;
 
+    /** Общее число мест. */
     private Long limit;
 
+    /** Число доступных мест. */
     private Long available;
 
     @Nullable
@@ -60,14 +77,18 @@ public class SportLesson {
     @SerializedName("time_slot_end")
     private String timeSlotEnd;
 
+    /** Пересекается ли занятие с другим событием пользователя. */
     private Boolean intersection;
 
+    /** Серверное решение о возможности записи и причины запрета. */
     @SerializedName("can_sign_in")
     private CanSignIn canSignIn;
 
+    /** Альтернативные связанные занятия. */
     @SerializedName("other_lessons")
     private List<OtherLesson> otherLessons;
 
+    /** Записан ли пользователь на занятие. */
     private Boolean signed;
 
     @SerializedName("teacher_isu")
@@ -76,6 +97,7 @@ public class SportLesson {
     @SerializedName("teacher_fio")
     private String teacherFio;
 
+    /** Краткое описание связанного альтернативного занятия. */
     @Data
     public static class OtherLesson {
 
