@@ -1,7 +1,7 @@
 package api.myitmo;
 
 import api.myitmo.model.*;
-import api.myitmo.model.election.ChangeResult;
+import api.myitmo.model.election.*;
 import api.myitmo.model.finance.ScholarshipTotal;
 import api.myitmo.model.other.QrData;
 import api.myitmo.model.personality.Personality;
@@ -267,7 +267,28 @@ public interface MyItmoApi {
 
     // region election
 
+    /** Возвращает состояние и сроки текущей кампании записи по выбору. */
+    @GET("/api/election/students/availability")
+    Call<ResultResponse<ElectionAvailability>> getElectionAvailability();
+
+    /** Возвращает дисциплины, доступные студенту в текущей кампании. */
+    @GET("/api/election/students/available_disciplines")
+    Call<ResultResponse<List<AvailableDiscipline>>> getAvailableDisciplines();
+
+    /**
+     * Проверяет полноту и совместимость набора дисциплин.
+     *
+     * @param groupFlowIds значения {@code groupFlow} из {@link AvailableDisciplineSemester}
+     */
+    @POST("/api/election/students/group_flow_available_disciplines")
+    Call<ResultResponse<DisciplineSelectionValidation>> validateSelectedDisciplines(@Body List<String> groupFlowIds);
+
+    /** Возвращает выбранные дисциплины и рекурсивное дерево доступных для них потоков. */
+    @GET("/api/election/students/ordered_flow_chains")
+    Call<ResultResponse<List<ElectionFlowChain>>> getOrderedFlowChains();
+
     /** Возвращает выбранные цепочки потоков в текущей кампании записи по выбору. */
+    @Deprecated
     @GET("/api/election/students/selected_flow_chains")
     Call<ResultResponse<FlowChainsWrapper>> getSelectedFlowChains();
 
@@ -283,9 +304,13 @@ public interface MyItmoApi {
     @POST("/api/election/students/order/clear")
     Call<ResultResponse<?>> clearAllSelectedFlows();
 
-    /** Заменяет выбранные дисциплины на переданный список идентификаторов. */
+    /**
+     * Заменяет выбранные дисциплины на переданный список значений {@code groupFlow}.
+     *
+     * @param groupFlowIds значения {@code groupFlow} из {@link AvailableDisciplineSemester}
+     */
     @POST("/api/election/students/order/")
-    Call<ResultResponse<ChangeResult>> changeSelectedDisciplines(@Body List<String> disciplineIds);
+    Call<ResultResponse<ChangeResult>> changeSelectedDisciplines(@Body List<String> groupFlowIds);
     // endregion election
 
     // region other
