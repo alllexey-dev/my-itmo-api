@@ -25,6 +25,7 @@ import retrofit2.http.*;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Retrofit-описание HTTP API личного кабинета MyITMO.
@@ -282,6 +283,10 @@ public interface MyItmoApi {
      */
     @POST("/api/election/students/group_flow_available_disciplines")
     Call<ResultResponse<DisciplineSelectionValidation>> validateSelectedDisciplines(@Body List<String> groupFlowIds);
+
+    /** Возвращает актуальную вместимость потоков по их идентификаторам. */
+    @GET("/api/election/students/limits/flows")
+    Call<ResultResponse<Map<String, FlowLimit>>> getFlowLimits();
 
     /** Возвращает выбранные дисциплины и рекурсивное дерево доступных для них потоков. */
     @GET("/api/election/students/ordered_flow_chains")
