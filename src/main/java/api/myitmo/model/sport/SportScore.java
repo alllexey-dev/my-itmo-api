@@ -1,6 +1,7 @@
 package api.myitmo.model.sport;
 
 import lombok.Data;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -10,6 +11,8 @@ public class SportScore {
 
     private Sum sum;
 
+    /** История начислений; сервер возвращает {@code null}, когда начислений ещё нет. */
+    @Nullable
     private List<SportAttendance> attendances;
 
     /** Разбиение итоговой суммы по источнику начисления. */
