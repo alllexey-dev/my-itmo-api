@@ -50,9 +50,16 @@ public class SportLesson {
     @SerializedName("type_id")
     private Long typeId;
 
+    /**
+     * Real venue ID, not necessarily present in the building filter options.
+     * Observed 2026-09-09: off-site venues have positive IDs missing from filters;
+     * online lessons have null here and room_id=-1. Preserve null and the raw ID.
+     */
+    @Nullable
     @SerializedName("building_id")
     private Long buildingId;
 
+    /** Real room ID; -1 explicitly denotes Online (observed 2026-09-09). */
     @SerializedName("room_id")
     private Long roomId;
 
