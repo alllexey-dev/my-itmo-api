@@ -10,7 +10,7 @@ public class Mark {
     /** Идентификатор записи оценки; не идентификатор работы. */
     private long id;
 
-    /** Связь с {@link Checkpoint#getId()}; {@code null} у дополнительных баллов. */
+    /** Связь с {@code id} точки ({@link Checkpoint}); {@code null} у дополнительных баллов. */
     @SerializedName("checkpoint_id")
     private Long checkpointId;
 
