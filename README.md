@@ -21,6 +21,8 @@
 - Получение суммарных выплат по категориям.
 - Просмотр и изменение выбора дисциплин и потоков.
 - Получение QR-пропуска в корпуса в HEX-формате.
+- БАРС: вход через ITMO.ID, выбор учебного периода, каталоги дисциплин и потоков,
+  собственный журнал с баллами, планом контрольных точек и подтверждёнными оценками.
 
 ## Требования
 
@@ -37,7 +39,7 @@
 <dependency>
     <groupId>dev.alllexey</groupId>
     <artifactId>my-itmo-api</artifactId>
-    <version>1.7.0</version>
+    <version>1.8.0</version>
 </dependency>
 ```
 
@@ -101,6 +103,60 @@ ResultResponse<List<Specialization>> response = myItmo.getApi()
 Большинство методов использует `ResultResponse<T>`, где `errorCode == 0` означает успешный ответ. Старые сервисы расписания используют `DataResponse<T>` с аналогичным значением `code == 0`.
 
 Полный перечень методов и параметров находится в [`MyItmoApi.java`](src/main/java/api/myitmo/MyItmoApi.java).
+
+## БАРС
+
+Клиент `api.bars.Bars` работает с `https://bars.itmo.ru` — отдельным сервисом с
+собственной сессией. Токен MyITMO для него не подходит.
+
+```java
+Bars bars = new Bars();
+bars.auth("my_cool_id", "my_strong_password");          // форма ITMO.ID для клиента bars
+
+// или без пароля по SSO, если MyItmo уже вошёл через тот же OkHttpClient
+MyItmo myItmo = new MyItmo();
+myItmo.auth("my_cool_id", "my_strong_password");
+Bars sso = new Bars(BarsConfiguration.DEFAULT, myItmo.getOkHttpClient());
+sso.authWithSession();
+
+// или из внешнего OIDC-входа (например, WebView): URL для входа и код из callback
+String state = BarsAuthHelper.newState();
+String loginUrl = bars.getAuthHelper().getLoginUrl(state);
+String code = bars.getAuthHelper().extractCode(callbackUrl, state);
+bars.login(code);
+```
+
+Сессия — заголовок `Bearer ...`, который сервер возвращает при входе. Он живёт около
+30 минут, refresh token не выдаётся. Для тихого продления задайте `BarsCodeSupplier`:
+при HTTP 401 клиент один раз запросит новый код и повторит запрос.
+
+```java
+bars.setCodeSupplier(state -> bars.getAuthHelper().obtainCodeFromSession(state));
+bars.setStorage(customBarsStorage);                       // по умолчанию сессия только в памяти
+```
+
+Каталоги и журналы читаются в контексте периода, сохранённого на сервере; эта
+настройка общая с веб-версией БАРС.
+
+```java
+List<StudentJournal> journals = bars.withPeriod("2025/2026", Term.SPRING, () -> {
+    List<Discipline> disciplines = bars.execute(bars.getApi().getDisciplines(true));
+    List<GroupOrFlow> flows = bars.execute(bars.getApi().getGroupsAndFlows(null));
+    List<StudentJournal> result = new ArrayList<>();
+    for (Discipline discipline : disciplines) {
+        for (long plan : discipline.getCheckpointPlanIds()) {
+            GroupOrFlow flow = flows.stream().filter(f -> f.getCheckpointPlanIds().contains(plan)).findFirst().orElse(null);
+            if (flow != null) result.add(bars.execute(bars.getApi().getStudentJournal(plan, flow.getType(), flow.getIdentifier())));
+        }
+    }
+    return result;
+});
+```
+
+`StudentMarks#getTotal()` у пустого журнала равен `0.0` — проверяйте `hasAnyMark()`.
+Оценка подтверждения приходит словами (`Удвл., E`); `Approval#getGradeCode()`
+переводит её в формат MyITMO (`3/E`). Идентификаторы БАРС не совпадают с
+`discipline_id` и `est_id` MyITMO.
 
 ## QR-пропуск
 
