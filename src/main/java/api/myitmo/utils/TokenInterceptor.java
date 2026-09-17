@@ -32,7 +32,13 @@ public class TokenInterceptor implements Interceptor {
 
         try {
             TokenResponse tokens = myItmo.getValidTokens();
-            return chain.proceed(chain.request().newBuilder().addHeader("Authorization", "Bearer " + tokens.getAccessToken()).build());
+            okhttp3.Request.Builder request = chain.request().newBuilder()
+                    .addHeader("Authorization", "Bearer " + tokens.getAccessToken());
+            // OkHttp sends no Accept-Language on its own; MyITMO then falls back to English.
+            if (chain.request().header("Accept-Language") == null) {
+                request.header("Accept-Language", myItmo.getConfiguration().getAcceptLanguage());
+            }
+            return chain.proceed(request.build());
         } catch (Exception e) {
             throw new IOException(e);
         }

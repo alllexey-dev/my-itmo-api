@@ -10,6 +10,16 @@ public interface MyItmoConfiguration {
 
     String getAuthRedirectUri();
 
+    /**
+     * Value of the {@code Accept-Language} header sent with every MyITMO request.
+     * MyITMO localises some payloads by it: without the header people search
+     * returns transliterated names ({@code Trifan Timofey}), with {@code ru}
+     * the Cyrillic originals. Schedule and sport endpoints ignore it.
+     */
+    default String getAcceptLanguage() {
+        return "ru";
+    }
+
     MyItmoConfiguration DEFAULT = new Default();
 
     MyItmoConfiguration DEV = new Dev();
