@@ -36,3 +36,6 @@ build/
 
 ### Mac OS ###
 .DS_Store
+.idea/yatool.xml
+.idea/AndroidProjectSystem.xml
+.idea/workspace.xml
