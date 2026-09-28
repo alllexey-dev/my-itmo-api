@@ -92,7 +92,17 @@ public interface MyItmoApi {
 
     // region personalities
 
-    /** Возвращает полный публичный профиль человека по номеру ИСУ. */
+    /**
+     * Возвращает полный публичный профиль человека по номеру ИСУ.
+     * В наблюдённых успешных ответах HTTP 200, {@code error_code = 0},
+     * а {@code result.isu} совпадает с запрошенным номером.
+     * Язык ответа задаётся заголовком {@code Accept-Language}; клиент по умолчанию передаёт {@code ru}.
+     * Для проверенного несуществующего ИСУ наблюдался HTTP 400 с числовым
+     * {@code error_code = 100} и явно заданным {@code result = null}.
+     * Retrofit оставляет этот JSON в {@link retrofit2.Response#errorBody()},
+     * а {@link retrofit2.Response#body()} возвращает {@code null}; клиент не преобразует ошибку.
+     * Это наблюдение относится только к данному маршруту, а не ко всем ошибкам HTTP 400.
+     */
     @GET("/api/personalities/persons/{personId}")
     Call<ResultResponse<Personality>> getPersonality(@Path("personId") int personId);
 

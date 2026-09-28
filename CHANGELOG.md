@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+### 2026-09-28
+
+- Documented observed `getPersonality` response shapes and nullable fields for
+  student, staff and service profiles, including numeric ISU, boolean exchange
+  status, null photos and empty collections. Unknown fields remain untyped.
+- Synthetic Gson and MockWebServer tests cover those shapes, the ISU path and
+  Russian `Accept-Language`. The observed missing-person HTTP 400 with numeric
+  `error_code=100` and explicit `result=null` remains in Retrofit's error body;
+  endpoint-specific interpretation belongs to the consumer. No public API,
+  model type or version change; the artifact stays 1.8.1.
+
 ## 1.8.1
 - Every MyITMO request carries `Accept-Language` from
   `MyItmoConfiguration.getAcceptLanguage()` (default `ru`), so people search

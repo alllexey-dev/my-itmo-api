@@ -3,11 +3,15 @@ package api.myitmo.model.personality;
 import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 
-/** Краткие сведения об обучении человека. */
+/**
+ * Краткие сведения об обучении человека.
+ * У студента все три поля наблюдались как строки; null и отсутствие не наблюдались.
+ * У сотрудника и служебной записи массив education был пустым.
+ */
 @Data
 public class Education {
 
-    /** Курс в текстовом представлении сервера. */
+    /** Номер курса, переданный числом в строке, а не JSON-числом. */
     private String course;
 
     /** Название факультета или института. */
