@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### 2026-09-30
+
+- `BarsAuthHelper.requestCodeWithCookies(state, cookieHeader)` requests a BARS
+  authorization code with ITMO.ID session cookies held by the caller (for
+  example a WebView cookie store): one request, no redirects followed, the body
+  is not read and the client's cookie jar is untouched. `BarsSessionCode`
+  tells a code (`CODE`) from a required login (`LOGIN_REQUIRED`), a foreign or
+  unusable redirect (`REJECTED`) and a server failure (`HTTP_ERROR`), and
+  returns the response's `Set-Cookie` values. `obtainCodeFromSession` is
+  unchanged. Version 1.8.2-SNAPSHOT, installed to Maven Local only; not
+  published.
+
 ### 2026-09-28
 
 - Documented observed `getPersonality` response shapes and nullable fields for

@@ -135,6 +135,28 @@ bars.setCodeSupplier(state -> bars.getAuthHelper().obtainCodeFromSession(state))
 bars.setStorage(customBarsStorage);                       // по умолчанию сессия только в памяти
 ```
 
+Если сессия ITMO.ID живёт в чужом хранилище cookie (например, в WebView), код можно
+получить без браузера: `requestCodeWithCookies` делает один запрос авторизации с
+переданным заголовком `Cookie`, не выполняет переходы, не читает тело и не трогает
+cookie jar клиента. Итог отличает «нужен вход» от сбоя сервера.
+
+```java
+String state = BarsAuthHelper.newState();
+String loginUrl = bars.getAuthHelper().getLoginUrl(state);
+String cookieHeader = browserCookies.get(loginUrl);       // "NAME=value; ..."
+BarsSessionCode result = bars.getAuthHelper().requestCodeWithCookies(state, cookieHeader);
+browserCookies.store(loginUrl, result.getSetCookies());  // ITMO.ID может обновить cookie сессии
+switch (result.getOutcome()) {
+    case CODE:           bars.login(result.getCode()); break; // обменять сразу, код одноразовый
+    case LOGIN_REQUIRED: break;                           // сессии ITMO.ID нет, нужен интерактивный вход
+    case REJECTED:                                        // callback с чужим state или переход не туда
+    case HTTP_ERROR:     break;                           // сбой; повторить позже, getHttpCode()
+}
+```
+
+`browserCookies` здесь — хранилище cookie вызывающего; `toString()` результата не
+содержит кода и cookie.
+
 Каталоги и журналы читаются в контексте периода, сохранённого на сервере; эта
 настройка общая с веб-версией БАРС.
 

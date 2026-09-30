@@ -1,6 +1,7 @@
 package api.bars.utils;
 
 import api.bars.Bars;
+import okhttp3.CookieJar;
 import okhttp3.FormBody;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
@@ -9,7 +10,9 @@ import okhttp3.Response;
 
 import java.net.URI;
 import java.net.URLDecoder;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -121,6 +124,60 @@ public class BarsAuthHelper {
     }
 
     /**
+     * Запрашивает код по cookie сессии ITMO.ID, которые хранит вызывающий (например, WebView),
+     * и отличает «нужен вход» от сбоя сервера.
+     *
+     * <p>Делает один {@code GET} {@link #getLoginUrl} с заголовком {@code Cookie}. Cookie
+     * передаются только в этот запрос: cookie jar клиента не читается и не пополняется,
+     * переходы не выполняются, тело ответа не читается. Относительный {@code Location}
+     * разрешается от URL запроса. Итоги:</p>
+     * <ul>
+     *     <li>точный callback с тем же {@code state} и кодом — {@link BarsSessionCode.Outcome#CODE};</li>
+     *     <li>callback без годного кода или переход на чужой адрес — {@link BarsSessionCode.Outcome#REJECTED};</li>
+     *     <li>переход на страницу ITMO.ID, ответ 2xx или пустой {@code cookieHeader} (без запроса) —
+     *     {@link BarsSessionCode.Outcome#LOGIN_REQUIRED};</li>
+     *     <li>4xx/5xx или переход без {@code Location} — {@link BarsSessionCode.Outcome#HTTP_ERROR}.</li>
+     * </ul>
+     *
+     * @param state        значение, которое должно вернуться в callback
+     * @param cookieHeader значение заголовка {@code Cookie} для URL авторизации
+     * @throws BarsApiException при ошибке сети; код и cookie в сообщение не попадают
+     */
+    public BarsSessionCode requestCodeWithCookies(String state, String cookieHeader) {
+        if (cookieHeader == null || cookieHeader.trim().isEmpty()) {
+            return BarsSessionCode.loginRequired(0, Collections.<String>emptyList());
+        }
+        OkHttpClient client = bars.getOkHttpClient().newBuilder()
+                .cookieJar(CookieJar.NO_COOKIES)
+                .followRedirects(false)
+                .followSslRedirects(false)
+                .cache(null)
+                .build();
+        Request request = new Request.Builder().get().url(getLoginUrl(state)).header("Cookie", cookieHeader).build();
+        try (Response response = client.newCall(request).execute()) {
+            int status = response.code();
+            List<String> setCookies = response.headers("Set-Cookie");
+            if (status >= 300 && status < 400) {
+                String location = response.header("Location");
+                if (location == null) return BarsSessionCode.httpError(status, setCookies);
+                String target = resolve(request.url().uri(), location);
+                if (target != null && isCallback(target)) {
+                    String code = extractCode(target, state);
+                    return code == null
+                            ? BarsSessionCode.rejected(status, setCookies)
+                            : BarsSessionCode.code(code, status, setCookies);
+                }
+                if (target != null && isAllowedPage(target)) return BarsSessionCode.loginRequired(status, setCookies);
+                return BarsSessionCode.rejected(status, setCookies);
+            }
+            if (response.isSuccessful()) return BarsSessionCode.loginRequired(status, setCookies);
+            return BarsSessionCode.httpError(status, setCookies);
+        } catch (java.io.IOException e) {
+            throw new BarsApiException("Network error", e);
+        }
+    }
+
+    /**
      * Вход по логину и паролю: форма ITMO.ID для клиента БАРС, код из redirect, обмен на сессию.
      * Логин и пароль не сохраняются.
      *
@@ -173,6 +230,14 @@ public class BarsAuthHelper {
     private static boolean trusted(URI uri, String host) {
         return "https".equals(uri.getScheme()) && uri.getHost() != null && uri.getHost().equalsIgnoreCase(host)
                 && uri.getRawUserInfo() == null && (uri.getPort() == -1 || uri.getPort() == 443);
+    }
+
+    private static String resolve(URI base, String location) {
+        try {
+            return base.resolve(new URI(location)).toString();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private static URI parse(String url) {
