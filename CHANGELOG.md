@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.8.2 — 2026-10-03
 
 ### 2026-09-30
 
@@ -11,8 +11,7 @@
   tells a code (`CODE`) from a required login (`LOGIN_REQUIRED`), a foreign or
   unusable redirect (`REJECTED`) and a server failure (`HTTP_ERROR`), and
   returns the response's `Set-Cookie` values. `obtainCodeFromSession` is
-  unchanged. Version 1.8.2-SNAPSHOT, installed to Maven Local only; not
-  published.
+  unchanged. Released in 1.8.2.
 
 ### 2026-09-28
 
