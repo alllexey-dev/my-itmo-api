@@ -1,0 +1,60 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": [
+    {
+      "date": "2026-10-05",
+      "lessons": [
+        {
+          "id": 500001,
+          "date": "2026-10-05T10:00:00+03:00",
+          "date_end": "2026-10-05T11:30:00+03:00",
+          "section_id": 31,
+          "section_name": "Тестовая секция",
+          "section_level": 1,
+          "lesson_group_id": 41,
+          "lesson_level": 1,
+          "type_id": 2,
+          "building_id": 335,
+          "room_id": 20013,
+          "room_name": "External venue",
+          "limit": 20,
+          "available": 3,
+          "comment": null,
+          "time_slot_id": 2,
+          "time_slot_start": "10:00",
+          "time_slot_end": "11:30",
+          "intersection": false,
+          "can_sign_in": {
+            "can_sign_in": false,
+            "unavailable_reasons": [
+              "synthetic_reason"
+            ]
+          },
+          "other_lessons": [
+            {
+              "id": 500002,
+              "weekday": 3,
+              "room_id": 1001,
+              "room_name": "Спортзал 1",
+              "evaluation_id": null,
+              "evaluation_name": null,
+              "time_slot_id": 2,
+              "time_slot_start": "10:00",
+              "time_slot_end": "11:30",
+              "repeatable": true,
+              "teacher_isu": 200002,
+              "teacher_fio": "Тренер Тестовый",
+              "type_id": 2,
+              "comment": null,
+              "intersection": false
+            }
+          ],
+          "signed": false,
+          "teacher_isu": 200002,
+          "teacher_fio": "Тренер Тестовый"
+        }
+      ]
+    }
+  ]
+}
