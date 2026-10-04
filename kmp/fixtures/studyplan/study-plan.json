@@ -1,0 +1,144 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": {
+    "id": 50001,
+    "currentSemester": 3,
+    "currentSemesterId": 77003,
+    "semestersCount": 8,
+    "planInfo": {
+      "directionCode": "09.03.04",
+      "directionName": "Синтетическое направление",
+      "levelQualification": "Бакалавр",
+      "planType": "Синтетический тип",
+      "programName": "Синтетическая программа",
+      "startYear": 2024
+    },
+    "semesters": [
+      {
+        "semester": 3,
+        "semesterId": 77003,
+        "semesterParity": 1,
+        "studyYear": "2025/2026"
+      },
+      {
+        "semester": 4,
+        "semesterId": 77004,
+        "semesterParity": 0,
+        "studyYear": "2025/2026"
+      }
+    ],
+    "structure": [
+      {
+        "id": 73001,
+        "name": "Синтетический блок",
+        "type": "block",
+        "children": [
+          {
+            "id": 72001,
+            "name": "Синтетический модуль",
+            "type": "module",
+            "children": [
+              {
+                "id": 70001,
+                "name": "Синтетическая дисциплина",
+                "type": "discipline",
+                "moduleId": 72001,
+                "blockId": 73001,
+                "blockName": "Синтетический блок",
+                "choiceParameterId": 74001,
+                "choiceParameterName": "Синтетический выбор",
+                "choiceAvailable": true,
+                "flowSelectable": false,
+                "replaceable": true,
+                "startSemesterSelectable": false,
+                "creditPoints": 3,
+                "disciplineDuration": 1,
+                "description": "Синтетическое описание",
+                "langCode": "ru",
+                "langName": "Русский",
+                "rpdUrl": "https://example.invalid/syllabus/70001",
+                "department": {
+                  "id": 75001,
+                  "name": "Синтетический факультет",
+                  "shortName": "СФ"
+                },
+                "rules": [
+                  76001,
+                  76002
+                ],
+                "children": [],
+                "contents": {
+                  "3": [
+                    {
+                      "id": 90001,
+                      "moduleId": 72001,
+                      "disciplineId": 70001,
+                      "order": 1,
+                      "semester": 3,
+                      "creditPoints": 3,
+                      "activities": [
+                        {
+                          "id": 91001,
+                          "contentId": 90001,
+                          "name": "Лекции",
+                          "volume": 32.0,
+                          "workTypeId": 1
+                        },
+                        {
+                          "id": 91002,
+                          "contentId": 90001,
+                          "name": "Практические занятия",
+                          "volume": 16.0,
+                          "workTypeId": 3
+                        },
+                        {
+                          "id": 91003,
+                          "contentId": 90001,
+                          "name": "Самостоятельная работа",
+                          "volume": 60.0,
+                          "workTypeId": 4
+                        },
+                        {
+                          "id": 91004,
+                          "contentId": 90001,
+                          "name": "Экзамен",
+                          "volume": null,
+                          "workTypeId": 5
+                        }
+                      ]
+                    }
+                  ],
+                  "4": [
+                    {
+                      "id": 90002,
+                      "moduleId": 72001,
+                      "disciplineId": 70001,
+                      "order": 2,
+                      "semester": 4,
+                      "creditPoints": 1,
+                      "activities": [
+                        {
+                          "id": 91005,
+                          "contentId": 90002,
+                          "name": "Зачёт",
+                          "volume": null,
+                          "workTypeId": 6
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "id": 70002,
+                "name": "Синтетическая дисциплина без деталей",
+                "type": "discipline"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
