@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.0.0 - development
+
+- Add the separate Kotlin Multiplatform client in `kmp/` for JVM/Android and
+  iOS, with suspend ITMO.ID, MyITMO and BARS APIs under `dev.alllexey.itmoapi`.
+- Inject engines, time and consumer-owned atomic token/session storage. Add
+  typed failures, coalesced refresh and isolated BARS cookie replay without
+  password login, shared-client SSO or `obtainCodeFromSession`.
+- Cover ported models/endpoints with synthetic parity tests against 1.8.2,
+  including model/member completeness and documentation checks.
+- Document 2.x first in the Russian README, with compiled/executed examples,
+  and provide an English migration guide with the full generated member map.
+- Keep 1.x compatible in the root. 2.x remains `2.0.0-SNAPSHOT`; this entry
+  does not announce publication or a release.
+
 ## 1.8.3 — unreleased
 
 - Reject unsuccessful HTTP responses, OAuth errors and incomplete/malformed token
