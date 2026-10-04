@@ -1,0 +1,10 @@
+[
+  {
+    "type": "flow",
+    "name": "Synthetic flow",
+    "identifier": "a/b",
+    "checkpoint_plan_ids": [
+      8
+    ]
+  }
+]

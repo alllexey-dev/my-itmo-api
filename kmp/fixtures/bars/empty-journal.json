@@ -1,0 +1,46 @@
+{
+  "students": [
+    {
+      "student_id": 0,
+      "student_login": "",
+      "student_name": "",
+      "marks": {
+        "regular": [],
+        "active_approvals": [],
+        "regularSum": 0.0,
+        "total": 0.0
+      },
+      "accessibility": {
+        "can_edit_current_marks": false,
+        "can_edit_additional_marks": false,
+        "can_edit_course_marks": false,
+        "can_edit_final_marks": false,
+        "can_approve_marks": false,
+        "can_approve_retry_marks": false,
+        "has_unfilled_key_checkpoints": false,
+        "course_project_theme_not_approved": false
+      },
+      "wants_to_increase_marks": false
+    }
+  ],
+  "headers": {
+    "plan": {
+      "id": 0,
+      "gid": "",
+      "year": "",
+      "terms": [],
+      "discipline": {
+        "id": 0,
+        "name": "",
+        "course_project": false
+      },
+      "regular_checkpoints": [],
+      "point_distribution": 0,
+      "additional_points": false,
+      "has_course_project": false
+    },
+    "type": "",
+    "identifier": "",
+    "name": ""
+  }
+}

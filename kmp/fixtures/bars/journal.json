@@ -1,0 +1,116 @@
+{
+  "students": [
+    {
+      "student_id": 1,
+      "student_login": "123456",
+      "student_name": "Synthetic learner",
+      "marks": {
+        "regular": [
+          {
+            "id": 5,
+            "checkpoint_plan_id": 8,
+            "type": "current",
+            "is_absent": false,
+            "is_not_bigger_than_max": false,
+            "created_by_name": "",
+            "updated_by_name": "",
+            "checkpoint_id": 6,
+            "mark": 7.5,
+            "created_at": 1770000000123,
+            "updated_at": 1770000000456
+          }
+        ],
+        "active_approvals": [
+          {
+            "id": 1,
+            "student_id": 1,
+            "student_login": "123456",
+            "checkpoint_plan_id": 8,
+            "attempt": 2,
+            "is_active": true,
+            "is_invalid": false,
+            "is_absent": false,
+            "was_recalculated": false,
+            "course": false,
+            "marks_sum": 9.5,
+            "mark_string": "Удвл., E",
+            "created_at": 1770000000123,
+            "updated_at": 1770000000456
+          }
+        ],
+        "additional": {
+          "id": 7,
+          "checkpoint_plan_id": 8,
+          "type": "current",
+          "is_absent": false,
+          "is_not_bigger_than_max": false,
+          "created_by_name": "",
+          "updated_by_name": "",
+          "mark": 2.0,
+          "created_at": 1770000000123,
+          "updated_at": 1770000000456
+        },
+        "regularSum": 7.5,
+        "total": 9.5
+      },
+      "accessibility": {
+        "can_edit_current_marks": false,
+        "can_edit_additional_marks": false,
+        "can_edit_course_marks": false,
+        "can_edit_final_marks": false,
+        "can_approve_marks": false,
+        "can_approve_retry_marks": false,
+        "has_unfilled_key_checkpoints": false,
+        "course_project_theme_not_approved": false
+      },
+      "wants_to_increase_marks": false
+    }
+  ],
+  "headers": {
+    "plan": {
+      "id": 8,
+      "gid": "",
+      "year": "2025/2026",
+      "terms": [
+        2
+      ],
+      "discipline": {
+        "id": 90,
+        "name": "Synthetic discipline",
+        "course_project": false
+      },
+      "regular_checkpoints": [
+        {
+          "id": 6,
+          "gid": "",
+          "type": "Тест",
+          "type_id": 0,
+          "group": false,
+          "key": true,
+          "min_grade": 1.0,
+          "max_grade": 10.0,
+          "sub_checkpoints": [],
+          "name": "Synthetic work",
+          "week": 2
+        }
+      ],
+      "point_distribution": 0,
+      "additional_points": false,
+      "has_course_project": false,
+      "final_checkpoint": {
+        "id": 9,
+        "gid": "",
+        "type": "Экзамен",
+        "type_id": 0,
+        "group": false,
+        "key": false,
+        "min_grade": 12.0,
+        "max_grade": 20.0,
+        "sub_checkpoints": []
+      }
+    },
+    "type": "flow",
+    "identifier": "a/b",
+    "name": "Synthetic flow"
+  }
+}
