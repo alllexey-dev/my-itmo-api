@@ -41,5 +41,27 @@ Git hygiene lines 115-116 and Definition of done item 10 for lane actions in thi
 ## Build
 
 ```bash
-mvn -q test
+scripts/verify.sh          # Maven and KMP, once kmp/ exists
+scripts/verify.sh maven    # 1.x verification, without signing
+scripts/verify.sh kmp      # JVM tests, iOS klibs, simulator tests with Xcode
+scripts/verify.sh kmp-jvm  # JVM tests only
+scripts/verify.sh kmp-ios  # Simulator tests only; exit 2 without Xcode
 ```
+
+The script uses JDK 17, the shared build slots and a Maven repository under
+`target/verify-maven-repository`, never writes to `~/.m2`, and prints a final
+`VERIFY M <mode> PASS|FAIL <secs>s <sha7>[+dirty]` summary. Exit 2 means a
+requested toolchain or module is unavailable; other failures exit 1.
+
+## Release lines
+
+- 1.x is the root Maven project (`my-itmo-api`): compatibility fixes use
+  `1.8.x`, with `1.*` tags. Development is `1.8.3-SNAPSHOT`.
+- 2.x lives beside it in `kmp/` (`my-itmo-api-kmp`), with `2.*` tags and its
+  separate release workflow once the KMP publishing card lands.
+- Both lines release only from `master`. The 1.x workflow checks a stable
+  semver tag, equality with the POM version and ancestry from `master` before
+  deployment, then creates a draft GitHub release.
+- Tags, Maven Central publication and pressing «Publish» belong to the owner.
+  Never push a tag from a lane: older commits still carry the unrestricted
+  release workflow.
