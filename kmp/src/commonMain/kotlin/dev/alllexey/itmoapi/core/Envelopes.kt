@@ -8,8 +8,11 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 public data class ResultResponse<T>(
+    /** Zero indicates success; other values identify API-level failures, independently of HTTP status. */
     @SerialName("error_code") public val errorCode: Int = 0,
+    /** Localized server message; observed null or absent on success, never rendered by diagnostics. */
     @SerialName("error_message") public val errorMessage: String? = null,
+    /** Typed payload; observed absent on error responses and required when unwrapping success. */
     public val result: T? = null,
 ) {
     override fun toString(): String = "ResultResponse(errorCode=$errorCode, payload=[redacted])"
@@ -20,8 +23,11 @@ public data class ResultResponse<T>(
  */
 @Serializable
 public data class DataResponse<T>(
+    /** Zero indicates success; a nonzero value is the legacy schedule service error code. */
     public val code: Int = 0,
+    /** Typed schedule payload; absent error payloads must not be treated as successful results. */
     public val data: T? = null,
+    /** Server message; usually observed null on success and excluded from diagnostic rendering. */
     public val message: String? = null,
 ) {
     override fun toString(): String = "DataResponse(code=$code, payload=[redacted])"
