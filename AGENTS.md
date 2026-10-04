@@ -30,8 +30,8 @@ Password login, `obtainCodeFromSession` and shared-client SSO are not ported.
   types instead of primitives where null has been observed.
 - Java 8 source compatibility; Retrofit, OkHttp, Gson and Lombok only.
 - Tokens, logins and passwords never appear in logs, exception messages, tests
-  or documentation. The local `.refresh-token` file in the Android repository is
-  for read-only exploration and is never copied or printed.
+  or documentation. Never open `.refresh-token`, `.env*`,
+  `local.properties`, `*.jks` or `*.har`; use synthetic fixtures only.
 - Maven Central publication happens only on explicit request.
 
 ### 2.x
@@ -54,6 +54,17 @@ Password login, `obtainCodeFromSession` and shared-client SSO are not ported.
   Exceptions and diagnostics are typed and English; consumers own localized
   UI, `DemoMode` and custom-services opt-in, with no global token/client state
   in the library.
+- Inject caller-owned storage, engine and clock. `TokenStorage` replaces the
+  complete five-field `TokenSet` atomically; `TokenManager` is its sole writer
+  after construction. Shared storage needs a shared `TokenRefreshGuard`; never
+  run a legacy refresher concurrently. `BarsStorage` holds a separate complete
+  authorization header, not MyITMO tokens. No password flow or shared-client SSO.
+- Refresh 5xx is `MyItmoException.Http`, never `Auth`; transient `Network`,
+  `Http` and `Decode` preserve the stored session. Cancellation propagates.
+  Do not log raw `Network.cause` or `Api.serverMessage`.
+- `defaultEngine()` provides OkHttp/Darwin without native cookies, caching or
+  redirects. A custom engine must already satisfy that policy; close clients
+  before closing the caller-owned engine, after in-flight calls finish.
 - Preserve ADR 0012 on both networking engines: replay caller-owned ITMO.ID
   cookies without shared cookie storage, redirects or caching; return every
   `Set-Cookie` header. Codes, cookies and tokens never reach logs, exceptions,
@@ -92,18 +103,33 @@ Git hygiene lines 115-116 and Definition of done item 10 for lane actions in thi
 
 ## Build
 
+Run from the repository root. Local lane verification uses JVM tests:
+
 ```bash
-scripts/verify.sh          # Maven and KMP, once kmp/ exists
-scripts/verify.sh maven    # 1.x verification, without signing
-scripts/verify.sh kmp      # JVM tests, iOS klibs, simulator tests with Xcode
-scripts/verify.sh kmp-jvm  # JVM tests only
-scripts/verify.sh kmp-ios  # Simulator tests only; exit 2 without Xcode
+scripts/verify.sh kmp-jvm  # Includes ReadmeSamplesTest and ML-09b completeness
+scripts/verify.sh maven    # 1.x verify, no signing or publication
 ```
 
-The script uses JDK 17, the shared build slots and a Maven repository under
-`target/verify-maven-repository`, never writes to `~/.m2`, and prints a final
-`VERIFY M <mode> PASS|FAIL <secs>s <sha7>[+dirty]` summary. Exit 2 means a
-requested toolchain or module is unavailable; other failures exit 1.
+Every Maven/Gradle invocation takes a shared slot via
+`${ITMO_SLOT_SH:-~/proj/.wt/bin/slot.sh}` (`jvm` or `kn`). If unavailable, use
+`/usr/bin/lockf -k ~/.cache/itmo-agents/slots/<kind>.1.lock <command>`;
+map `kn` to `android.1.lock`. Never stop another daemon or simulate CI to skip
+locking. The script selects JDK 17, stores Maven dependencies under
+`target/verify-maven-repository`, never writes to `~/.m2`, and prints
+`VERIFY M <mode> PASS|FAIL <secs>s <sha7>[+dirty]`. Exit 2 means unavailable
+toolchain/module; other failures exit 1.
+
+`kmp` runs JVM tests, both iOS klib compilations and simulator tests when Xcode
+is installed; `kmp-ios` runs simulator tests and exits 2 without Xcode.
+The default `all` also verifies Maven. Do not use these runtime/linking modes
+for a compile-only lane check. Native compile-only tasks are
+`compileKotlinIosArm64 compileKotlinIosSimulatorArm64`, under the `kn` slot.
+Simulator/runtime checks require the card/owner's authorization and Xcode;
+compilation alone is not runtime verification. Never publish or install artifacts.
+
+See `README.md` for executed samples and `docs/migration.md` for the complete
+1.x model/member map. The JVM completeness suite writes fresh mapping and
+fixture coverage under ignored `kmp/build/parity/`.
 
 ## Release lines
 
