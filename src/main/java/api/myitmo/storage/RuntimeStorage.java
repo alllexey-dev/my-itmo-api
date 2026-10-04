@@ -14,4 +14,9 @@ public class RuntimeStorage implements Storage {
     private long refreshExpiresAt;
 
     private String idToken;
+
+    @Override
+    public String toString() {
+        return "RuntimeStorage(redacted)";
+    }
 }

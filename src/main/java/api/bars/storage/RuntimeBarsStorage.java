@@ -7,4 +7,9 @@ import lombok.Data;
 public class RuntimeBarsStorage implements BarsStorage {
 
     private volatile String authorization;
+
+    @Override
+    public String toString() {
+        return "RuntimeBarsStorage(redacted)";
+    }
 }

@@ -2,8 +2,12 @@ package api.myitmo.utils;
 
 import api.myitmo.MyItmo;
 import api.myitmo.model.other.TokenResponse;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import okhttp3.*;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -77,8 +81,7 @@ public class AuthHelper {
 
         Request tokenRequest = getTokenRequest(code, codeVerifier);
         try (Response tokenResponse = client.newCall(tokenRequest).execute()) {
-            String body = tokenResponse.body().string();
-            return myItmo.getGson().fromJson(body, TokenResponse.class);
+            return readTokenResponse(tokenResponse);
         } catch (Exception e) {
             throw new RuntimeException("Could not get tokens", e);
         }
@@ -207,12 +210,39 @@ public class AuthHelper {
                 .build();
 
         try (Response response = myItmo.getOkHttpClient().newCall(request).execute()) {
-            ResponseBody body = response.body();
-            if (body == null) throw new NullPointerException("Response body is null");
-            String bodyString = body.string();
-            return myItmo.getGson().fromJson(bodyString, TokenResponse.class);
+            return readTokenResponse(response);
         } catch (Exception e) {
             throw new RuntimeException("Could not refresh tokens", e);
+        }
+    }
+
+    private TokenResponse readTokenResponse(Response response) throws IOException {
+        if (!response.isSuccessful()) {
+            throw new IllegalStateException("Token endpoint returned HTTP " + response.code());
+        }
+        ResponseBody body = response.body();
+        if (body == null) {
+            throw new IllegalStateException("Token endpoint returned no body");
+        }
+        String bodyString = body.string();
+        try {
+            JsonElement parsed = myItmo.getGson().fromJson(bodyString, JsonElement.class);
+            if (parsed == null || !parsed.isJsonObject()) {
+                throw new IllegalStateException("Token endpoint returned an invalid response");
+            }
+            JsonObject fields = parsed.getAsJsonObject();
+            if (fields.has("error")) {
+                throw new IllegalStateException("Token endpoint rejected the request");
+            }
+            TokenResponse tokens = myItmo.getGson().fromJson(fields, TokenResponse.class);
+            if (tokens.getAccessToken() == null || tokens.getAccessToken().trim().isEmpty()
+                    || tokens.getRefreshToken() == null || tokens.getRefreshToken().trim().isEmpty()) {
+                throw new IllegalStateException("Token endpoint returned incomplete tokens");
+            }
+            return tokens;
+        } catch (JsonParseException e) {
+            // Gson diagnostics may contain token values; never attach them as a cause.
+            throw new IllegalStateException("Token endpoint returned an invalid response");
         }
     }
 }
