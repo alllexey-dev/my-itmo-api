@@ -2,6 +2,9 @@ package dev.alllexey.itmoapi.parity
 
 import java.io.File
 import java.lang.reflect.InvocationTargetException
+import java.lang.reflect.Modifier
+import com.google.gson.annotations.SerializedName
+import kotlin.test.assertFailsWith
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -24,6 +27,29 @@ internal object ParityRegistrations {
         } finally {
             paths.remove()
         }
+    }
+}
+
+/** Resolves actual property declarations and their effective serialized names, never TODO comments. */
+internal object ModelMemberAudit {
+    fun mappedMember(source: String, owner: String, member: String, wire: String): String? {
+        val declarations = Regex("/\\*.*?\\*/", RegexOption.DOT_MATCHES_ALL).replace(source, "")
+            .lineSequence().map { it.substringBefore("//") }.joinToString("\n")
+        val classes = Regex("\\bclass\\s+(\\w+)").findAll(declarations).toList()
+        val properties = Regex("((?:@[\\w.]+(?:\\([^)]*\\))?\\s*)*)(?:(?:public|internal|private)\\s+)?val\\s+(\\w+)")
+            .findAll(declarations).filter { property ->
+                classes.lastOrNull { it.range.first < property.range.first }?.groupValues?.get(1) == owner
+            }.map { property ->
+                val name = property.groupValues[2]
+                val serialName = Regex("@SerialName\\(\"([^\"]+)\"\\)").find(property.groupValues[1])?.groupValues?.get(1) ?: name
+                name to serialName
+            }.toList()
+        val named = properties.firstOrNull { it.first == member }
+        if (named != null) {
+            assertEquals(wire, named.second, "$owner.$member serialized name")
+            return named.first
+        }
+        return properties.singleOrNull { it.second == wire }?.first
     }
 }
 
@@ -80,7 +106,7 @@ class ParityCompletenessTest {
         legacyModels.forEach { legacy ->
             val name = legacy.nameWithoutExtension
             val packageName = Regex("package\\s+([\\w.]+);").find(legacy.readText())!!.groupValues[1]
-            Class.forName("$packageName.$name")
+            val legacyType = Class.forName("$packageName.$name")
             rows += "## ${legacy.relativeTo(kmp.parentFile).invariantSeparatorsPath}"
             rows += ""
             if (name in excludedFlows) {
@@ -102,23 +128,35 @@ class ParityCompletenessTest {
             rows += ""
             rows += "| Legacy member | Wire key | Modern member |"
             rows += "|---|---|---|"
-            val kotlin = declarationsOnly(modelSource(modern, renamed))
-            val fields = Regex("(?s)(?<annotations>(?:\\s*@[\\w.]+(?:\\([^\\n]*\\))?\\s*)*)private\\s+(?!static)([\\w<>?,. ]+)\\s+(\\w+)\\s*;")
-            fields.findAll(declarationsOnly(legacy.readText())).forEach { field ->
-                val member = field.groupValues[3]
-                val wire = Regex("@SerializedName\\(\"([^\"]+)\"\\)")
-                    .find(field.groups["annotations"]!!.value)?.groupValues?.get(1) ?: member
-                val annotated = Regex("@SerialName\\(\"${Regex.escape(wire)}\"\\)\\s*public\\s+val\\s+(\\w+)")
-                    .find(kotlin)?.groupValues?.get(1)
-                val destination = annotated ?: if (Regex("\\bval\\s+$member\\b").containsMatchIn(kotlin)) member else null
+            val kotlin = modelSource(modern, renamed)
+            fun members(type: Class<*>, nestedOwner: String? = null): List<Triple<String?, String, String>> {
+                val own = type.declaredFields.filterNot { it.isSynthetic || Modifier.isStatic(it.modifiers) }
+                    .map { Triple(nestedOwner, it.name, it.getAnnotation(SerializedName::class.java)?.value ?: it.name) }
+                val inherited = type.superclass?.takeIf { ".model." in it.name }?.let { members(it, nestedOwner) }.orEmpty()
+                val nested = type.declaredClasses.flatMap { members(it, it.simpleName) }
+                return own + inherited + nested
+            }
+            members(legacyType).forEach { (nestedOwner, member, wire) ->
+                val owner = nestedOwner ?: renamed
                 val converted = if (name == "TokenResponse") when (member) {
                     "expiresIn" -> "accessExpiresAt (seconds converted to Instant using injected Clock)"
                     "refreshExpiresIn" -> "refreshExpiresAt (seconds converted to Instant using injected Clock)"
                     "sessionState" -> "Not retained: ML-04a five-field Storage contract; ItmoIdClient.TokenWire documents ignored session_state"
                     else -> null
                 } else null
+                val declaration = if (name == "TokenResponse" && converted == null) {
+                    File(kmp, "src/commonMain/kotlin/dev/alllexey/itmoapi/itmoid/ItmoIdClient.kt").readText()
+                } else kotlin
+                val targetOwner = if (name == "TokenResponse" && converted == null) "TokenWire" else owner
+                val destination = try {
+                    ModelMemberAudit.mappedMember(declaration, targetOwner, member, wire)
+                } catch (failure: AssertionError) {
+                    problems += "$name.$member: ${failure.message}"
+                    null
+                }
                 if (destination == null && converted == null) problems += "$name.$member ($wire): no mapped member"
-                rows += "| $member | $wire | ${destination ?: converted ?: "UNRESOLVED"} |"
+                val label = if (nestedOwner == null) member else "$nestedOwner.$member"
+                rows += "| $label | $wire | ${converted ?: destination ?: "UNRESOLVED"} |"
             }
             val unknowns = Regex("(?m)^\\s*//\\s*private\\s+[^;]+\\s+(\\w+);").findAll(legacy.readText())
                 .map { it.groupValues[1] }.toList()
@@ -140,6 +178,16 @@ class ParityCompletenessTest {
     }
 
     @Test
+    fun memberAuditRejectsWrongSerialNameAndCommentOnlyDeclarations() {
+        assertFailsWith<AssertionError> {
+            ModelMemberAudit.mappedMember("public class Shape(@SerialName(\"wrong\") public val value: String)", "Shape", "value", "right")
+        }
+        assertEquals(null, ModelMemberAudit.mappedMember("public class Shape { // val value: String\n}", "Shape", "value", "value"))
+        assertEquals(null, ModelMemberAudit.mappedMember("public class Shape {\n// val value: String\n}", "Shape", "value", "value"))
+        assertEquals("renamed", ModelMemberAudit.mappedMember("public class Shape(@SerialName(\"right\") public val renamed: String)", "Shape", "value", "right"))
+    }
+
+    @Test
     fun eachMappedModelRetainsAtLeastItsLegacyDocumentationCount() {
         val deficits = mutableListOf<String>()
         legacyModels.filterNot { it.nameWithoutExtension in excludedFlows }.forEach { legacy ->
@@ -155,9 +203,6 @@ class ParityCompletenessTest {
         }
         assertTrue(deficits.isEmpty(), deficits.joinToString("\n"))
     }
-
-    private fun declarationsOnly(text: String): String = Regex("/\\*.*?\\*/", RegexOption.DOT_MATCHES_ALL)
-        .replace(text, "").lineSequence().filterNot { it.trimStart().startsWith("//") }.joinToString("\n")
 
     private fun modelSource(file: File, name: String): String {
         val text = file.readText()
