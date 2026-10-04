@@ -1,0 +1,18 @@
+{
+  "error_code": 0,
+  "result": {
+    "count": 31,
+    "data": [
+      {
+        "id": 123456,
+        "fio": "Тестовый Студент",
+        "gender": "male",
+        "phone": "",
+        "email": "student@example.test",
+        "work": "",
+        "education": [],
+        "photo": "https://example.test/student.jpg"
+      }
+    ]
+  }
+}

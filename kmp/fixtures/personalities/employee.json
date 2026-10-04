@@ -1,0 +1,42 @@
+{
+  "error_code": 0,
+  "result": {
+    "isu": 234567,
+    "fio": "Тестовый Сотрудник",
+    "gender": "male",
+    "photo": "https://example.test/employee.jpg",
+    "contacts": [
+      {
+        "contact": [
+          "teacher@example.test"
+        ],
+        "contact_alias": "Электронная почта"
+      }
+    ],
+    "rooms": [],
+    "positions": [
+      {
+        "department_name": "Тестовое подразделение",
+        "department_link": "https://example.test/department",
+        "position_name": "Преподаватель",
+        "vacation": null,
+        "start_vacation": null,
+        "end_vacation": null
+      }
+    ],
+    "powers": [
+      {
+        "dep_name": "Тестовое подразделение",
+        "dep_link": "https://example.test/department",
+        "power_name": "Тестовое полномочие"
+      }
+    ],
+    "levels": {
+      "rank": "Тестовое звание",
+      "degree": "Тестовая степень"
+    },
+    "education": [],
+    "activities": null,
+    "exchange_training": false
+  }
+}

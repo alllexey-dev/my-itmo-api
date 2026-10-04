@@ -1,0 +1,23 @@
+{
+  "error_code": 0,
+  "result": {
+    "isu": 123456,
+    "fio": "Тестовый Студент",
+    "gender": "male",
+    "photo": "https://example.test/student.jpg",
+    "contacts": [],
+    "rooms": [],
+    "positions": [],
+    "powers": [],
+    "levels": null,
+    "education": [
+      {
+        "course": "3",
+        "group": "T1234",
+        "faculty_name": "Тестовый факультет"
+      }
+    ],
+    "activities": null,
+    "exchange_training": false
+  }
+}
