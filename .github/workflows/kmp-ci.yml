@@ -48,3 +48,65 @@ jobs:
           xcrun simctl list devices available | grep 'iPhone 17 ('
       - name: iOS smoke test
         run: scripts/verify.sh kmp-ios
+
+  dry-run:
+    # No credentials or signing keys: this job must remain safe on every PR.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5
+      - name: Package all variants into the build-local repository
+        run: ./gradlew -p kmp publishAllPublicationsToDryRunRepository
+      - name: Check all four publications, sources and POM metadata
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          from zipfile import ZipFile
+
+          properties = dict(line.split('=', 1) for line in Path('kmp/gradle.properties').read_text().splitlines()
+                            if '=' in line and not line.startswith('#'))
+          version = properties['VERSION_NAME']
+          root = Path('kmp/build/dry-run-repo/dev/alllexey')
+          artifacts = {'my-itmo-api-kmp': 'jar', 'my-itmo-api-kmp-jvm': 'jar',
+                       'my-itmo-api-kmp-iosarm64': 'klib', 'my-itmo-api-kmp-iossimulatorarm64': 'klib'}
+          assert {path.name for path in root.iterdir()} == set(artifacts)
+          ns = {'m': 'http://maven.apache.org/POM/4.0.0'}
+          for artifact, extension in artifacts.items():
+              directory = root / artifact / version
+              poms = list(directory.glob('*.pom'))
+              assert poms, f'Missing POM for {artifact}'
+              for path in poms:
+                  pom = ET.parse(path).getroot()
+                  expected = {'groupId': 'dev.alllexey', 'artifactId': artifact, 'version': version,
+                              'name': 'my-itmo-api-kmp', 'description': properties['POM_DESCRIPTION'],
+                              'url': properties['POM_URL'], 'licenses/license/name': properties['POM_LICENSE_NAME'],
+                              'licenses/license/url': properties['POM_LICENSE_URL'],
+                              'developers/developer/name': properties['POM_DEVELOPER_NAME'],
+                              'developers/developer/organization': properties['POM_DEVELOPER_ORGANIZATION'],
+                              'developers/developer/organizationUrl': properties['POM_DEVELOPER_ORGANIZATION_URL'],
+                              'scm/connection': properties['POM_SCM_CONNECTION'],
+                              'scm/developerConnection': properties['POM_SCM_DEV_CONNECTION'],
+                              'scm/url': properties['POM_SCM_URL']}
+                  for field, value in expected.items():
+                      assert pom.findtext('/'.join('m:' + part for part in field.split('/')), namespaces=ns) == value, field
+              sources = list(directory.glob('*-sources.jar'))
+              assert sources, f'Missing sources for {artifact}'
+              for path in sources:
+                  with ZipFile(path) as archive:
+                      assert any(name.endswith('.kt') for name in archive.namelist()), path
+              assert list(directory.glob('*-javadoc.jar')), f'Missing javadoc for {artifact}'
+              assert list(directory.glob('*.module')), f'Missing module metadata for {artifact}'
+              binaries = [path for path in directory.glob('*.' + extension)
+                          if not path.name.endswith(('-sources.jar', '-javadoc.jar'))]
+              assert binaries and all(path.stat().st_size > 0 for path in binaries), artifact
+              assert not list(directory.glob('*.asc')), 'Dry-run must not require signing'
+              print(f'PASS {artifact}: {extension}, sources, javadoc, module and complete POM')
+          PY

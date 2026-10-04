@@ -1,5 +1,11 @@
+import com.vanniktech.maven.publish.JavadocJar
+import com.vanniktech.maven.publish.KotlinMultiplatform
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import com.vanniktech.maven.publish.SourcesJar
+import org.gradle.api.publish.PublishingExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeSimulatorTest
 
 plugins {
@@ -7,6 +13,9 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.maven.publish) apply false
 }
+
+// Use the base DSL so signing is controlled only by the in-memory key below.
+apply(plugin = "com.vanniktech.maven.publish.base")
 
 group = providers.gradleProperty("GROUP").get()
 version = providers.gradleProperty("VERSION_NAME").get()
@@ -27,6 +36,10 @@ kotlin {
     }
     iosArm64()
     iosSimulatorArm64()
+    targets.withType<KotlinNativeTarget>().configureEach {
+        // SP-10: remove checkout paths from klibs for identical Mac/Linux publications.
+        compilerOptions.freeCompilerArgs.add("-Xklib-relative-path-base=${rootDir.absolutePath}")
+    }
 
     sourceSets {
         commonMain.dependencies {
@@ -107,4 +120,47 @@ kotlin.sourceSets.commonTest {
 }
 tasks.matching { it.name.startsWith("compileTestKotlin") }.configureEach {
     dependsOn(generateFixtures)
+}
+
+extensions.configure<MavenPublishBaseExtension> {
+    configure(KotlinMultiplatform(JavadocJar.Empty(), SourcesJar.Sources()))
+    coordinates(
+        groupId = providers.gradleProperty("GROUP").get(),
+        artifactId = providers.gradleProperty("POM_ARTIFACT_ID").get(),
+        version = providers.gradleProperty("VERSION_NAME").get(),
+    )
+    publishToMavenCentral(automaticRelease = false)
+    if (providers.gradleProperty("signingInMemoryKey").isPresent) {
+        signAllPublications()
+    }
+    pom {
+        name.set(providers.gradleProperty("POM_NAME"))
+        description.set(providers.gradleProperty("POM_DESCRIPTION"))
+        url.set(providers.gradleProperty("POM_URL"))
+        licenses {
+            license {
+                name.set(providers.gradleProperty("POM_LICENSE_NAME"))
+                url.set(providers.gradleProperty("POM_LICENSE_URL"))
+            }
+        }
+        developers {
+            developer {
+                name.set(providers.gradleProperty("POM_DEVELOPER_NAME"))
+                organization.set(providers.gradleProperty("POM_DEVELOPER_ORGANIZATION"))
+                organizationUrl.set(providers.gradleProperty("POM_DEVELOPER_ORGANIZATION_URL"))
+            }
+        }
+        scm {
+            connection.set(providers.gradleProperty("POM_SCM_CONNECTION"))
+            developerConnection.set(providers.gradleProperty("POM_SCM_DEV_CONNECTION"))
+            url.set(providers.gradleProperty("POM_SCM_URL"))
+        }
+    }
+}
+
+extensions.configure<PublishingExtension> {
+    repositories.maven {
+        name = "DryRun"
+        url = uri(layout.buildDirectory.dir("dry-run-repo"))
+    }
 }
