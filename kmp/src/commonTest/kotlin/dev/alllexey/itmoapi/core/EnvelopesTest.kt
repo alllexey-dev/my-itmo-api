@@ -24,6 +24,7 @@ class EnvelopesTest {
         val failure = assertFailsWith<MyItmoException.Api> { response.requireResult() }
         assertEquals(200, failure.status)
         assertEquals(3, failure.errorCode)
+        assertEquals(response.errorMessage, failure.serverMessage)
     }
 
     @Test
@@ -32,6 +33,7 @@ class EnvelopesTest {
         val failure = assertFailsWith<MyItmoException.Api> { response.requireResult(400) }
         assertEquals(400, failure.status)
         assertEquals(100, failure.errorCode)
+        assertNull(failure.serverMessage)
     }
 
     @Test
@@ -47,6 +49,7 @@ class EnvelopesTest {
         val failure = assertFailsWith<MyItmoException.Api> { response.requireResult(400) }
         assertEquals(400, failure.status)
         assertEquals(5, failure.errorCode)
+        assertEquals(response.message, failure.serverMessage)
     }
 
     @Test
@@ -71,12 +74,14 @@ class EnvelopesTest {
     @Test
     fun envelopesAndApiExceptionsNeverRenderRemoteMessagesOrPayloads() {
         val marker = "untrusted marker"
+        val failure = MyItmoException.Api(400, 100, marker)
+        assertEquals(marker, failure.serverMessage)
         val renderings = listOf(
             ResultResponse(3, marker, marker).toString(), DataResponse(3, marker, marker).toString(),
             SimpleResponse(marker).toString(), CountWrapper(1, marker).toString(),
-            MyItmoException.Api(400, 100, marker).toString(),
+            failure.message.orEmpty(), failure.toString(),
         )
         renderings.forEach { assertTrue(marker !in it) }
-        assertNull(MyItmoException.Api(400, 100, marker).cause)
+        assertNull(failure.cause)
     }
 }

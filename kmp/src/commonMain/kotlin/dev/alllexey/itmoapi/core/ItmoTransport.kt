@@ -70,9 +70,13 @@ internal class ItmoTransport(internal val client: HttpClient, private val baseUr
             null
         }
         val envelope = tree as? JsonObject
-        val errorCode = (envelope?.get("error_code") as? JsonPrimitive)?.intOrNull
-            ?: (envelope?.get("code") as? JsonPrimitive)?.intOrNull
-        if (errorCode != null && errorCode != 0) throw MyItmoException.Api(status, errorCode)
+        val resultCode = (envelope?.get("error_code") as? JsonPrimitive)?.intOrNull
+        val errorCode = resultCode ?: (envelope?.get("code") as? JsonPrimitive)?.intOrNull
+        if (errorCode != null && errorCode != 0) {
+            val messageField = if (resultCode != null) "error_message" else "message"
+            val serverMessage = (envelope?.get(messageField) as? JsonPrimitive)?.takeIf { it.isString }?.content
+            throw MyItmoException.Api(status, errorCode, serverMessage)
+        }
         if (status == 401 || status == 403) throw MyItmoException.Auth(status)
         if (status !in 200..299) throw MyItmoException.Http(status)
         if (tree == null) throw MyItmoException.Decode()

@@ -13,11 +13,14 @@ public sealed class MyItmoException protected constructor(message: String, cause
     public class Http(public val status: Int) : MyItmoException("HTTP request failed (status=$status)")
 
     /** API error, including error envelopes returned with HTTP 200 or HTTP 400.
-     * [message] is untrusted server text and is deliberately not retained or rendered.
-     * Callers classify errors by [status] and [errorCode], never localized message text.
+     * Incoming [message] is retained as [serverMessage] only for explicit domain reason classification.
+     * It is untrusted wire text: never log it. Exception diagnostics remain redacted.
      */
     public class Api(public val status: Int, public val errorCode: Int, message: String? = null) :
-        MyItmoException("API request failed (status=$status, errorCode=$errorCode)")
+        MyItmoException("API request failed (status=$status, errorCode=$errorCode)") {
+        /** Untrusted wire reason; read explicitly for domain classification, never for logging. */
+        public val serverMessage: String? = message
+    }
 
     /** The request is unauthenticated (HTTP 401 or 403), without a more specific API error. */
     public class Auth(public val status: Int) : MyItmoException("Authentication required (status=$status)")

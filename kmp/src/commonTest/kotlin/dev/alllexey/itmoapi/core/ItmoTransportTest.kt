@@ -82,17 +82,21 @@ class ItmoTransportTest {
         }
         assertEquals(200, failure.status)
         assertEquals(3, failure.errorCode)
+        assertEquals("Синтетическая ошибка", failure.serverMessage)
     }
 
     @Test
     fun errorCodeAtHttp400RetainsCode100() = runTest {
         val failure = assertFailsWith<MyItmoException.Api> {
-            exchange(fixture("errors/error-envelope-400.json"), 400) {
+            exchange("""{"error_code":100,"error_message":"untrusted marker","result":null}""", 400) {
                 it.execute(ResultResponse.serializer(Int.serializer()), HttpMethod.Get, "sample")
             }
         }
         assertEquals(400, failure.status)
         assertEquals(100, failure.errorCode)
+        assertEquals("untrusted marker", failure.serverMessage)
+        assertTrue("untrusted marker" !in failure.message.orEmpty() && "untrusted marker" !in failure.toString())
+        assertNull(failure.cause)
     }
 
     @Test
@@ -113,7 +117,27 @@ class ItmoTransportTest {
             }
         }
         assertEquals(9, failure.errorCode)
+        assertEquals("untrusted marker", failure.serverMessage)
+        assertTrue("untrusted marker" !in failure.message.orEmpty())
+        assertNull(failure.cause)
         assertTrue("untrusted marker" !in failure.toString())
+    }
+
+    @Test
+    fun onlyStringReasonsFromTheMatchingEnvelopeAreRetained() = runTest {
+        for ((codeKey, messageKey) in listOf("error_code" to "error_message", "code" to "message")) {
+            for (value in listOf(null, "null", "137", "true", "{}", "[]", "\"no capacity\"", "\"\"")) {
+                val otherKey = if (messageKey == "message") "error_message" else "message"
+                val field = value?.let { ",\"$messageKey\":$it" }.orEmpty() + ",\"$otherKey\":\"untrusted marker\""
+                val failure = assertFailsWith<MyItmoException.Api> {
+                    exchange("{\"$codeKey\":137$field}", 200) {
+                        it.execute(ResultResponse.serializer(Int.serializer()), HttpMethod.Get, "sample")
+                    }
+                }
+                assertEquals(137, failure.errorCode)
+                assertEquals(value?.takeIf { it.startsWith('"') }?.removeSurrounding("\""), failure.serverMessage)
+            }
+        }
     }
 
     @Test
