@@ -1,0 +1,17 @@
+{
+  "error_code": 0,
+  "result": {
+    "isu": 345678,
+    "fio": "Тестовая Служебная Запись",
+    "gender": "male",
+    "photo": null,
+    "contacts": [],
+    "rooms": [],
+    "positions": [],
+    "powers": [],
+    "levels": null,
+    "education": [],
+    "activities": null,
+    "exchange_training": false
+  }
+}
