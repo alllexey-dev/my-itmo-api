@@ -4,6 +4,8 @@ import dev.alllexey.itmoapi.bars.BarsClient
 import dev.alllexey.itmoapi.itmoid.ItmoIdClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.http.Url
+import dev.alllexey.itmoapi.itmoid.TokenTestStorage
+import dev.alllexey.itmoapi.itmoid.TokenTestClock
 import kotlinx.coroutines.Job
 import kotlin.time.Clock
 import kotlin.time.Instant
@@ -16,7 +18,7 @@ class ClientShellTest {
     @Test
     fun everyAreaIsStableAndDoesNotMakeRequestsWhenConstructed() {
         val engine = MockEngine { error("A shell must not make a request") }
-        val client = MyItmoClient(engine, Url("https://example.invalid/"))
+        val client = MyItmoClient(MyItmoConfiguration(baseUrl = Url("https://example.invalid/")), TokenTestStorage(), engine, TokenTestClock())
         try {
             assertSame(client.schedule, client.schedule)
             assertSame(client.recordBook, client.recordBook)
@@ -53,8 +55,8 @@ class ClientShellTest {
     @Test
     fun separateMyItmoClientsOwnIndependentAreasWithoutOwningInjectedEngine() {
         val engine = MockEngine { error("A shell must not make a request") }
-        val first = MyItmoClient(engine)
-        val second = MyItmoClient(engine)
+        val first = MyItmoClient(MyItmoConfiguration.DEFAULT, TokenTestStorage(), engine, TokenTestClock())
+        val second = MyItmoClient(MyItmoConfiguration.DEFAULT, TokenTestStorage(), engine, TokenTestClock())
         try {
             assertTrue(first.schedule !== second.schedule)
             first.close()
