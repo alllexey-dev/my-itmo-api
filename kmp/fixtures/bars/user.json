@@ -1,0 +1,24 @@
+{
+  "id": 1,
+  "login": "123456",
+  "first_name": "",
+  "middle_name": "",
+  "last_name": "",
+  "user_roles": [
+    {
+      "id": 2,
+      "name": "Обучающийся"
+    }
+  ],
+  "selected_role": {
+    "id": 2,
+    "name": "Обучающийся",
+    "locked": false,
+    "selected": true
+  },
+  "selected_year": "2026/2027",
+  "selected_term": 1,
+  "personal_config": [],
+  "can_change_user": false,
+  "restricted_to_have_read_only_access": false
+}
