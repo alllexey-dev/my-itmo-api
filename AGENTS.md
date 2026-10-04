@@ -10,7 +10,16 @@ The only client for official MyITMO (`api.myitmo`) and BARS (`api.bars`)
 endpoints used by ITMO.Widgets. When the university exposes a useful endpoint,
 it is added here, never as a second Retrofit interface in the app or Backend.
 
+1.x remains the Java client in the root (`api.myitmo`, `api.bars`,
+`dev.alllexey:my-itmo-api`), with source- and binary-compatible fixes only.
+2.x is the Kotlin Multiplatform client for ITMO.ID, MyITMO and BARS beside it
+in `kmp/`: `dev.alllexey:my-itmo-api-kmp`, root project `my-itmo-api-kmp`,
+package `dev.alllexey.itmoapi`, development version `2.0.0-SNAPSHOT`.
+Password login, `obtainCodeFromSession` and shared-client SSO are not ported.
+
 ## Hard rules
+
+### 1.x
 
 - Every model and endpoint documents the endpoint purpose, the observed response
   shape, field semantics and units, observed enum-like values, and whether null
@@ -24,6 +33,49 @@ it is added here, never as a second Retrofit interface in the app or Backend.
   or documentation. The local `.refresh-token` file in the Android repository is
   for read-only exploration and is never copied or printed.
 - Maven Central publication happens only on explicit request.
+
+### 2.x
+
+- Kotlin 2.4.20, Gradle 9.7.0, Ktor 3.6.0, kotlinx.serialization 1.11.0,
+  kotlinx-datetime 0.8.0, coroutines 1.11.0 and JDK 17. Targets: JVM
+  (Java 11 bytecode), `iosArm64`, `iosSimulatorArm64`. Per SP-09, set both
+  language/API versions to Kotlin 2.2 and `coreLibrariesVersion = "2.2.0"`
+  while the oldest JVM consumer uses Kotlin 2.2; opt into experimental time
+  and UUID APIs at module scope when needed.
+- `jvmMain` also serves Android (minSdk 26): no `java.net.http` or JDK 12+
+  APIs; use only APIs available on Android. No blocking facade.
+- Every model and endpoint has English KDoc of observed wire shapes, purpose,
+  semantics, units, enum-like values and nulls. Nullable means observed null
+  or absence; otherwise use non-null defaults. Unknown field types remain
+  commented declarations, never `Any?`; `JsonElement` is reserved for the
+  untyped `ResultResponse<?>` payload.
+- Take time only from an injected `kotlin.time.Clock`. Public suspend
+  operations carry `@Throws(MyItmoException::class, CancellationException::class)`.
+  Exceptions and diagnostics are typed and English; consumers own localized
+  UI, `DemoMode` and custom-services opt-in, with no global token/client state
+  in the library.
+- Preserve ADR 0012 on both networking engines: replay caller-owned ITMO.ID
+  cookies without shared cookie storage, redirects or caching; return every
+  `Set-Cookie` header. Codes, cookies and tokens never reach logs, exceptions,
+  `toString()`, fixtures or docs. A server/network failure never clears a
+  stored session; an ended session is a separate outcome.
+- Production dependencies allowed: Ktor client core, content-negotiation,
+  serialization-kotlinx-json, okhttp and darwin engines; kotlinx-serialization,
+  kotlinx-datetime and kotlinx-coroutines. Tests may use kotlin-test,
+  ktor-client-mock and coroutines-test; MockWebServer and Maven Central
+  `dev.alllexey:my-itmo-api:1.8.2` are `jvmTest` dependencies only.
+- All fixtures are synthetic, under `kmp/fixtures/<area>/<case>.json`.
+  Tests use injected engines, never real ITMO.ID, MyITMO or BARS endpoints.
+  Never open `.refresh-token`, `.env*`, `local.properties`, `*.jks` or `*.har`.
+- One writer per area: port cards touch only
+  `kmp/src/*/kotlin/dev/alllexey/itmoapi/<area-path>/**`, their fixtures and
+  their `kmp/src/jvmTest/**/parity/<Area>ParityTest.kt`. Core, client shells,
+  stubs and fixture wiring belong to their designated lane cards.
+  ML-01a and ML-01b run alone in `kmp/`. Port cards never edit Gradle files:
+  hand missing dependencies to the next authorized build-file card.
+- Never push tags or run `mvn install`/`deploy`, `publishToMavenLocal` or any
+  Central publication task. Do not write to `~/.m2`. Releases and publication
+  always need the owner's word.
 
 ## v2.3 lanes
 
