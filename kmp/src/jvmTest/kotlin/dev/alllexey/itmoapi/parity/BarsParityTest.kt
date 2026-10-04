@@ -32,6 +32,7 @@ class BarsParityTest {
         .addConverterFactory(GsonConverterFactory.create(Gson())).build().create(BarsApi::class.java)
 
     private inline fun <reified Legacy, Modern> barsParity(path: String, serializer: KSerializer<Modern>) {
+        ParityRegistrations.record(path)
         val gson = Gson()
         val retrofit = Retrofit.Builder().baseUrl(baseUrl)
             .addConverterFactory(GsonConverterFactory.create(gson)).build()

@@ -14,6 +14,7 @@ import kotlin.test.assertEquals
 
 /** Central 1.8.2 converter, including Retrofit's strict document-consumption check. */
 internal inline fun <reified Legacy, Modern> assertParity(path: String, serializer: KSerializer<Modern>) {
+    ParityRegistrations.record(path)
     val gson = MyItmo().gson
     val retrofit = Retrofit.Builder().baseUrl("https://synthetic.invalid/")
         .addConverterFactory(GsonConverterFactory.create(gson)).build()
