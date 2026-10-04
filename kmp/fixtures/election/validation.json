@@ -1,0 +1,16 @@
+{
+  "error_code": 0,
+  "error_message": "",
+  "result": {
+    "disciplines": [
+      22,
+      23
+    ],
+    "validVariantSelection": true,
+    "validRequiredSelection": false,
+    "needSelectRequired": 1,
+    "needSelectVariants": 2,
+    "needSelectVariantsMax": 3,
+    "scheduleAvailable": true
+  }
+}

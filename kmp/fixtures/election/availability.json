@@ -1,0 +1,17 @@
+{
+  "error_code": 0,
+  "error_message": "",
+  "result": {
+    "id": 1,
+    "status": "Open",
+    "semesterStart": "2026-01-05T00:00:00+03:00",
+    "semesterEnd": "2026-06-30T00:00:00+03:00",
+    "dateStart": "2026-01-06T10:00:00+03:00",
+    "dateEnd": "2026-01-07T18:30:00+03:00",
+    "timeStart": "10:00",
+    "timeEnd": "18:30",
+    "studyYear": "2025/2026",
+    "semesterId": 101,
+    "semester": 2
+  }
+}

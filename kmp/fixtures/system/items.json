@@ -1,0 +1,26 @@
+{
+  "error_code": 0,
+  "error_message": "",
+  "result": {
+    "menu": [
+      {
+        "title": "Synthetic section",
+        "description": "Synthetic description",
+        "to": "/section",
+        "icon": "section",
+        "multicolor_icon": "",
+        "exact": false,
+        "children": [
+          {
+            "title": "Synthetic leaf",
+            "description": "Leaf description",
+            "to": "/section/leaf",
+            "icon": "leaf",
+            "multicolor_icon": "leaf-color",
+            "exact": true
+          }
+        ]
+      }
+    ]
+  }
+}

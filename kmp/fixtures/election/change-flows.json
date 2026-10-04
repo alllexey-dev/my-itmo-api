@@ -1,0 +1,12 @@
+{
+  "error_code": 0,
+  "error_message": "",
+  "result": {
+    "status": 1,
+    "name": "Synthetic flow",
+    "flows": [
+      101,
+      102
+    ]
+  }
+}
