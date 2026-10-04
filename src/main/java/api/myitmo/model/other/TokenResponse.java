@@ -33,4 +33,9 @@ public class TokenResponse {
     /** Идентификатор серверной OIDC-сессии. */
     @SerializedName("session_state")
     private String sessionState;
+
+    @Override
+    public String toString() {
+        return "TokenResponse(redacted)";
+    }
 }

@@ -10,6 +10,7 @@ import api.myitmo.storage.Storage;
 import api.myitmo.utils.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParseException;
 import lombok.Getter;
 import lombok.Setter;
 import okhttp3.OkHttpClient;
@@ -262,7 +263,16 @@ public class MyItmo {
                         : null;
 
                 if (errorJson != null && !errorJson.isEmpty()) {
-                    ResultResponse<?> error = gson.fromJson(errorJson, ResultResponse.class);
+                    ResultResponse<?> error;
+                    try {
+                        error = getGson().fromJson(errorJson, ResultResponse.class);
+                    } catch (JsonParseException e) {
+                        // Parser messages can echo the response; expose only the HTTP status.
+                        throw new ApiException("HTTP " + response.code() + " with invalid error body", null);
+                    }
+                    if (error == null) {
+                        throw new ApiException("HTTP " + response.code() + " without error details", null);
+                    }
 
                     throw new ApiException(
                             error.getErrorCode(),

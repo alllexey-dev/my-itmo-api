@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.8.3 — unreleased
+
+- Reject unsuccessful HTTP responses, OAuth errors and incomplete/malformed token
+  payloads before updating `Storage`, for both code exchange and refresh. Refresh
+  failures remain `TokenRefreshException`; transport failures retain their cause.
+- Redact `TokenResponse`, `RuntimeStorage` and `RuntimeBarsStorage` string
+  representations. Invalid API error JSON becomes `ApiException` without echoing
+  the response body.
+- Keep Java 8 compatibility with `maven.compiler.release=8`, make Lombok a
+  build-only dependency and align delombok with 1.18.38. Add the Maven 3.9.11
+  script-only wrapper; sign only under the owner-run `release` profile on JDK 17.
+- Remove the unused shade/release plugins and the assembly plugin. The previously
+  published Maven Central `jar-with-dependencies` classifier is no longer built
+  or published; main, sources and Javadoc JARs remain.
+
 ## 1.8.2 — 2026-10-03
 
 ### 2026-09-30
