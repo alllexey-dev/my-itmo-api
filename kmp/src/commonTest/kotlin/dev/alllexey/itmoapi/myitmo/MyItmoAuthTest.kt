@@ -9,6 +9,7 @@ import dev.alllexey.itmoapi.itmoid.testTokens
 import dev.alllexey.itmoapi.itmoid.tokenBody
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.MockEngineConfig
 import io.ktor.client.engine.mock.respond
 import io.ktor.client.engine.mock.respondError
 import io.ktor.client.request.get
@@ -16,9 +17,11 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import kotlinx.coroutines.async
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -237,29 +240,38 @@ class MyItmoAuthTest {
     fun tenConcurrentUnauthorizedResponsesReuseOneForcedRotation() = runTest {
         val original = testTokens(clock)
         val rotation = testTokens(clock)
+        val storage = TokenTestStorage(original)
+        val allOriginalRequests = CompletableDeferred<Unit>()
         var refreshes = 0
         var rejectedCalls = 0
         var successfulCalls = 0
-        val engine = MockEngine { request ->
-            if (request.url.host == "id.itmo.ru") {
-                refreshes++
-                delay(10)
-                respond(tokenBody(rotation), headers = headersOf(HttpHeaders.ContentType, "application/json"))
-            } else if (request.headers[HttpHeaders.Authorization] == "Bearer ${original.accessToken}") {
-                rejectedCalls++
-                respondError(HttpStatusCode.Unauthorized)
-            } else {
-                successfulCalls++
-                assertTrue(request.headers[HttpHeaders.Authorization] == "Bearer ${rotation.accessToken}", "Rotation reused")
-                respond("""{"response":{"qr_hex":"001122"}}""", headers = headersOf(HttpHeaders.ContentType, "application/json"))
+        val engine = MockEngine(MockEngineConfig().apply {
+            dispatcher = StandardTestDispatcher(testScheduler)
+            addHandler { request ->
+                if (request.url.host == "id.itmo.ru") {
+                    refreshes++
+                    assertTrue(allOriginalRequests.isCompleted, "All original requests reach the barrier before refresh")
+                    respond(tokenBody(rotation), headers = headersOf(HttpHeaders.ContentType, "application/json"))
+                } else if (request.headers[HttpHeaders.Authorization] == "Bearer ${original.accessToken}") {
+                    rejectedCalls++
+                    if (rejectedCalls == 10) allOriginalRequests.complete(Unit)
+                    allOriginalRequests.await()
+                    respondError(HttpStatusCode.Unauthorized)
+                } else {
+                    successfulCalls++
+                    assertTrue(request.headers[HttpHeaders.Authorization] == "Bearer ${rotation.accessToken}", "Rotation reused")
+                    respond("""{"response":{"qr_hex":"001122"}}""", headers = headersOf(HttpHeaders.ContentType, "application/json"))
+                }
             }
-        }
-        val client = MyItmoClient(MyItmoConfiguration.DEFAULT, TokenTestStorage(original), engine, clock)
+        })
+        val client = MyItmoClient(MyItmoConfiguration.DEFAULT, storage, engine, clock)
         try {
             List(10) { async { client.qr.getQrCode() } }.awaitAll()
             assertEquals(1, refreshes)
+            assertEquals(1, storage.writes)
             assertEquals(10, rejectedCalls)
             assertEquals(10, successfulCalls)
+            assertEquals(21, engine.requestHistory.size)
         } finally { client.close(); engine.close() }
     }
 
