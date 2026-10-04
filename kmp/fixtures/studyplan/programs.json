@@ -1,0 +1,21 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": {
+    "isu": 100001,
+    "programs": [
+      {
+        "planId": 50001,
+        "specializationId": 50011,
+        "name": "Синтетическая программа",
+        "isActive": true
+      },
+      {
+        "planId": 50002,
+        "specializationId": null,
+        "name": "Синтетическая программа без специализации",
+        "isActive": false
+      }
+    ]
+  }
+}

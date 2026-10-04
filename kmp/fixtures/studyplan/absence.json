@@ -1,0 +1,18 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": {
+    "id": 50002,
+    "structure": [
+      {
+        "id": 70002,
+        "name": "Синтетическая дисциплина без деталей",
+        "type": "discipline",
+        "moduleId": null,
+        "blockId": null,
+        "creditPoints": null,
+        "department": null
+      }
+    ]
+  }
+}
