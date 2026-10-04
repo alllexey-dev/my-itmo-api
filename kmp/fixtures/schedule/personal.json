@@ -1,0 +1,57 @@
+{
+  "code": 0,
+  "message": null,
+  "data": [
+    {
+      "day_number": 1,
+      "week_number": 6,
+      "date": "2026-10-05",
+      "note": null,
+      "type": 0,
+      "intersections": [],
+      "lessons": [
+        {
+          "pair_id": 9000001,
+          "subject": "Тестовая дисциплина",
+          "subject_id": 70001,
+          "note": null,
+          "type": "Лекция",
+          "time_start": "08:20",
+          "time_end": "09:50",
+          "teacher_id": 200001,
+          "teacher_name": "Преподаватель Тестовый",
+          "room": "1404",
+          "building": "Кронверкский пр., д.49, лит.А",
+          "format": "Очно",
+          "work_type": "Лекции",
+          "work_type_id": 1,
+          "group": "T3100",
+          "flow_type_id": 2,
+          "flow_id": 80001,
+          "zoom_url": null,
+          "zoom_password": null,
+          "zoom_info": null,
+          "bld_id": 13,
+          "format_id": 1,
+          "main_bld_id": 13
+        },
+        {
+          "pair_id": 9000002,
+          "subject": null,
+          "subject_id": 70002,
+          "type": "Практика",
+          "time_start": "10:00",
+          "time_end": "11:30",
+          "format": "Дистанционно",
+          "work_type": "Практические занятия",
+          "work_type_id": 3,
+          "group": "T3100",
+          "flow_type_id": 2,
+          "flow_id": 80002,
+          "zoom_url": "https://example.invalid/meeting/1",
+          "format_id": 3
+        }
+      ]
+    }
+  ]
+}

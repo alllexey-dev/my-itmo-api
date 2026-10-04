@@ -1,0 +1,17 @@
+{
+  "error_code": 0,
+  "result": {
+    "isu": 100001,
+    "fio": "Тестовый Профиль Синтетический",
+    "gender": "male",
+    "photo": "https://example.invalid/photo/100001.jpg",
+    "contacts": [{ "contact": ["test@example.invalid"], "contact_alias": "E-mail" }],
+    "rooms": [],
+    "positions": [{ "department_name": "Тестовый отдел", "department_link": "https://example.invalid/dep", "position_name": "Инженер", "vacation": null, "start_vacation": null, "end_vacation": null }],
+    "powers": [],
+    "levels": null,
+    "education": [{ "course": "3", "faculty_name": "Тестовый факультет", "group": "T3100" }],
+    "activities": null,
+    "exchange_training": false
+  }
+}
