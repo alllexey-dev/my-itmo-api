@@ -92,7 +92,9 @@ internal class BarsLoginLoopbackServer {
                     val response = (listOf("HTTP/1.1 ${reply.status} Synthetic") + headers + listOf("", "")).joinToString("\r\n")
                     writeBytes(connection, response.encodeToByteArray())
                     if (reply.unreadBody) {
-                        // A body read cannot finish: the client must return after headers and cancel this connection.
+                        // Ktor Darwin exposes response metadata on its first data callback, not on headers alone.
+                        // Send a small prefix, but never the advertised remainder: whole-body reads cannot finish.
+                        writeBytes(connection, "x".repeat(1024).encodeToByteArray())
                         val byte = ByteArray(1)
                         byte.usePinned { recv(connection, it.addressOf(0), 1u, 0) }
                     }
