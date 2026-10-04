@@ -108,11 +108,11 @@ class TokenManagerTest {
     }
 
     @Test
-    fun oauthRejectionAndBareUnauthorizedAreAuthWithoutSnapshotWrites() = runTest {
-        for ((status, body) in listOf(400 to """{"error":"invalid_grant"}""", 401 to "not JSON", 403 to "{}")) {
+    fun recognizedOAuthRejectionIsAuthWithoutSnapshotWrites() = runTest {
+        for (status in listOf(400, 401, 403)) {
             val stored = testTokens(clock, expired = true)
             val storage = TokenTestStorage(stored)
-            val engine = MockEngine { respond(body, HttpStatusCode.fromValue(status)) }
+            val engine = MockEngine { respond("""{"error":"invalid_grant"}""", HttpStatusCode.fromValue(status)) }
             val identity = ItmoIdClient(engine, clock)
             try {
                 val failure = assertFailsWith<MyItmoException.Auth> { TokenManager(storage, identity, clock).validAccessToken() }

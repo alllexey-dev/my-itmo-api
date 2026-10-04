@@ -176,22 +176,38 @@ class MyItmoAuthTest {
     }
 
     @Test
-    fun expiredRefreshAndTransientIdentityFailureRemainTypedAtAreaBoundary() = runTest {
-        for (rejected in listOf(true, false)) {
-            val snapshot = testTokens(clock, expired = true)
-            val storage = TokenTestStorage(snapshot)
-            val engine = MockEngine { request ->
-                assertEquals("id.itmo.ru", request.url.host)
-                if (rejected) respond("""{"error":"invalid_grant"}""", HttpStatusCode.BadRequest)
-                else respond("{}", HttpStatusCode.ServiceUnavailable)
+    fun recognizedOAuthRejectionRemainsAuthAtAreaBoundary() = runTest {
+        val snapshot = testTokens(clock, expired = true)
+        val storage = TokenTestStorage(snapshot)
+        val engine = MockEngine { request ->
+            assertEquals("id.itmo.ru", request.url.host)
+            respond("""{"error":"invalid_grant"}""", HttpStatusCode.BadRequest)
+        }
+        val client = MyItmoClient(MyItmoConfiguration.DEFAULT, storage, engine, clock)
+        try {
+            assertFailsWith<MyItmoException.Auth> { client.qr.getQrCode() }
+            assertEquals(0, storage.writes)
+            assertTrue(storage.snapshot === snapshot)
+        } finally { client.close(); engine.close() }
+    }
+
+    @Test
+    fun unrecognized401403AndServerFailureFromIdentityStayHttpAtAreaBoundary() = runTest {
+        for (status in listOf(401, 403, 503)) {
+            for (body in listOf("not JSON", "{}")) {
+                val snapshot = testTokens(clock, expired = true)
+                val storage = TokenTestStorage(snapshot)
+                val engine = MockEngine { request ->
+                    assertEquals("id.itmo.ru", request.url.host)
+                    respond(body, HttpStatusCode.fromValue(status))
+                }
+                val client = MyItmoClient(MyItmoConfiguration.DEFAULT, storage, engine, clock)
+                try {
+                    assertEquals(status, assertFailsWith<MyItmoException.Http> { client.qr.getQrCode() }.status)
+                    assertEquals(0, storage.writes)
+                    assertTrue(storage.snapshot === snapshot)
+                } finally { client.close(); engine.close() }
             }
-            val client = MyItmoClient(MyItmoConfiguration.DEFAULT, storage, engine, clock)
-            try {
-                if (rejected) assertFailsWith<MyItmoException.Auth> { client.qr.getQrCode() }
-                else assertEquals(503, assertFailsWith<MyItmoException.Http> { client.qr.getQrCode() }.status)
-                assertEquals(0, storage.writes)
-                assertTrue(storage.snapshot === snapshot)
-            } finally { client.close(); engine.close() }
         }
     }
 

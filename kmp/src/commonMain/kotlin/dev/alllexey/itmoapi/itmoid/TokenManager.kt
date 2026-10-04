@@ -10,7 +10,8 @@ import kotlin.time.Duration.Companion.seconds
 
 /** The sole session writer for one client. Access expiry includes [clockSkew]; refresh expiry is absolute.
  * A per-client Mutex and a re-read under [refreshGuard] coalesce successful concurrent refreshes.
- * Rejected/expired refresh is Auth; all failures leave the stored snapshot untouched.
+ * Recognized OAuth rejection or expired refresh is Auth; other typed failures stay unchanged.
+ * All failures leave the stored snapshot untouched.
  * Consumers must not run a legacy refresher against the same storage at the same time.
  */
 public class TokenManager(
@@ -67,12 +68,7 @@ public class TokenManager(
                 current
             } else {
                 if (current.refreshExpiresAt <= clock.now()) throw MyItmoException.Auth(401)
-                val refreshed = try {
-                    identity.refresh(current.refreshToken)
-                } catch (failure: MyItmoException.Http) {
-                    if (failure.status == 401 || failure.status == 403) throw MyItmoException.Auth(failure.status)
-                    throw failure
-                }
+                val refreshed = identity.refresh(current.refreshToken)
                 storage.write(refreshed)
                 refreshed
             }
