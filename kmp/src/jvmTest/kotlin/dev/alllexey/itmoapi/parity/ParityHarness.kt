@@ -35,6 +35,40 @@ internal object IntendedDifferences {
         "recordbook/controls.json" to setOf("$.result[0].date"),
     )
 
+    // Reviewed 2026-10-04: SP-02 date-by-instant / ADR 0025 Q5, same Instant for
+    // these exact sport fixture paths and old/new spellings; no fallback or shape changes.
+    private val sportDates = mapOf(
+        "sport/schedule.json" to mapOf(
+            "$.result[0].lessons[0].date" to ("2026-10-05T10:00+03:00" to "2026-10-05T07:00:00Z"),
+            "$.result[0].lessons[0].date_end" to ("2026-10-05T11:30+03:00" to "2026-10-05T08:30:00Z"),
+            "$.result[0].lessons[1].date" to ("2026-10-05T18:00+03:00" to "2026-10-05T15:00:00Z"),
+            "$.result[0].lessons[1].date_end" to ("2026-10-05T19:30+03:00" to "2026-10-05T16:30:00Z"),
+        ),
+        "sport/chosen.json" to mapOf(
+            "$.result[0].lesson_groups[0].lessons[0].date_start" to ("2026-01-05T10:00+03:00" to "2026-01-05T07:00:00Z"),
+            "$.result[0].lesson_groups[0].lessons[0].date_end" to ("2026-01-05T11:30+03:00" to "2026-01-05T08:30:00Z"),
+        ),
+        "sport/external-venue.json" to mapOf(
+            "$.result[0].lessons[0].date" to ("2026-10-05T10:00+03:00" to "2026-10-05T07:00:00Z"),
+            "$.result[0].lessons[0].date_end" to ("2026-10-05T11:30+03:00" to "2026-10-05T08:30:00Z"),
+        ),
+        "sport/current-semester.json" to mapOf(
+            "$.result.date_start" to ("2026-01-05T00:00+03:00" to "2026-01-04T21:00:00Z"),
+            "$.result.date_end" to ("2026-06-01T00:00+03:00" to "2026-05-31T21:00:00Z"),
+            "$.result.hard_date_end" to ("2026-07-01T00:00+03:00" to "2026-06-30T21:00:00Z"),
+            "$.result.choice_start" to ("0001-01-01T00:00+03:00" to "0000-12-31T21:00:00Z"),
+            "$.result.bachelor_bound" to ("0001-01-01T00:00+03:00" to "0000-12-31T21:00:00Z"),
+            "$.result.ppa1_start" to ("2026-06-02T00:00+03:00" to "2026-06-01T21:00:00Z"),
+            "$.result.ppa1_end" to ("2026-06-10T00:00+03:00" to "2026-06-09T21:00:00Z"),
+            "$.result.ppa2_start" to ("2026-06-11T00:00+03:00" to "2026-06-10T21:00:00Z"),
+            "$.result.ppa2_end" to ("2026-06-20T00:00+03:00" to "2026-06-19T21:00:00Z"),
+        ),
+        "sport/score.json" to mapOf(
+            "$.result.attendances[0].date" to ("2026-01-05T10:00+03:00" to "2026-01-05T07:00:00Z"),
+            "$.result.attendances[1].date" to ("2026-01-05T10:00+03:00" to "2026-01-05T07:00:00Z"),
+        ),
+    )
+
     // Owner review 2026-10-04: "Да, разрешить эти конкретные fallback-расхождения".
     // ADR 0025 Q6 client fallbacks; only these absent wire paths get these exact values.
     private val fallbacks = mapOf(
@@ -60,6 +94,9 @@ internal object IntendedDifferences {
 
     fun normalize(fixture: String, tree: JsonElement): JsonElement {
         fun visit(value: JsonElement, path: String): JsonElement = when {
+            sportDates[fixture]?.get(path)?.let { (old, new) ->
+                value is JsonPrimitive && value.isString && (value.content == old || value.content == new)
+            } == true -> JsonPrimitive(OffsetDateTime.parse(value.jsonPrimitive.content).toInstant().toString())
             path in dates[fixture].orEmpty() -> JsonPrimitive(OffsetDateTime.parse(value.jsonPrimitive.content).toInstant().toString())
             value is JsonObject -> {
                 val members = value.mapValues { (key, child) -> visit(child, "$path.$key") }.toMutableMap()
