@@ -1,0 +1,9 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": {
+    "is_having_debt": true,
+    "needed_score": 12.5,
+    "free_attempts": 2
+  }
+}

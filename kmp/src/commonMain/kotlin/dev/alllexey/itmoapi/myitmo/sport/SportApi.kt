@@ -18,7 +18,7 @@ import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 
 /** MyITMO sports operations used by schedule, enrollment and score consumers. */
-public interface SportApi {
+public interface SportApi : SportRemainingApi {
     /** GET /api/sport/time_slots; Sports lesson intervals. */
     @Throws(MyItmoException::class, CancellationException::class)
     public suspend fun getSportTimeSlots(): ResultResponse<List<TimeSlot>>
@@ -65,7 +65,7 @@ public interface SportApi {
 
 }
 
-internal class SportApiImpl(private val transport: ItmoTransport) : SportApi {
+internal class SportApiImpl(private val transport: ItmoTransport) : SportApi, SportRemainingApi by SportRemainingApiImpl(transport) {
     override suspend fun getSportTimeSlots(): ResultResponse<List<TimeSlot>> = transport.execute(
         ResultResponse.serializer(ListSerializer(TimeSlot.serializer())), HttpMethod.Get, "api/sport/time_slots",
     ) {

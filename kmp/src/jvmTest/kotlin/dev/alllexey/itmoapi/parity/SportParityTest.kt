@@ -193,4 +193,79 @@ class SportParityTest {
             }
         }
     }
+
+    @Test
+    fun `remaining sport fixtures preserve their full wire trees`() {
+        for (path in listOf("sport/sport-types.json", "sport/sport-types-empty.json")) {
+            assertParity<api.myitmo.model.ResultResponse<List<api.myitmo.model.IdValuePair>>, ResultResponse<List<IdValuePair>>>(
+                path, ResultResponse.serializer(ListSerializer(IdValuePair.serializer())),
+            )
+        }
+        for (path in listOf("sport/sign-attempts.json", "sport/sign-attempts-zero.json", "sport/remaining-error.json")) {
+            assertParity<api.myitmo.model.ResultResponse<Int>, ResultResponse<Int>>(
+                path, ResultResponse.serializer(Int.serializer()),
+            )
+        }
+        for (path in listOf("sport/calendar.json", "sport/calendar-empty.json")) {
+            assertParity<api.myitmo.model.ResultResponse<List<api.myitmo.model.sport.SportSchedule>>, ResultResponse<List<SportSchedule>>>(
+                path, ResultResponse.serializer(ListSerializer(SportSchedule.serializer())),
+            )
+        }
+        for (path in listOf("sport/debt.json", "sport/debt-none.json")) {
+            assertParity<api.myitmo.model.ResultResponse<api.myitmo.model.sport.SportDebt>, ResultResponse<SportDebt>>(
+                path, ResultResponse.serializer(SportDebt.serializer()),
+            )
+        }
+        for (path in listOf("sport/externat.json", "sport/externat-declined.json", "sport/externat-none.json")) {
+            assertParity<api.myitmo.model.ResultResponse<api.myitmo.model.sport.SportExternat>, ResultResponse<SportExternat>>(
+                path, ResultResponse.serializer(SportExternat.serializer()),
+            )
+        }
+        for (path in listOf("sport/health-level.json")) {
+            assertParity<api.myitmo.model.ResultResponse<api.myitmo.model.sport.SportHealthLevelResponse>, ResultResponse<SportHealthLevelResponse>>(
+                path, ResultResponse.serializer(SportHealthLevelResponse.serializer()),
+            )
+        }
+        for (path in listOf("sport/selections.json", "sport/selections-empty.json")) {
+            assertParity<api.myitmo.model.ResultResponse<List<api.myitmo.model.sport.SportSelection>>, ResultResponse<List<SportSelection>>>(
+                path, ResultResponse.serializer(ListSerializer(SportSelection.serializer())),
+            )
+        }
+        for (path in listOf("sport/projects.json", "sport/projects-empty.json")) {
+            assertParity<api.myitmo.model.ResultResponse<List<api.myitmo.model.sport.SportProject>>, ResultResponse<List<SportProject>>>(
+                path, ResultResponse.serializer(ListSerializer(SportProject.serializer())),
+            )
+        }
+    }
+
+    @Test
+    fun `all remaining production requests match legacy Retrofit`() = runTest {
+        val legacy = legacyApi()
+        val cases: List<Pair<retrofit2.Call<*>, suspend (SportApi) -> Unit>> = listOf(
+            legacy.getSportTypes() to { it.getSportTypes() },
+            legacy.getSportSignAttempts() to { it.getSportSignAttempts() },
+            legacy.getPersonalSportCalendar(JavaDate.of(2026, 1, 5), JavaDate.of(2026, 1, 11)) to {
+                it.getPersonalSportCalendar(LocalDate(2026, 1, 5), LocalDate(2026, 1, 11))
+            },
+            legacy.getSportDebt() to { it.getSportDebt() },
+            legacy.getSportExternat() to { it.getSportExternat() },
+            legacy.getSportHealthLevel() to { it.getSportHealthLevel() },
+            legacy.getSportSelections() to { it.getSportSelections() },
+            legacy.getSportProjects() to { it.getSportProjects() },
+        )
+        val responses = listOf("sport-types", "sign-attempts", "calendar", "debt", "externat", "health-level", "selections", "projects")
+        for ((index, case) in cases.withIndex()) {
+            val request = case.first.request()
+            val query = request.url.queryParameterNames.associateWith { key -> request.url.queryParameterValues(key).map { requireNotNull(it) } }
+            sportExchange(request.url.encodedPath.removePrefix("/api/sport/"), fixture("sport/${responses[index]}.json"), query, inspect = { modern ->
+                assertEquals(request.method, modern.method.value)
+                assertEquals(request.url.scheme, modern.url.protocol.name)
+                assertEquals(request.url.host, modern.url.host)
+                assertEquals(request.url.encodedPath, modern.url.encodedPath)
+                assertEquals(request.url.encodedQuery.orEmpty(), modern.url.encodedQuery)
+            }) {
+                case.second(SportApiImpl(it))
+            }
+        }
+    }
 }

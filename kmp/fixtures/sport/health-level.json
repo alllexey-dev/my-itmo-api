@@ -1,0 +1,11 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": {
+    "health_level": {
+      "id": 1,
+      "isu": 200001,
+      "name": "Основная группа здоровья"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": {
+    "signed": false,
+    "externat_status_id": 13,
+    "decline_reason": "Synthetic refusal"
+  }
+}
