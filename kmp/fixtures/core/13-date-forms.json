@@ -1,0 +1,9 @@
+{
+  "gson-fcm-zero-seconds": "2026-10-03T12:00+03:00",
+  "gson-fcm-nanos": "2026-10-03T12:00:42.123456789+03:00",
+  "jackson-offset": "2026-10-03T12:00:00+03:00",
+  "jackson-micros": "2026-10-03T12:00:00.123456+03:00",
+  "jackson-utc": "2026-10-03T09:00:00Z",
+  "gson-utc-zero-seconds": "2026-10-03T09:00Z",
+  "myitmo-offset": "2026-10-05T10:00:00+03:00"
+}

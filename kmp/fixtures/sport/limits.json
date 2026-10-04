@@ -1,0 +1,8 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": {
+    "1": { "10": { "limit": 4, "available": 2 }, "11": { "limit": 2, "available": 0 } },
+    "2": { "20": { "limit": 1, "available": 1 } }
+  }
+}

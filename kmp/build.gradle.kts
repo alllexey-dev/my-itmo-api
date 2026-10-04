@@ -63,3 +63,48 @@ kotlin {
 tasks.withType<KotlinNativeSimulatorTest>().configureEach {
     device = "iPhone 17"
 }
+
+// Common constants avoid platform resource APIs; every new fixture is discovered automatically.
+val fixtureDirectory = layout.projectDirectory.dir("fixtures")
+val generatedFixtures = layout.buildDirectory.dir("generated/fixtures/commonTest")
+val generateFixtures = tasks.register("generateFixtures") {
+    inputs.files(fileTree(fixtureDirectory) { include("**/*.json", "**/*.html") })
+    outputs.dir(generatedFixtures)
+    doLast {
+        fun quoted(value: String): String = buildString {
+            append('"')
+            value.forEach { character ->
+                when (character) {
+                    '\\' -> append("\\\\")
+                    '"' -> append("\\\"")
+                    '$' -> append("\\$")
+                    '\n' -> append("\\n")
+                    '\r' -> append("\\r")
+                    '\t' -> append("\\t")
+                    else -> if (character.code < 32) {
+                        append("\\u%04x".format(character.code))
+                    } else {
+                        append(character)
+                    }
+                }
+            }
+            append('"')
+        }
+        val root = fixtureDirectory.asFile
+        val entries = inputs.files.files.sortedBy { it.relativeTo(root).invariantSeparatorsPath }.joinToString(",\n") {
+            "        ${quoted(it.relativeTo(root).invariantSeparatorsPath)} to ${quoted(it.readText())}"
+        }
+        val output = generatedFixtures.get().file("dev/alllexey/itmoapi/testing/GeneratedFixtures.kt").asFile
+        output.parentFile.mkdirs()
+        output.writeText(
+            "package dev.alllexey.itmoapi.testing\n\n" +
+                "internal val generatedFixtures: Map<String, String> = mapOf(\n$entries\n)\n"
+        )
+    }
+}
+kotlin.sourceSets.commonTest {
+    kotlin.srcDir(generatedFixtures)
+}
+tasks.matching { it.name.startsWith("compileTestKotlin") }.configureEach {
+    dependsOn(generateFixtures)
+}
