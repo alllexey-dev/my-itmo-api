@@ -1,0 +1,22 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": [
+    {
+      "id": 31,
+      "name": "Тестовая дисциплина",
+      "requisites": [
+        {
+          "id": 41,
+          "level_name": "Сборная команда",
+          "name": "Тестовый отбор"
+        }
+      ]
+    },
+    {
+      "id": 32,
+      "name": "Другой отбор",
+      "requisites": []
+    }
+  ]
+}
