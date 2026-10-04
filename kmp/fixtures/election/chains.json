@@ -1,0 +1,39 @@
+{
+  "error_code": 0,
+  "error_message": "",
+  "result": [
+    {
+      "groupFlow": "00a /+&?",
+      "disciplineId": 22,
+      "disciplineName": "Synthetic Discipline",
+      "flows": [
+        {
+          "id": 101,
+          "name": "Synthetic flow",
+          "limitMax": 20,
+          "teachers": [
+            "Synthetic Teacher"
+          ],
+          "variants": [
+            {
+              "id": 102,
+              "name": "Alternative",
+              "limitMax": null,
+              "teachers": [],
+              "variants": [],
+              "workType": 2,
+              "available": false,
+              "selections": []
+            }
+          ],
+          "workType": 1,
+          "available": true,
+          "selections": [
+            1,
+            3
+          ]
+        }
+      ]
+    }
+  ]
+}

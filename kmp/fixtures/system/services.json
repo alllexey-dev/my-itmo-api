@@ -1,0 +1,18 @@
+{
+  "error_code": 0,
+  "error_message": "",
+  "result": {
+    "menu": [
+      {
+        "title": "Synthetic service",
+        "description": "Service description",
+        "to": "https://example.invalid/service",
+        "icon": "service",
+        "multicolor_icon": "service-color",
+        "exact": false,
+        "color": "#123456",
+        "children": []
+      }
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "error_code": 0,
+  "error_message": "",
+  "result": [
+    {
+      "id": 7001,
+      "name": "Synthetic request",
+      "notice": "Synthetic notice",
+      "status": 91,
+      "status_name": "Synthetic status",
+      "created_at": "2026-01-05T09:00:00+03:00",
+      "updated_at": "2026-01-06T10:30:00+03:00"
+    }
+  ]
+}

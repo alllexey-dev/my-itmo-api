@@ -69,6 +69,21 @@ internal object IntendedDifferences {
         ),
     )
 
+    // Coordinator review 2026-10-04: SP-02 date-by-instant / ADR 0025 Q5.
+    // Only these six exact fixture/path/old/new spellings; no shape or fallback changes.
+    private val electionRequestDates = mapOf(
+        "election/availability.json" to mapOf(
+            "$.result.semesterStart" to ("2026-01-05T00:00+03:00" to "2026-01-04T21:00:00Z"),
+            "$.result.semesterEnd" to ("2026-06-30T00:00+03:00" to "2026-06-29T21:00:00Z"),
+            "$.result.dateStart" to ("2026-01-06T10:00+03:00" to "2026-01-06T07:00:00Z"),
+            "$.result.dateEnd" to ("2026-01-07T18:30+03:00" to "2026-01-07T15:30:00Z"),
+        ),
+        "requests/my.json" to mapOf(
+            "$.result[0].created_at" to ("2026-01-05T09:00+03:00" to "2026-01-05T06:00:00Z"),
+            "$.result[0].updated_at" to ("2026-01-06T10:30+03:00" to "2026-01-06T07:30:00Z"),
+        ),
+    )
+
     // Owner review 2026-10-04: "Да, разрешить эти конкретные fallback-расхождения".
     // ADR 0025 Q6 client fallbacks; only these absent wire paths get these exact values.
     private val fallbacks = mapOf(
@@ -94,7 +109,7 @@ internal object IntendedDifferences {
 
     fun normalize(fixture: String, tree: JsonElement): JsonElement {
         fun visit(value: JsonElement, path: String): JsonElement = when {
-            sportDates[fixture]?.get(path)?.let { (old, new) ->
+            (sportDates[fixture]?.get(path) ?: electionRequestDates[fixture]?.get(path))?.let { (old, new) ->
                 value is JsonPrimitive && value.isString && (value.content == old || value.content == new)
             } == true -> JsonPrimitive(OffsetDateTime.parse(value.jsonPrimitive.content).toInstant().toString())
             path in dates[fixture].orEmpty() -> JsonPrimitive(OffsetDateTime.parse(value.jsonPrimitive.content).toInstant().toString())

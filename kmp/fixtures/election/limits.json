@@ -1,0 +1,11 @@
+{
+  "error_code": 0,
+  "error_message": "",
+  "result": {
+    "00a /+&?": {
+      "limitMax": 20,
+      "occupied": 17,
+      "free": 3
+    }
+  }
+}

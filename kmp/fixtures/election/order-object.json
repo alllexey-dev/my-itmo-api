@@ -1,0 +1,13 @@
+{
+  "error_code": 0,
+  "error_message": "",
+  "result": {
+    "accepted": true,
+    "ids": [
+      101
+    ],
+    "metadata": {
+      "revision": "synthetic"
+    }
+  }
+}

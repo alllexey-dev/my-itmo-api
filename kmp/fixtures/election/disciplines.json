@@ -1,0 +1,29 @@
+{
+  "error_code": 0,
+  "error_message": "",
+  "result": [
+    {
+      "dcId": 11,
+      "discId": 22,
+      "langId": 1,
+      "depName": "Synthetic Department",
+      "discName": "Synthetic Discipline",
+      "langCode": "en",
+      "required": true,
+      "semesters": [
+        {
+          "semester": 2,
+          "statusId": 1,
+          "groupFlow": "00a /+&?",
+          "statusName": "Available"
+        }
+      ],
+      "description": "Synthetic description",
+      "depNameShort": "SYN",
+      "notCompatibleWith": [
+        23,
+        24
+      ]
+    }
+  ]
+}
