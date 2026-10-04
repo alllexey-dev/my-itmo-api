@@ -5,6 +5,8 @@ import dev.alllexey.itmoapi.itmoid.ItmoIdClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.http.Url
 import kotlinx.coroutines.Job
+import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertSame
@@ -35,7 +37,7 @@ class ClientShellTest {
     @Test
     fun identityAndBarsShellsDoNotInitializeTransportJustToClose() {
         val engine = MockEngine { error("A shell must not make a request") }
-        val identity = ItmoIdClient(engine)
+        val identity = ItmoIdClient(engine, object : Clock { override fun now(): Instant = Instant.parse("2026-10-03T09:00:00Z") })
         val bars = BarsClient(engine)
         try {
             identity.close()
