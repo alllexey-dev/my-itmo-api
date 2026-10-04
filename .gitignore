@@ -7,10 +7,9 @@ kmp/local.properties
 !**/src/test/**/target/
 
 ### IntelliJ IDEA ###
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
+/.idea/*
+!/.idea/dictionaries/
+!/.idea/inspectionProfiles/
 *.iws
 *.iml
 *.ipr
@@ -39,6 +38,3 @@ build/
 
 ### Mac OS ###
 .DS_Store
-.idea/yatool.xml
-.idea/AndroidProjectSystem.xml
-.idea/workspace.xml
