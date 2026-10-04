@@ -57,6 +57,8 @@ internal class ItmoTransport(internal val client: HttpClient, private val baseUr
             body = response.bodyAsText()
         } catch (failure: CancellationException) {
             throw failure
+        } catch (failure: MyItmoException) {
+            throw failure
         } catch (failure: Exception) {
             if (hasNetworkCause(failure)) throw MyItmoException.Network(failure)
             // Non-I/O engine/plugin failures can also contain request data.
