@@ -235,7 +235,7 @@ class ReadmeSamplesTest {
         val root = repositoryRoot()
         val source = File(root, "kmp/src/jvmTest/kotlin/dev/alllexey/itmoapi/ReadmeSamplesTest.kt").readText()
         val readme = File(root, "README.md").readText()
-        for (name in listOf("imports", "storage", "client", "login", "schedule", "bars", "cookies")) {
+        for (name in listOf("storage", "client", "login", "schedule", "bars", "cookies")) {
             val sample = source.substringAfter("// README $name begin\n").substringBefore("// README $name end")
                 .trimIndent().trimEnd()
             assertTrue(readme.contains("```kotlin\n$sample\n```"), "README sample differs: $name")

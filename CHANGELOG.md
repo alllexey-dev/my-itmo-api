@@ -7,6 +7,8 @@
 - Add `LICENSE` (MIT, as declared in the POMs) and a contributor section in the
   README; `scripts/verify.sh` runs without build-slot tooling outside this
   machine. Drop internal planning IDs from KDoc and comments.
+- Restructure the README after the 1.x one: features, requirements, setup,
+  authentication, API usage, BARS and notes.
 
 ## 2.0.0 - 2026-10-10
 
