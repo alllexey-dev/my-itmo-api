@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.0.0 - development
+## 2.0.0 - 2026-10-10
 
 - Add the separate Kotlin Multiplatform client in `kmp/` for JVM/Android and
   iOS, with suspend ITMO.ID, MyITMO and BARS APIs under `dev.alllexey.itmoapi`.
@@ -11,8 +11,7 @@
   including model/member completeness and documentation checks.
 - Document 2.x first in the Russian README, with compiled/executed examples,
   and provide an English migration guide with the full generated member map.
-- Keep 1.x compatible in the root. 2.x remains `2.0.0-SNAPSHOT`; this entry
-  does not announce publication or a release.
+- Keep 1.x compatible in the root as `dev.alllexey:my-itmo-api`.
 
 ## 1.8.3 — unreleased
 
