@@ -1,9 +1,8 @@
 # Migrating from MyItmoApi 1.x to 2.x
 
 2.x is a separate Kotlin Multiplatform artifact, not a binary-compatible update
-of the Java artifact. The source is currently in `kmp/`, at `2.0.0-SNAPSHOT`;
-`dev.alllexey:my-itmo-api-kmp:2.0.0` is the planned release coordinate, not a
-publication announcement. 1.x stays in the root as `dev.alllexey:my-itmo-api`.
+of the Java artifact. `dev.alllexey:my-itmo-api-kmp:2.0.0` is on Maven Central;
+the source in `kmp/` is at `2.0.1-SNAPSHOT`. 1.x stays in the root as `dev.alllexey:my-itmo-api`.
 Targets are JVM (JVM 11 bytecode, also Android minSdk 26), iosArm64 and
 iosSimulatorArm64. Source builds use JDK 17 and Kotlin language/API 2.2.
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.1 - development
+
+- Move `kmp/` to `2.0.1-SNAPSHOT` after the 2.0.0 release; the README points
+  at `dev.alllexey:my-itmo-api-kmp:2.0.0` on Maven Central.
+
 ## 2.0.0 - 2026-10-10
 
 - Add the separate Kotlin Multiplatform client in `kmp/` for JVM/Android and
