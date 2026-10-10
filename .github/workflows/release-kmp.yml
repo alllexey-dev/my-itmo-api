@@ -35,7 +35,7 @@ jobs:
 
   release:
     needs: guard
-    # SP-10: Linux x86_64 produces identical path-normalized Apple klibs.
+    # Linux x86_64 produces identical path-normalized Apple klibs.
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:

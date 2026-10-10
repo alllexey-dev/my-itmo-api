@@ -37,7 +37,7 @@ esac
 [ "$#" -le 1 ] || unavailable 'Expected at most one verification mode'
 
 require_kmp() {
-    [ -f kmp/settings.gradle.kts ] || unavailable 'KMP: unavailable (ML-01a has not landed)'
+    [ -f kmp/settings.gradle.kts ] || unavailable 'KMP: kmp/ is missing'
     [ -x ./gradlew ] || unavailable 'KMP: root Gradle wrapper is unavailable'
 }
 
@@ -61,12 +61,12 @@ in_slot() {
     local kind=$1
     local slot_script=${ITMO_SLOT_SH:-$HOME/proj/.wt/bin/slot.sh}
     shift
-    if [ "${CI:-false}" = true ]; then
+    # Slots only serialize parallel local agents; CI and plain checkouts run directly.
+    if [ "${CI:-false}" = true ] || { [ ! -x "$slot_script" ] && [ ! -x /usr/bin/lockf ]; }; then
         "$@"
     elif [ -x "$slot_script" ]; then
         "$slot_script" "$kind" -- "$@"
     else
-        [ -x /usr/bin/lockf ] || unavailable 'Build slots require lockf or ITMO_SLOT_SH'
         [ "$kind" != kn ] || kind=android
         mkdir -p "$HOME/.cache/itmo-agents/slots"
         /usr/bin/lockf -k "$HOME/.cache/itmo-agents/slots/${kind}.1.lock" "$@"

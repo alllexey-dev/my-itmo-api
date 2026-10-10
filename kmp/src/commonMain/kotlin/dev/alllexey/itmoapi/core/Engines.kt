@@ -9,12 +9,10 @@ import io.ktor.client.statement.HttpResponse
  */
 public expect fun defaultEngine(): HttpClientEngine
 
-/** ML-03 seam for ADR 0012 cookie replay without shared cookies, caches or redirects.
- * Platform implementations intentionally remain TODO until their real-engine tests land.
- */
+/** Client for caller-owned ITMO.ID cookie replay: no shared cookie storage, caching or redirects. */
 internal expect fun noCookieClient(engine: HttpClientEngine): HttpClient
 
-/** ML-03 seam returning every Set-Cookie value, including Darwin's folded headers. */
+/** Returns every Set-Cookie value, including Darwin's folded headers. */
 internal expect fun readSetCookies(response: HttpResponse): List<String>
 
 internal expect fun isNetworkFailure(cause: Throwable): Boolean

@@ -198,17 +198,33 @@ Refresh HTTP 5xx - `Http`, не `Auth`. На `Http`/`Network`/`Decode` не уд
 Диагностика редактирована; `Network.cause` и `Api.serverMessage` могут содержать
 недоверенные данные и не предназначены для логов. Не логируйте коды, токены,
 cookie, verifier, URL входа/callback и тела ответов. Локализация ошибок,
-`DemoMode` и согласие на дополнительные сервисы принадлежат потребителю.
+демо-режим и пользовательские согласия остаются на стороне приложения.
 
 ## Разработка
 
+Нужен JDK 17; для iOS - macOS с Xcode. Обращений к настоящим ITMO.ID, MyITMO и
+БАРС в тестах нет: только `MockEngine` и синтетические фикстуры в `kmp/fixtures/`.
+
+| Что | Где |
+|---|---|
+| 2.x, Kotlin Multiplatform | `kmp/` (отдельный Gradle-проект, wrapper в корне) |
+| 1.x, Java | `src/`, `pom.xml` (Maven wrapper в корне) |
+| Карта миграции 1.x -> 2.x | `docs/migration.md` |
+
 ```bash
-scripts/verify.sh kmp-jvm
+./gradlew -p kmp jvmTest                 # JVM-тесты, примеры из README и паритет с 1.8.2
+./gradlew -p kmp iosSimulatorArm64Test   # iOS-тесты на симуляторе
+./mvnw verify -Dgpg.skip=true            # 1.x
 ```
 
-Проверка использует JDK 17 и общий JVM build slot, запускает примеры и
-паритетные тесты без обращений к университетским сервисам. Проверки iOS требуют
-Xcode и отдельного разрешённого Native slot; инструкции - в [AGENTS.md](AGENTS.md).
+`scripts/verify.sh [kmp-jvm|kmp|maven|all]` запускает те же проверки, что CI,
+и печатает итоговую строку `VERIFY ... PASS|FAIL`. В IntelliJ IDEA импортируйте
+`kmp/` как Gradle-проект: корень открывается как Maven-проект 1.x.
+
+Изменения - через PR. Новые поля и эндпоинты документируются по наблюдаемым
+ответам (KDoc на английском, синтетическая фикстура, тест); подробные правила -
+в [AGENTS.md](AGENTS.md). Версии публикуются в Maven Central из CI по тегу
+владельца репозитория.
 
 ## 1.x
 

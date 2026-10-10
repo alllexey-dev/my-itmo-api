@@ -16,7 +16,7 @@ import io.ktor.http.headersOf
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-/** Isolated request seam for the ML-05b recordbook and study-plan endpoints; never prints request headers or bodies. */
+/** Isolated request seam for the recordbook and study-plan endpoints; never prints request headers or bodies. */
 internal suspend fun <T> recordBookExchange(
     path: String,
     response: String,

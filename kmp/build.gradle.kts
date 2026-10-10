@@ -37,7 +37,7 @@ kotlin {
     iosArm64()
     iosSimulatorArm64()
     targets.withType<KotlinNativeTarget>().configureEach {
-        // SP-10: remove checkout paths from klibs for identical Mac/Linux publications.
+        // Remove checkout paths from klibs for identical Mac/Linux publications.
         compilerOptions.freeCompilerArgs.add("-Xklib-relative-path-base=${rootDir.absolutePath}")
     }
 
