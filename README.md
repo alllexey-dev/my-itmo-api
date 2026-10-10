@@ -1,62 +1,46 @@
-# MyItmoApi 2.x
+<h1 align="center">MyItmoApi</h1>
 
-Неофициальный Kotlin Multiplatform клиент для ITMO.ID, MyITMO и БАРС.
-2.x находится в `kmp/` рядом с совместимой Java-веткой 1.x.
+<p align="center"><strong>Неофициальная Kotlin Multiplatform библиотека для работы с <a href="https://my.itmo.ru">MyITMO</a> и <a href="https://bars.itmo.ru">БАРС</a></strong></p>
 
-## Подключение и платформы
+## Возможности
 
-Координаты 2.x в Maven Central: `dev.alllexey:my-itmo-api-kmp:2.0.0`, версия
-исходников `2.0.1-SNAPSHOT`. Зависимость в `commonMain`:
+- Вход через ITMO.ID в браузере (OAuth с PKCE) и автоматическое обновление токенов.
+- Личное расписание и временные слоты пар.
+- Зачётка, специализации и дерево контрольных мероприятий.
+- Учебный план.
+- Просмотр и поиск персоналий.
+- Спорт:
+  - расписание, фильтры и временные слоты;
+  - личный календарь и выбранные секции;
+  - запись на занятия и отмена записи;
+  - баллы, попытки, задолженность и медицинская группа;
+  - отборы, экстернат и специальные проекты.
+- Выбор дисциплин и потоков.
+- Главный экран, меню и каталог сервисов MyITMO.
+- Заявки пользователя.
+- Суммарные выплаты по категориям.
+- QR-пропуск в корпуса в HEX-формате.
+- БАРС: вход через ITMO.ID, выбор учебного периода, каталоги дисциплин и потоков,
+  журнал с баллами и подтверждёнными оценками.
+
+## Требования
+
+- JVM 11 или новее, Android с minSdk 26, iOS (`iosArm64`, `iosSimulatorArm64`).
+- Kotlin 2.2 или новее.
+
+Основные зависимости: Ktor, kotlinx.serialization, kotlinx-datetime и kotlinx.coroutines.
+
+## Подключение
 
 ```kotlin
 implementation("dev.alllexey:my-itmo-api-kmp:2.0.0")
 ```
 
-Цели: `jvm`, `iosArm64`, `iosSimulatorArm64`. JVM-артефакт также используется
-на Android с minSdk 26; байткод JVM 11. Все сетевые операции - `suspend`,
-без Retrofit `Call` и блокирующего фасада. Пакеты начинаются с
-`dev.alllexey.itmoapi`. Для сборки исходников нужен JDK 17.
+## Клиент
 
-## Клиент и хранение сессии
-
-`MyItmoClient` принимает неизменяемую `MyItmoConfiguration`, `TokenStorage`,
-движок Ktor и `kotlin.time.Clock`. `MyItmoConfiguration.DEFAULT` и `.DEV`
-задают официальные окружения; `baseUrl`, `itmoId`, `acceptLanguage` (по
-умолчанию `ru`) и `clockSkew` (30 секунд) можно передать явно.
-`ItmoIdConfiguration` задаёт `issuer`, `clientId` и точный HTTPS `redirectUri`.
-
-`core.defaultEngine()` создаёт OkHttp на JVM/Android и Darwin на Apple.
-Движок принадлежит вызывающему: после завершения запросов вызовите
-`client.close()`, затем `engine.close()`. Переданный движок сам должен
-отключать cookie, кеш и автоматические переходы; для БАРС это обязательное
-условие. В библиотеке нет глобального клиента, cookie jar или сессии.
-
-Ниже - функции из [ReadmeSamplesTest](kmp/src/jvmTest/kotlin/dev/alllexey/itmoapi/ReadmeSamplesTest.kt),
-реально компилируемые и вызываемые тестами с `MockEngine` и синтетическими
-адресами. Общие импорты для этих примеров:
-
-```kotlin
-import dev.alllexey.itmoapi.bars.BarsClient
-import dev.alllexey.itmoapi.bars.auth.BarsLogin
-import dev.alllexey.itmoapi.bars.auth.BarsSessionCode
-import dev.alllexey.itmoapi.bars.model.Discipline
-import dev.alllexey.itmoapi.bars.model.Term
-import dev.alllexey.itmoapi.core.requireResult
-import dev.alllexey.itmoapi.itmoid.CallbackUrl
-import dev.alllexey.itmoapi.itmoid.TokenSet
-import dev.alllexey.itmoapi.itmoid.TokenStorage
-import dev.alllexey.itmoapi.myitmo.MyItmoClient
-import dev.alllexey.itmoapi.myitmo.MyItmoConfiguration
-import dev.alllexey.itmoapi.myitmo.schedule.Schedule
-import io.ktor.client.engine.HttpClientEngine
-import kotlinx.datetime.LocalDate
-import kotlin.time.Clock
-```
-
-`TokenStorage` атомарно читает и заменяет весь `TokenSet`: access token,
-refresh token, ID token и два срока действия типа `kotlin.time.Instant`.
-`null` означает отсутствие сессии. Этот минимальный пример хранит сессию
-только в памяти и предназначен для одного владельца, не для постоянного хранения:
+Все запросы - `suspend`-функции. Токены хранятся в вашей реализации `TokenStorage`;
+пример ниже держит их только в памяти, для постоянного хранения используйте
+Keychain, Keystore или свою базу:
 
 ```kotlin
 class MemoryTokens : TokenStorage {
@@ -67,13 +51,6 @@ class MemoryTokens : TokenStorage {
 }
 ```
 
-Для приложения реализуйте защищённое хранение самостоятельно (Keychain,
-Keystore или серверное хранилище). После создания клиента единственный
-писатель - `client.tokens` (`TokenManager`): вход через `replaceTokens`, выход
-через `replaceTokens(null)`. Не запускайте рядом старый механизм обновления.
-Для общего хранилища нескольких клиентов или процессов передайте общий
-`TokenRefreshGuard`; локальный Mutex по умолчанию защищает только один менеджер.
-
 ```kotlin
 fun createClient(
     storage: TokenStorage,
@@ -83,12 +60,16 @@ fun createClient(
 ): MyItmoClient = MyItmoClient(configuration, storage, engine, clock)
 ```
 
-## Вход через браузер
+Движок `defaultEngine()` создаёт OkHttp на JVM и Android и Darwin на iOS. Движок
+принадлежит вызывающему: закройте сначала клиент (`client.close()`), потом движок.
 
-Создайте verifier и state через `Pkce.newVerifier()` и `Pkce.newState()`,
-постройте URL через `client.identity.loginUrl(Pkce.challenge(verifier), state)`
-и откройте в браузере. Сохраните verifier/state до callback. Проверяйте callback
-перед обменом одноразового кода; не выводите эти значения в логи:
+## Аутентификация
+
+Входа по логину и паролю в 2.x нет: пользователь входит в браузере.
+
+1. Создайте `Pkce.newVerifier()` и `Pkce.newState()` и сохраните их до callback.
+2. Откройте `client.identity.loginUrl(Pkce.challenge(verifier), state)`.
+3. Обменяйте callback на токены:
 
 ```kotlin
 suspend fun completeLogin(
@@ -105,17 +86,15 @@ suspend fun completeLogin(
 }
 ```
 
-`ItmoIdClient.exchange` и `.refresh` возвращают полный снимок, сами не меняют
-хранилище. `TokenManager.validAccessToken()` обновляет истекающий access token,
-`forceRefresh()` принудительно обновляет его, `isRefreshTokenExpired()` проверяет
-срок refresh token. Успешные конкурентные обновления объединяются; неудача
-оставляет снимок нетронутым. Парольного входа и общего SSO-клиента в 2.x нет.
+Дальше access token обновляется автоматически. Выход - `client.tokens.replaceTokens(null)`.
 
-## MyITMO
+Не записывайте токены, коды и cookie в логи.
 
-Области клиента: `schedule`, `recordBook`, `personalities`, `studyplan`, `qr`,
-`sport`, `election`, `finances`, `requests`, `system`. Методы возвращают
-типизированные конверты; `requireResult()` проверяет код и извлекает результат:
+## Использование API
+
+Разделы клиента: `schedule`, `recordBook`, `personalities`, `studyplan`, `qr`,
+`sport`, `election`, `finances`, `requests`, `system`. Методы возвращают ответ
+MyITMO; `requireResult()` достаёт результат или бросает ошибку.
 
 ```kotlin
 suspend fun readSchedule(client: MyItmoClient): List<Schedule> =
@@ -124,25 +103,16 @@ suspend fun readSchedule(client: MyItmoClient): List<Schedule> =
     ).requireResult()
 ```
 
-`client.sport` реализует `SportApi`, включая наследуемый `SportRemainingApi`:
-личный календарь, медицинскую группу, долг, отборы и проекты. Фильтры спорта
-сохраняют повторяющиеся query-параметры. Полный список перенесённых моделей
-и членов находится в [руководстве миграции](docs/migration.md).
-
 ## БАРС
 
-`BarsClient` принимает движок, `BarsConfiguration`, `BarsStorage` (по умолчанию
-`RuntimeBarsStorage`, только память) и необязательный `BarsCodeSupplier`.
-Конфигурация задаёт `restUrl`, `clientId`, `redirectUri` и общий ITMO.ID issuer.
-Сессия БАРС - полный заголовок `Authorization`, не токен MyITMO; refresh token нет.
-`BarsLogin` строит `loginUrl(state)`, проверяет `isCallback`/`isAllowedPage`
-и извлекает код через `extractCode(callbackUrl, state)`. Передайте код в
-`bars.login(code)`. `hasSession()` проверяет только наличие сохранённой сессии.
+`BarsClient` работает с `https://bars.itmo.ru` - отдельным сервисом с собственной
+сессией. Токен MyITMO для него не подходит. Вход: `BarsLogin.loginUrl(state)` в
+браузере, затем `extractCode(callbackUrl, state)` и `bars.login(code)`.
 
-При HTTP 401 клиент может один раз получить код через `BarsCodeSupplier` и
-повторить запрос. `null` от поставщика означает необходимость входа; сбой
-сети или сервера - исключение, а не причина удаления сессии. Cookie вызывающий
-читает и сохраняет сам. Для тихого входа без общего SSO:
+Сессия живёт около 30 минут, refresh token не выдаётся. Для тихого продления
+передайте `BarsCodeSupplier`: при HTTP 401 клиент один раз запросит новый код и
+повторит запрос. Если сессия ITMO.ID живёт в cookie WebView, код можно получить
+без браузера:
 
 ```kotlin
 suspend fun replayBarsLogin(
@@ -164,16 +134,8 @@ suspend fun replayBarsLogin(
 }
 ```
 
-Для `LOGIN_REQUIRED` показывайте вход, для `REJECTED` отклоняйте callback,
-для `HTTP_ERROR` откладывайте повтор (`result.httpCode` содержит статус).
-Транспортный сбой бросает `MyItmoException.Network`, не возвращает исход
-`LOGIN_REQUIRED`. Все `Set-Cookie` возвращаются даже при неуспешном исходе;
-их нельзя логировать. Переходы не выполняются, тело страницы не читается.
-
-Каталоги и журналы используют период, сохранённый на сервере и общий с
-веб-версией. `withPeriod` сериализует изменения только через этот экземпляр;
-другой клиент всё ещё может поменять период. Не вкладывайте в блок другие
-операции изменения периода:
+Каталоги и журналы читаются в контексте периода, сохранённого на сервере; эта
+настройка общая с веб-версией БАРС.
 
 ```kotlin
 suspend fun readBarsDisciplines(bars: BarsClient): List<Discipline> =
@@ -182,52 +144,32 @@ suspend fun readBarsDisciplines(bars: BarsClient): List<Discipline> =
     }
 ```
 
-Также доступны `getCurrentUser`, `getConfig`, `setPersonalSetting`,
-`getGroupsAndFlows` и `getStudentJournal`. Идентификаторы БАРС не совпадают
-с идентификаторами дисциплин/контрольных мероприятий MyITMO.
+Идентификаторы БАРС не совпадают с `discipline_id` и `est_id` MyITMO.
 
 ## Ошибки
 
-`MyItmoException` имеет варианты `Network` (сетевая причина), `Http` (status),
-`Api` (status, errorCode, необработанный serverMessage), `Auth` (status) и `Decode`.
-Refresh HTTP 5xx - `Http`, не `Auth`. На `Http`/`Network`/`Decode` не удаляйте
-сохранённую сессию. OAuth-отказ, отсутствующая или истёкшая refresh-сессия
-классифицируются как `Auth`; решение о повторном входе принимает потребитель.
-`CancellationException` пробрасывается без преобразования.
+Все методы бросают `MyItmoException`:
 
-Диагностика редактирована; `Network.cause` и `Api.serverMessage` могут содержать
-недоверенные данные и не предназначены для логов. Не логируйте коды, токены,
-cookie, verifier, URL входа/callback и тела ответов. Локализация ошибок,
-демо-режим и пользовательские согласия остаются на стороне приложения.
+- `Auth` - сессия закончилась, нужен повторный вход;
+- `Network`, `Http`, `Decode` - временный сбой, сохранённая сессия не удаляется;
+- `Api` - MyITMO вернул код ошибки.
+
+## Версия 1.x
+
+Java-библиотека `dev.alllexey:my-itmo-api:1.8.2` остаётся в корне репозитория.
+Переход на 2.x описан в [docs/migration.md](docs/migration.md).
 
 ## Разработка
 
-Нужен JDK 17; для iOS - macOS с Xcode. Обращений к настоящим ITMO.ID, MyITMO и
-БАРС в тестах нет: только `MockEngine` и синтетические фикстуры в `kmp/fixtures/`.
-
-| Что | Где |
-|---|---|
-| 2.x, Kotlin Multiplatform | `kmp/` (отдельный Gradle-проект, wrapper в корне) |
-| 1.x, Java | `src/`, `pom.xml` (Maven wrapper в корне) |
-| Карта миграции 1.x -> 2.x | `docs/migration.md` |
-
 ```bash
-./gradlew -p kmp jvmTest                 # JVM-тесты, примеры из README и паритет с 1.8.2
-./gradlew -p kmp iosSimulatorArm64Test   # iOS-тесты на симуляторе
+./gradlew -p kmp jvmTest                 # 2.x, JDK 17
+./gradlew -p kmp iosSimulatorArm64Test   # 2.x, нужен Xcode
 ./mvnw verify -Dgpg.skip=true            # 1.x
 ```
 
-`scripts/verify.sh [kmp-jvm|kmp|maven|all]` запускает те же проверки, что CI,
-и печатает итоговую строку `VERIFY ... PASS|FAIL`. В IntelliJ IDEA импортируйте
-`kmp/` как Gradle-проект: корень открывается как Maven-проект 1.x.
+## Особенности
 
-Изменения - через PR. Новые поля и эндпоинты документируются по наблюдаемым
-ответам (KDoc на английском, синтетическая фикстура, тест); подробные правила -
-в [AGENTS.md](AGENTS.md). Версии публикуются в Maven Central из CI по тегу
-владельца репозитория.
-
-## 1.x
-
-Совместимая Java-библиотека остаётся в корне: `dev.alllexey:my-itmo-api:1.8.2`.
-Для существующих потребителей смотрите [README версии 1.8.2](https://github.com/alllexey-dev/my-itmo-api/blob/1.8.2/README.md).
-2.x не является бинарно совместимой заменой: используйте [руководство миграции](docs/migration.md).
+MyITMO не предоставляет публичную документацию для всех используемых сервисов.
+Модели основаны на наблюдаемых ответах API, поэтому сервер может добавлять новые
+поля и справочные значения. Неизвестные, но подтверждённо присутствующие поля
+отмечены в моделях закомментированными объявлениями до уточнения их типов.
