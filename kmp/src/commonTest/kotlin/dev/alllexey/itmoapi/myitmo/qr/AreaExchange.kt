@@ -15,7 +15,7 @@ import io.ktor.http.headersOf
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-/** Isolated shared seam for the three ML-05a areas; never prints request headers or bodies. */
+/** Isolated shared seam for MyITMO area tests; never prints request headers or bodies. */
 internal suspend fun <T> areaExchange(
     path: String,
     response: String,

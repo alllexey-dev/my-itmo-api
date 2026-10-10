@@ -23,7 +23,7 @@ public class TokenSet(
     }
 
     /** Redacted diagnostics disclose no token values. The observed wire session_state is intentionally
-     * not retained: ML-04a preserves the five-field 1.x Storage snapshot, not every TokenResponse member.
+     * not retained: the set mirrors the five-field 1.x Storage snapshot, not every TokenResponse member.
      */
     override fun toString(): String = "TokenSet(redacted)"
 }

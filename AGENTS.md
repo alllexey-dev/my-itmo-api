@@ -84,7 +84,7 @@ Password login, `obtainCodeFromSession` and shared-client SSO are not ported.
   `kmp/src/*/kotlin/dev/alllexey/itmoapi/<area-path>/**`, their fixtures and
   their `kmp/src/jvmTest/**/parity/<Area>ParityTest.kt`. Core, client shells,
   stubs and fixture wiring belong to their designated lane cards.
-  ML-01a and ML-01b run alone in `kmp/`. Port cards never edit Gradle files:
+  Port cards never edit Gradle files:
   hand missing dependencies to the next authorized build-file card.
 - Never push tags or run `mvn install`/`deploy`, `publishToMavenLocal` or any
   Central publication task. Do not write to `~/.m2`. Releases and publication
@@ -93,12 +93,11 @@ Password login, `obtainCodeFromSession` and shared-client SSO are not ported.
 ## v2.3 lanes
 
 For an agent executing a v2.3 lane card, the lane rules of `ITMO.Widgets/AGENTS.md` § v2.3 lanes
-apply here too; until that section exists in the app repository, this block also overrides its
-Git hygiene lines 115-116 and Definition of done item 10 for lane actions in this repository.
+apply here too.
 
 - Lanes push only `v2.3/<lane-id>/<card-id>-<slug>` and open PRs into `v2.3/next`.
 - No agent pushes a tag: any pushed tag publishes to Maven Central through `release.yml`.
-  Releases (1.8.x, 2.0.0) happen only on the owner's word.
+  Releases happen only on the owner's word.
 - 2.x lives in `kmp/` (artifact `my-itmo-api-kmp`, package `dev.alllexey.itmoapi`) beside 1.x;
   no `mvn install`/`deploy`, no `publishToMavenLocal`.
 - Everything else in the § Forbidden and § owner-word lists of the app repository applies.
@@ -137,8 +136,8 @@ fixture coverage under ignored `kmp/build/parity/`.
 
 - 1.x is the root Maven project (`my-itmo-api`): compatibility fixes use
   `1.8.x`, with `1.*` tags. Development is `1.8.3-SNAPSHOT`.
-- 2.x lives beside it in `kmp/` (`my-itmo-api-kmp`), with `2.*` tags and its
-  separate release workflow once the KMP publishing card lands.
+- 2.x lives beside it in `kmp/` (`my-itmo-api-kmp`), with `2.*` tags released by
+  `release-kmp.yml` under the same tag guards; 2.0.0 is on Maven Central.
 - Both lines release only from `master`. The 1.x workflow checks a stable
   semver tag, equality with the POM version and ancestry from `master` before
   deployment, then creates a draft GitHub release.

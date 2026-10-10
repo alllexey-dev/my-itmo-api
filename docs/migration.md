@@ -159,7 +159,7 @@ BARS and MyITMO identifiers are not interchangeable.
 README Kotlin snippets are copied from and exercised by `ReadmeSamplesTest`
 with MockEngine, injected time and synthetic issuer.invalid/callback.invalid
 addresses. Run `scripts/verify.sh kmp-jvm` to compile/execute them and the
-merged ML-09b completeness suite. No real university services are involved.
+model completeness suite. No real university services are involved.
 The suite checks 84 legacy model source files against pinned Central 1.8.2,
 including inherited/nested fields, serialized names, unknown-type observations
 and per-model KDoc counts. The full output below is copied verbatim from this
@@ -571,7 +571,7 @@ Renamed: src/commonMain/kotlin/dev/alllexey/itmoapi/itmoid/TokenSet.kt
 | refreshToken | refresh_token | refreshToken |
 | refreshExpiresIn | refresh_expires_in | refreshExpiresAt (seconds converted to Instant using injected Clock) |
 | idToken | id_token | idToken |
-| sessionState | session_state | Not retained: ML-04a five-field Storage contract; ItmoIdClient.TokenWire documents ignored session_state |
+| sessionState | session_state | Not retained: five-field 1.x Storage contract; ItmoIdClient.TokenWire documents ignored session_state |
 
 ## src/main/java/api/myitmo/model/personality/Contact.java
 

@@ -141,7 +141,7 @@ class ParityCompletenessTest {
                 val converted = if (name == "TokenResponse") when (member) {
                     "expiresIn" -> "accessExpiresAt (seconds converted to Instant using injected Clock)"
                     "refreshExpiresIn" -> "refreshExpiresAt (seconds converted to Instant using injected Clock)"
-                    "sessionState" -> "Not retained: ML-04a five-field Storage contract; ItmoIdClient.TokenWire documents ignored session_state"
+                    "sessionState" -> "Not retained: five-field 1.x Storage contract; ItmoIdClient.TokenWire documents ignored session_state"
                     else -> null
                 } else null
                 val declaration = if (name == "TokenResponse" && converted == null) {

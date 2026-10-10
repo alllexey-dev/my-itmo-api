@@ -36,7 +36,7 @@ internal actual fun noCookieClient(engine: HttpClientEngine): HttpClient = HttpC
     expectSuccess = false
 }
 
-/** Darwin may fold several cookies into one header. Ktor's SP-15a-verified public parser
+/** Darwin may fold several cookies into one header. Ktor's public parser
  * recovers each cookie, including the Expires comma, flags and SameSite extensions.
  * Rendering preserves values/attribute semantics, normalizes spelling/order, and adds no $x-enc marker.
  */
