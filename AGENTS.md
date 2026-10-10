@@ -15,7 +15,8 @@ it is added here, never as a second Retrofit interface in the app or Backend.
 `dev.alllexey:my-itmo-api`), with source- and binary-compatible fixes only.
 2.x is the Kotlin Multiplatform client for ITMO.ID, MyITMO and BARS beside it
 in `kmp/`: `dev.alllexey:my-itmo-api-kmp`, root project `my-itmo-api-kmp`,
-package `dev.alllexey.itmoapi`, development version `2.0.0-SNAPSHOT`.
+package `dev.alllexey.itmoapi`, released `2.0.0`,
+development version `2.0.1-SNAPSHOT`.
 Password login, `obtainCodeFromSession` and shared-client SSO are not ported.
 
 ## Hard rules

@@ -5,8 +5,8 @@
 
 ## Подключение и платформы
 
-Координаты 2.x: `dev.alllexey:my-itmo-api-kmp:2.0.0`, версия исходников
-`2.0.0`. Зависимость в `commonMain`:
+Координаты 2.x в Maven Central: `dev.alllexey:my-itmo-api-kmp:2.0.0`, версия
+исходников `2.0.1-SNAPSHOT`. Зависимость в `commonMain`:
 
 ```kotlin
 implementation("dev.alllexey:my-itmo-api-kmp:2.0.0")
