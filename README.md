@@ -5,11 +5,8 @@
 
 ## Подключение и платформы
 
-Координаты 2.x: `dev.alllexey:my-itmo-api-kmp:2.0.0`.
-Это будущий релиз, а не объявление о публикации: текущая версия исходников
-`2.0.0-SNAPSHOT`. Публикацией управляет владелец. До релиза потребители
-используют закреплённый composite build с `includeBuild("<checkout>/kmp")`.
-После публикации зависимость в `commonMain` будет выглядеть так:
+Координаты 2.x: `dev.alllexey:my-itmo-api-kmp:2.0.0`, версия исходников
+`2.0.0`. Зависимость в `commonMain`:
 
 ```kotlin
 implementation("dev.alllexey:my-itmo-api-kmp:2.0.0")
