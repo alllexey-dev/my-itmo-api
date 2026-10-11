@@ -57,45 +57,21 @@ if [ -x /usr/libexec/java_home ]; then
     export JAVA_HOME
 fi
 
-in_slot() {
-    local kind=$1
-    local slot_script=${ITMO_SLOT_SH:-$HOME/proj/.wt/bin/slot.sh}
-    shift
-    # Slots only serialize parallel local agents; CI and plain checkouts run directly.
-    if [ "${CI:-false}" = true ] || { [ ! -x "$slot_script" ] && [ ! -x /usr/bin/lockf ]; }; then
-        "$@"
-    elif [ -x "$slot_script" ]; then
-        "$slot_script" "$kind" -- "$@"
-    else
-        [ "$kind" != kn ] || kind=android
-        mkdir -p "$HOME/.cache/itmo-agents/slots"
-        /usr/bin/lockf -k "$HOME/.cache/itmo-agents/slots/${kind}.1.lock" "$@"
-    fi
-}
-
 verify_maven() {
-    local maven
-    if [ -x ./mvnw ]; then
-        maven=./mvnw
-    elif command -v mvn >/dev/null 2>&1; then
-        maven=$(command -v mvn)
-    else
-        maven='/Applications/IntelliJ IDEA.app/Contents/plugins/maven/lib/maven3/bin/mvn'
-        [ -x "$maven" ] || unavailable 'Maven is unavailable'
-    fi
-    in_slot jvm "$maven" -B verify -Dgpg.skip=true "-Dmaven.repo.local=$ROOT/target/verify-maven-repository"
+    [ -x ./mvnw ] || unavailable 'Maven wrapper is unavailable'
+    ./mvnw -B verify -Dgpg.skip=true "-Dmaven.repo.local=$ROOT/target/verify-maven-repository"
 }
 
 verify_kmp_jvm() {
     require_kmp
-    in_slot jvm ./gradlew -p kmp jvmTest
+    ./gradlew -p kmp jvmTest
 }
 
 verify_kmp() {
     verify_kmp_jvm
-    in_slot kn ./gradlew -p kmp compileKotlinIosArm64 compileKotlinIosSimulatorArm64
+    ./gradlew -p kmp compileKotlinIosArm64 compileKotlinIosSimulatorArm64
     if has_xcode; then
-        in_slot kn ./gradlew -p kmp iosSimulatorArm64Test
+        ./gradlew -p kmp iosSimulatorArm64Test
     else
         printf 'iOS tests: SKIP (no Xcode)\n'
     fi
@@ -111,5 +87,5 @@ case "$MODE" in
     maven) verify_maven ;;
     kmp) verify_kmp ;;
     kmp-jvm) verify_kmp_jvm ;;
-    kmp-ios) in_slot kn ./gradlew -p kmp iosSimulatorArm64Test ;;
+    kmp-ios) ./gradlew -p kmp iosSimulatorArm64Test ;;
 esac

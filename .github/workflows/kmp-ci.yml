@@ -3,7 +3,7 @@ name: kmp-ci
 on:
   pull_request:
   push:
-    branches: [v2.3/next, master]
+    branches: [master]
 
 permissions:
   contents: read
