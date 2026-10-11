@@ -7,7 +7,6 @@ import dev.alllexey.itmoapi.core.ResultResponse
 import dev.alllexey.itmoapi.core.toQueryValue
 import io.ktor.client.request.parameter
 import io.ktor.http.HttpMethod
-import io.ktor.http.encodedPath
 import kotlinx.coroutines.CancellationException
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.builtins.ListSerializer
@@ -52,52 +51,37 @@ public interface SportRemainingApi {
 internal class SportRemainingApiImpl(private val transport: ItmoTransport) : SportRemainingApi {
     override suspend fun getSportTypes(): ResultResponse<List<IdValuePair>> = transport.execute(
         ResultResponse.serializer(ListSerializer(IdValuePair.serializer())), HttpMethod.Get, "api/sport/sport_types",
-    ) {
-        url { encodedPath = "/api/sport/sport_types" }
-    }
+    )
 
     override suspend fun getSportSignAttempts(): ResultResponse<Int> = transport.execute(
         ResultResponse.serializer(Int.serializer()), HttpMethod.Get, "api/sport/personal/sign_attempts",
-    ) {
-        url { encodedPath = "/api/sport/personal/sign_attempts" }
-    }
+    )
 
     override suspend fun getPersonalSportCalendar(dateStart: LocalDate, dateEnd: LocalDate): ResultResponse<List<SportSchedule>> = transport.execute(
         ResultResponse.serializer(ListSerializer(SportSchedule.serializer())), HttpMethod.Get, "api/sport/personal/calendar",
     ) {
-        url { encodedPath = "/api/sport/personal/calendar" }
         parameter("date_start", dateStart.toQueryValue())
         parameter("date_end", dateEnd.toQueryValue())
     }
 
     override suspend fun getSportDebt(): ResultResponse<SportDebt> = transport.execute(
         ResultResponse.serializer(SportDebt.serializer()), HttpMethod.Get, "api/sport/personal/debt",
-    ) {
-        url { encodedPath = "/api/sport/personal/debt" }
-    }
+    )
 
     override suspend fun getSportExternat(): ResultResponse<SportExternat> = transport.execute(
         ResultResponse.serializer(SportExternat.serializer()), HttpMethod.Get, "api/sport/personal/externat",
-    ) {
-        url { encodedPath = "/api/sport/personal/externat" }
-    }
+    )
 
     override suspend fun getSportHealthLevel(): ResultResponse<SportHealthLevelResponse> = transport.execute(
         ResultResponse.serializer(SportHealthLevelResponse.serializer()), HttpMethod.Get, "api/sport/personal/health_level",
-    ) {
-        url { encodedPath = "/api/sport/personal/health_level" }
-    }
+    )
 
     override suspend fun getSportSelections(): ResultResponse<List<SportSelection>> = transport.execute(
         ResultResponse.serializer(ListSerializer(SportSelection.serializer())), HttpMethod.Get, "api/sport/personal/selections",
-    ) {
-        url { encodedPath = "/api/sport/personal/selections" }
-    }
+    )
 
     override suspend fun getSportProjects(): ResultResponse<List<SportProject>> = transport.execute(
         ResultResponse.serializer(ListSerializer(SportProject.serializer())), HttpMethod.Get, "api/sport/projects/list",
-    ) {
-        url { encodedPath = "/api/sport/projects/list" }
-    }
+    )
 
 }

@@ -6,7 +6,6 @@ import dev.alllexey.itmoapi.core.MyItmoException
 import dev.alllexey.itmoapi.core.toQueryValue
 import io.ktor.client.request.parameter
 import io.ktor.http.HttpMethod
-import io.ktor.http.encodedPath
 import kotlinx.coroutines.CancellationException
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.builtins.ListSerializer
@@ -31,7 +30,6 @@ internal class ScheduleApiImpl(private val transport: ItmoTransport) : ScheduleA
             HttpMethod.Get,
             "api/schedule/schedule/personal",
         ) {
-            url { encodedPath = "/api/schedule/schedule/personal" }
             parameter("date_start", dateStart.toQueryValue())
             parameter("date_end", dateEnd.toQueryValue())
         }
@@ -39,5 +37,5 @@ internal class ScheduleApiImpl(private val transport: ItmoTransport) : ScheduleA
     override suspend fun getTimeSlots(): DataResponse<List<ExtendedTimeSlot>> = transport.execute(
         DataResponse.serializer(ListSerializer(ExtendedTimeSlot.serializer())), HttpMethod.Get,
         "api/schedule/meta/time_slots",
-    ) { url { encodedPath = "/api/schedule/meta/time_slots" } }
+    )
 }

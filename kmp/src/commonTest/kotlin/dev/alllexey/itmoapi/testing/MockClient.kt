@@ -134,8 +134,8 @@ internal suspend fun <T> mockExchange(
         }
     }
     try {
-        // A path prefix catches endpoints resolved relative to the base; QR uses its own absolute URL.
-        return action(ItmoTransport(client, Url("https://example.invalid/custom/base/")))
+        // MyItmoConfiguration only accepts a bare origin; QR uses its own absolute URL.
+        return action(ItmoTransport(client, Url("https://example.invalid/")))
     } finally {
         client.close()
         engine.close()

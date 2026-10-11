@@ -8,7 +8,6 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.contentType
-import io.ktor.http.encodedPath
 import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.MapSerializer
@@ -59,60 +58,45 @@ public interface ElectionApi {
 internal class ElectionApiImpl(private val transport: ItmoTransport) : ElectionApi {
     override suspend fun getElectionAvailability(): ResultResponse<ElectionAvailability> = transport.execute(
         ResultResponse.serializer(ElectionAvailability.serializer()), HttpMethod.Get, "api/election/students/availability",
-    ) {
-        url { encodedPath = "/api/election/students/availability" }
-    }
+    )
 
     override suspend fun getAvailableDisciplines(): ResultResponse<List<AvailableDiscipline>> = transport.execute(
         ResultResponse.serializer(ListSerializer(AvailableDiscipline.serializer())), HttpMethod.Get, "api/election/students/available_disciplines",
-    ) {
-        url { encodedPath = "/api/election/students/available_disciplines" }
-    }
+    )
 
     override suspend fun validateSelectedDisciplines(groupFlowIds: List<String>): ResultResponse<DisciplineSelectionValidation> = transport.execute(
         ResultResponse.serializer(DisciplineSelectionValidation.serializer()), HttpMethod.Post, "api/election/students/group_flow_available_disciplines",
     ) {
-        url { encodedPath = "/api/election/students/group_flow_available_disciplines" }
         contentType(ContentType.Application.Json)
         setBody(ItmoApiJson.encodeToString(ListSerializer(String.serializer()), groupFlowIds))
     }
 
     override suspend fun getFlowLimits(): ResultResponse<Map<String, FlowLimit>> = transport.execute(
         ResultResponse.serializer(MapSerializer(String.serializer(), FlowLimit.serializer())), HttpMethod.Get, "api/election/students/limits/flows",
-    ) {
-        url { encodedPath = "/api/election/students/limits/flows" }
-    }
+    )
 
     override suspend fun getOrderedFlowChains(): ResultResponse<List<ElectionFlowChain>> = transport.execute(
         ResultResponse.serializer(ListSerializer(ElectionFlowChain.serializer())), HttpMethod.Get, "api/election/students/ordered_flow_chains",
-    ) {
-        url { encodedPath = "/api/election/students/ordered_flow_chains" }
-    }
+    )
 
     override suspend fun getChosenFlows(): ResultResponse<List<Long>> = transport.execute(
         ResultResponse.serializer(ListSerializer(Long.serializer())), HttpMethod.Get, "api/election/students/chosen_flows",
-    ) {
-        url { encodedPath = "/api/election/students/chosen_flows" }
-    }
+    )
 
     override suspend fun changeSelectedFlows(flowIds: List<Long>): ResultResponse<JsonElement?> = transport.execute(
         ResultResponse.serializer(JsonElement.serializer().nullable), HttpMethod.Post, "api/election/students/order/change",
     ) {
-        url { encodedPath = "/api/election/students/order/change" }
         contentType(ContentType.Application.Json)
         setBody(ItmoApiJson.encodeToString(ListSerializer(Long.serializer()), flowIds))
     }
 
     override suspend fun clearAllSelectedFlows(): ResultResponse<JsonElement?> = transport.execute(
         ResultResponse.serializer(JsonElement.serializer().nullable), HttpMethod.Post, "api/election/students/order/clear",
-    ) {
-        url { encodedPath = "/api/election/students/order/clear" }
-    }
+    )
 
     override suspend fun changeSelectedDisciplines(groupFlowIds: List<String>): ResultResponse<JsonElement?> = transport.execute(
         ResultResponse.serializer(JsonElement.serializer().nullable), HttpMethod.Post, "api/election/students/order/",
     ) {
-        url { encodedPath = "/api/election/students/order/" }
         contentType(ContentType.Application.Json)
         setBody(ItmoApiJson.encodeToString(ListSerializer(String.serializer()), groupFlowIds))
     }
