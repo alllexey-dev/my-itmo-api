@@ -227,7 +227,7 @@ public class BarsClient(
     }
 
     private fun requireSuccess(status: Int) {
-        if (status == 401 || status == 403) throw MyItmoException.Auth(status)
+        if (status == 401) throw MyItmoException.Auth(status)
         if (status !in 200..299) throw MyItmoException.Http(status)
     }
 

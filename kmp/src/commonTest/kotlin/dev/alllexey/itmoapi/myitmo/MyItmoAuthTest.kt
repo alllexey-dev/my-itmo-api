@@ -276,6 +276,25 @@ class MyItmoAuthTest {
     }
 
     @Test
+    fun forbiddenIsHttpNotAuthAndDoesNotRefreshOrTouchTheSession() = runTest {
+        val snapshot = testTokens(clock)
+        var requests = 0
+        val engine = MockEngine { request ->
+            requests++
+            assertEquals("my.itmo.ru", request.url.host)
+            respond("{}", HttpStatusCode.Forbidden)
+        }
+        val storage = TokenTestStorage(snapshot)
+        val client = MyItmoClient(MyItmoConfiguration.DEFAULT, storage, engine, clock)
+        try {
+            assertEquals(403, assertFailsWith<MyItmoException.Http> { client.system.getDashboard() }.status)
+            assertEquals(1, requests)
+            assertTrue(storage.snapshot === snapshot)
+            assertEquals(0, storage.writes)
+        } finally { client.close(); engine.close() }
+    }
+
+    @Test
     fun endedSessionStaysAuthAtAreaBoundaryWithoutMakingRequests() = runTest {
         val expired = testTokens(clock, expired = true)
         clock.instant = expired.refreshExpiresAt

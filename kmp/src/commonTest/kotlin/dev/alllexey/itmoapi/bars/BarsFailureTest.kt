@@ -14,16 +14,15 @@ class BarsFailureTest {
     private val header = "Bearer synthetic-existing-session"
 
     @Test
-    fun forbiddenAndServerErrorsDoNotRenewOrEraseTheSession() = runTest {
+    fun forbiddenIsNotAuthAndNeitherItNorServerErrorsRenewOrEraseTheSession() = runTest {
         for (status in listOf(HttpStatusCode.Forbidden, HttpStatusCode.BadGateway)) {
             var supplied = 0
             val storage = RuntimeBarsStorage().also { it.setAuthorization(header) }
             val engine = MockEngine { respond("synthetic-sensitive-body", status) }
             val client = BarsClient(engine, configuration, storage, BarsCodeSupplier { supplied++; "synthetic-code" })
             try {
-                val error = if (status == HttpStatusCode.Forbidden) {
-                    assertFailsWith<MyItmoException.Auth> { client.getCurrentUser() }
-                } else assertFailsWith<MyItmoException.Http> { client.getCurrentUser() }
+                val error = assertFailsWith<MyItmoException.Http> { client.getCurrentUser() }
+                assertEquals(status.value, error.status)
                 assertEquals(0, supplied)
                 assertFalse("synthetic-sensitive-body" in error.toString())
                 assertTrue(storage.getAuthorization() == header)
