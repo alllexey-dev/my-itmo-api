@@ -6,7 +6,6 @@ import dev.alllexey.itmoapi.core.ResultResponse
 import dev.alllexey.itmoapi.core.toQueryValue
 import io.ktor.client.request.parameter
 import io.ktor.http.HttpMethod
-import io.ktor.http.encodedPath
 import kotlinx.coroutines.CancellationException
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.builtins.ListSerializer
@@ -23,7 +22,6 @@ internal class FinancesApiImpl(private val transport: ItmoTransport) : FinancesA
     override suspend fun getScholarshipTotals(dateFrom: LocalDate?, dateTo: LocalDate?): ResultResponse<List<ScholarshipTotal>> = transport.execute(
         ResultResponse.serializer(ListSerializer(ScholarshipTotal.serializer())), HttpMethod.Get, "api/finances/scholarship/total",
     ) {
-        url { encodedPath = "/api/finances/scholarship/total" }
         if (dateFrom != null) parameter("dateFrom", dateFrom.toQueryValue())
         if (dateTo != null) parameter("dateTo", dateTo.toQueryValue())
     }

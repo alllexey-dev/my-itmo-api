@@ -135,7 +135,7 @@ public class ItmoIdClient(
         return TokenSet(wire.accessToken, accessExpiresAt, wire.refreshToken, refreshExpiresAt, wire.idToken)
     }
 
-    /** Releases an initialized client, without initializing an unused shell or closing the injected engine. */
+    /** Releases an initialized client, without initializing an unused client or closing the injected engine. */
     public fun close(): Unit {
         if (transport.isInitialized()) transport.value.client.close()
     }

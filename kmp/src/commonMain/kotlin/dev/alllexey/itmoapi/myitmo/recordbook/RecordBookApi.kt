@@ -4,7 +4,6 @@ import dev.alllexey.itmoapi.core.ItmoTransport
 import dev.alllexey.itmoapi.core.MyItmoException
 import dev.alllexey.itmoapi.core.ResultResponse
 import io.ktor.http.HttpMethod
-import io.ktor.http.encodedPath
 import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.builtins.ListSerializer
 
@@ -31,17 +30,17 @@ internal class RecordBookApiImpl(private val transport: ItmoTransport) : RecordB
     override suspend fun getSpecializations(): ResultResponse<List<Specialization>> = transport.execute(
         ResultResponse.serializer(ListSerializer(Specialization.serializer())), HttpMethod.Get,
         "api/record_book/specializations",
-    ) { url { encodedPath = "/api/record_book/specializations" } }
+    )
 
     override suspend fun getRecordBook(specializationId: Long, semester: Int): ResultResponse<List<RecordBookEntry>> =
         transport.execute(
             ResultResponse.serializer(ListSerializer(RecordBookEntry.serializer())), HttpMethod.Get,
             "api/record_book/$specializationId/$semester",
-        ) { url { encodedPath = "/api/record_book/$specializationId/$semester" } }
+        )
 
     override suspend fun getControlEntries(recordBookEntryId: Long): ResultResponse<List<ControlEntry>> =
         transport.execute(
             ResultResponse.serializer(ListSerializer(ControlEntry.serializer())), HttpMethod.Get,
             "api/record_book/$recordBookEntryId",
-        ) { url { encodedPath = "/api/record_book/$recordBookEntryId" } }
+        )
 }

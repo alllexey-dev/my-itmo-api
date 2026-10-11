@@ -1,5 +1,6 @@
 package dev.alllexey.itmoapi.myitmo.recordbook
 
+import dev.alllexey.itmoapi.testing.mockExchange
 import dev.alllexey.itmoapi.core.MyItmoException
 import dev.alllexey.itmoapi.core.requireResult
 import dev.alllexey.itmoapi.testing.fixture
@@ -15,7 +16,7 @@ import kotlin.time.Instant
 class RecordBookApiTest {
     @Test
     fun specializationsDecodeProgramAndAcademicPeriods() = runTest {
-        val programs = recordBookExchange("/api/record_book/specializations", fixture("recordbook/specializations.json")) {
+        val programs = mockExchange("/api/record_book/specializations", fixture("recordbook/specializations.json")) {
             RecordBookApiImpl(it).getSpecializations().requireResult()
         }
         val program = programs.single()
@@ -30,7 +31,7 @@ class RecordBookApiTest {
 
     @Test
     fun recordBookUsesPlanAndSemesterAndPreservesPointsGradesAndNames() = runTest {
-        val entries = recordBookExchange("/api/record_book/50001/3", fixture("recordbook/record-book.json")) {
+        val entries = mockExchange("/api/record_book/50001/3", fixture("recordbook/record-book.json")) {
             RecordBookApiImpl(it).getRecordBook(50001L, 3).requireResult()
         }
         val graded = entries.first()
@@ -60,7 +61,7 @@ class RecordBookApiTest {
 
     @Test
     fun controlsUseEntryIdentifierAndDecodeFlatTreeAndPartialTeacher() = runTest {
-        val controls = recordBookExchange("/api/record_book/60001", fixture("recordbook/controls.json")) {
+        val controls = mockExchange("/api/record_book/60001", fixture("recordbook/controls.json")) {
             RecordBookApiImpl(it).getControlEntries(60001L).requireResult()
         }
         val root = controls.first()
@@ -88,7 +89,7 @@ class RecordBookApiTest {
 
     @Test
     fun missingResultsRemainAbsentRatherThanZero() = runTest {
-        val entry = recordBookExchange("/api/record_book/50001/4", fixture("recordbook/absence.json")) {
+        val entry = mockExchange("/api/record_book/50001/4", fixture("recordbook/absence.json")) {
             RecordBookApiImpl(it).getRecordBook(50001L, 4).requireResult().single()
         }
         assertNull(entry.currentScore)
@@ -101,13 +102,13 @@ class RecordBookApiTest {
     @Test
     fun emptyCollectionsRemainEmptyForAllRecordBookEndpoints() = runTest {
         val response = fixture("recordbook/empty.json")
-        assertTrue(recordBookExchange("/api/record_book/specializations", response) {
+        assertTrue(mockExchange("/api/record_book/specializations", response) {
             RecordBookApiImpl(it).getSpecializations().requireResult()
         }.isEmpty())
-        assertTrue(recordBookExchange("/api/record_book/50001/3", response) {
+        assertTrue(mockExchange("/api/record_book/50001/3", response) {
             RecordBookApiImpl(it).getRecordBook(50001L, 3).requireResult()
         }.isEmpty())
-        assertTrue(recordBookExchange("/api/record_book/60001", response) {
+        assertTrue(mockExchange("/api/record_book/60001", response) {
             RecordBookApiImpl(it).getControlEntries(60001L).requireResult()
         }.isEmpty())
     }
@@ -115,7 +116,7 @@ class RecordBookApiTest {
     @Test
     fun numericApiFailureIsMappedBeforeReturningRecordBook() = runTest {
         val failure = assertFailsWith<MyItmoException.Api> {
-            recordBookExchange("/api/record_book/50001/3", fixture("errors/error-envelope-400.json"), status = 400) {
+            mockExchange("/api/record_book/50001/3", fixture("errors/error-envelope-400.json"), status = 400) {
                 RecordBookApiImpl(it).getRecordBook(50001L, 3)
             }
         }

@@ -6,7 +6,6 @@ import dev.alllexey.itmoapi.core.MyItmoException
 import dev.alllexey.itmoapi.core.ResultResponse
 import io.ktor.client.request.parameter
 import io.ktor.http.HttpMethod
-import io.ktor.http.encodedPath
 import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.builtins.ListSerializer
 
@@ -33,7 +32,7 @@ public interface PersonalitiesApi {
 internal class PersonalitiesApiImpl(private val transport: ItmoTransport) : PersonalitiesApi {
     override suspend fun getPersonality(isu: Long): ResultResponse<Personality> = transport.execute(
         ResultResponse.serializer(Personality.serializer()), HttpMethod.Get, "api/personalities/persons/$isu",
-    ) { url { encodedPath = "/api/personalities/persons/$isu" } }
+    )
 
     override suspend fun searchPersonalities(
         limit: Int,
@@ -44,7 +43,6 @@ internal class PersonalitiesApiImpl(private val transport: ItmoTransport) : Pers
         HttpMethod.Get,
         "api/personalities/persons",
     ) {
-        url { encodedPath = "/api/personalities/persons" }
         parameter("limit", limit)
         parameter("offset", offset)
         parameter("q", query)

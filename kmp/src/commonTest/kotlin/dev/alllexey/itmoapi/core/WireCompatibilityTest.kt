@@ -39,7 +39,7 @@ class WireCompatibilityTest {
     private data class Dated(@Serializable(with = WireInstantSerializer::class) val time: Instant)
 
     @Test
-    fun chosenConfigurationIsSp02ConfigBWithoutLeniency() {
+    fun jsonConfigurationIgnoresUnknownKeysWithoutLeniency() {
         assertTrue(ItmoApiJson.configuration.ignoreUnknownKeys)
         assertFalse(ItmoApiJson.configuration.explicitNulls)
         assertTrue(ItmoApiJson.configuration.encodeDefaults)
@@ -89,7 +89,7 @@ class WireCompatibilityTest {
     }
 
     @Test
-    fun everySp02OffsetFormDecodesToTheExpectedInstant() {
+    fun everyObservedOffsetFormDecodesToTheExpectedInstant() {
         val forms = ItmoApiJson.decodeFromString<Map<String, String>>(fixture("core/13-date-forms.json"))
         val expected = mapOf(
             "gson-fcm-zero-seconds" to "2026-10-03T09:00:00Z",

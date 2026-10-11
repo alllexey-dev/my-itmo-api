@@ -17,7 +17,7 @@ public interface TokenStorage {
     public suspend fun write(tokens: TokenSet?)
 }
 
-/** Consumer seam for a cross-process refresh lock, for example an iOS App Group file lock.
+/** Consumer hook for a cross-process refresh lock, for example an iOS App Group file lock.
  * Run [action] exactly once while exclusively locked; release in finally, including cancellation.
  * All clients sharing storage must share this guard. The action re-reads storage after acquisition.
  * The default manager uses only its own in-process Mutex; no global lock or token state exists.

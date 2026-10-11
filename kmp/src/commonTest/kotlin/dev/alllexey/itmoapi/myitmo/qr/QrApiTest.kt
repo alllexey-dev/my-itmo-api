@@ -1,5 +1,6 @@
 package dev.alllexey.itmoapi.myitmo.qr
 
+import dev.alllexey.itmoapi.testing.mockExchange
 import dev.alllexey.itmoapi.core.MyItmoException
 import dev.alllexey.itmoapi.core.requireResult
 import dev.alllexey.itmoapi.testing.fixture
@@ -12,7 +13,7 @@ import kotlin.test.assertFalse
 class QrApiTest {
     @Test
     fun passUsesAbsoluteQrHostAndPreservesBearerAndHexadecimalLeadingZeroes() = runTest {
-        val pass = areaExchange("/v1/user/pass", fixture("qr/pass.json"), host = "qr.itmo.su") {
+        val pass = mockExchange("/v1/user/pass", fixture("qr/pass.json"), host = "qr.itmo.su") {
             QrApiImpl(it).getQrCode().requireResult()
         }
         assertEquals("001122aabb", pass.qrHex)
@@ -22,7 +23,7 @@ class QrApiTest {
     @Test
     fun nullPassCannotBeUnwrappedAsSuccess() = runTest {
         assertFailsWith<MyItmoException.Decode> {
-            areaExchange("/v1/user/pass", """{"response":null}""", host = "qr.itmo.su") {
+            mockExchange("/v1/user/pass", """{"response":null}""", host = "qr.itmo.su") {
                 QrApiImpl(it).getQrCode().requireResult()
             }
         }
@@ -31,7 +32,7 @@ class QrApiTest {
     @Test
     fun externalServiceHttpFailureIsTypedBeforeDecode() = runTest {
         val error = assertFailsWith<MyItmoException.Http> {
-            areaExchange("/v1/user/pass", "not JSON", host = "qr.itmo.su", status = 502) {
+            mockExchange("/v1/user/pass", "not JSON", host = "qr.itmo.su", status = 502) {
                 QrApiImpl(it).getQrCode()
             }
         }

@@ -5,7 +5,6 @@ import dev.alllexey.itmoapi.core.MyItmoException
 import dev.alllexey.itmoapi.core.ResultResponse
 import io.ktor.client.request.parameter
 import io.ktor.http.HttpMethod
-import io.ktor.http.encodedPath
 import kotlinx.coroutines.CancellationException
 
 /** Read-only study-plan programs and complete recursive plan structures. */
@@ -24,12 +23,11 @@ public interface StudyPlanApi {
 internal class StudyPlanApiImpl(private val transport: ItmoTransport) : StudyPlanApi {
     override suspend fun getStudyPlanPrograms(): ResultResponse<StudyPlanPrograms> = transport.execute(
         ResultResponse.serializer(StudyPlanPrograms.serializer()), HttpMethod.Get, "api/eduPlanNew/programs",
-    ) { url { encodedPath = "/api/eduPlanNew/programs" } }
+    )
 
     override suspend fun getStudyPlan(planId: Long, specializationId: Long?): ResultResponse<StudyPlan> = transport.execute(
         ResultResponse.serializer(StudyPlan.serializer()), HttpMethod.Get, "api/eduPlanNew/study_plan/$planId",
     ) {
-        url { encodedPath = "/api/eduPlanNew/study_plan/$planId" }
         if (specializationId != null) parameter("spec_id", specializationId)
     }
 }

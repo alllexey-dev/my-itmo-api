@@ -2,7 +2,7 @@ package dev.alllexey.itmoapi.myitmo.schedule
 
 import dev.alllexey.itmoapi.core.MyItmoException
 import dev.alllexey.itmoapi.core.requireResult
-import dev.alllexey.itmoapi.myitmo.qr.areaExchange
+import dev.alllexey.itmoapi.testing.mockExchange
 import dev.alllexey.itmoapi.testing.fixture
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
@@ -17,7 +17,7 @@ class ScheduleApiTest {
 
     @Test
     fun personalScheduleUsesExplicitZeroPaddedDateQueryAndDataEnvelope() = runTest {
-        val days = areaExchange("/api/schedule/schedule/personal", fixture("schedule/personal.json"), dates) {
+        val days = mockExchange("/api/schedule/schedule/personal", fixture("schedule/personal.json"), dates) {
             ScheduleApiImpl(it).getPersonalSchedule(LocalDate(2026, 1, 5), LocalDate(2026, 1, 11)).requireResult()
         }
         val day = days.single()
@@ -61,7 +61,7 @@ class ScheduleApiTest {
 
     @Test
     fun timeSlotsDecodeFlattenedLegacyFieldsAndOrder() = runTest {
-        val slots = areaExchange("/api/schedule/meta/time_slots", fixture("schedule/time-slots.json")) {
+        val slots = mockExchange("/api/schedule/meta/time_slots", fixture("schedule/time-slots.json")) {
             ScheduleApiImpl(it).getTimeSlots().requireResult()
         }
         assertEquals(listOf(1, 2), slots.map { it.order })
@@ -72,7 +72,7 @@ class ScheduleApiTest {
 
     @Test
     fun emptyPersonalScheduleStaysEmpty() = runTest {
-        val days = areaExchange("/api/schedule/schedule/personal", fixture("schedule/empty.json"), dates) {
+        val days = mockExchange("/api/schedule/schedule/personal", fixture("schedule/empty.json"), dates) {
             ScheduleApiImpl(it).getPersonalSchedule(LocalDate(2026, 1, 5), LocalDate(2026, 1, 11)).requireResult()
         }
         assertTrue(days.isEmpty())
@@ -81,7 +81,7 @@ class ScheduleApiTest {
     @Test
     fun scheduleCodeMapsToTypedApiFailureEvenWithHttp200() = runTest {
         val failure = assertFailsWith<MyItmoException.Api> {
-            areaExchange("/api/schedule/meta/time_slots", fixture("schedule/error.json")) {
+            mockExchange("/api/schedule/meta/time_slots", fixture("schedule/error.json")) {
                 ScheduleApiImpl(it).getTimeSlots()
             }
         }

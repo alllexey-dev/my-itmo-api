@@ -9,6 +9,12 @@
   machine. Drop internal planning IDs from KDoc and comments.
 - Restructure the README after the 1.x one: features, requirements, setup,
   authentication, API usage, BARS and notes.
+- Build each MyITMO request path once in the transport instead of overwriting
+  it per call; request URLs are unchanged.
+- Drop the test-only comparison with the 1.8.2 artifact and the generated
+  member map in `docs/migration.md`; `FixtureDecodeTest` decodes every endpoint
+  fixture into its 2.x model. Merge the MockEngine test helpers.
+- Add `CONTRIBUTING.md` and a single fixture README; shorten `AGENTS.md`.
 
 ## 2.0.0 - 2026-10-10
 
@@ -17,13 +23,13 @@
 - Inject engines, time and consumer-owned atomic token/session storage. Add
   typed failures, coalesced refresh and isolated BARS cookie replay without
   password login, shared-client SSO or `obtainCodeFromSession`.
-- Cover ported models/endpoints with synthetic parity tests against 1.8.2,
-  including model/member completeness and documentation checks.
+- Cover ported models/endpoints with synthetic tests comparing them with
+  1.8.2, including model/member completeness and documentation checks.
 - Document 2.x first in the Russian README, with compiled/executed examples,
   and provide an English migration guide with the full generated member map.
 - Keep 1.x compatible in the root as `dev.alllexey:my-itmo-api`.
 
-## 1.8.3 — unreleased
+## 1.8.3 - unreleased
 
 - Reject unsuccessful HTTP responses, OAuth errors and incomplete/malformed token
   payloads before updating `Storage`, for both code exchange and refresh. Refresh
@@ -38,7 +44,7 @@
   published Maven Central `jar-with-dependencies` classifier is no longer built
   or published; main, sources and Javadoc JARs remain.
 
-## 1.8.2 — 2026-10-03
+## 1.8.2 - 2026-10-03
 
 ### 2026-09-30
 

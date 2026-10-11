@@ -10,7 +10,6 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.contentType
-import io.ktor.http.encodedPath
 import kotlinx.coroutines.CancellationException
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.builtins.ListSerializer
@@ -68,20 +67,15 @@ public interface SportApi : SportRemainingApi {
 internal class SportApiImpl(private val transport: ItmoTransport) : SportApi, SportRemainingApi by SportRemainingApiImpl(transport) {
     override suspend fun getSportTimeSlots(): ResultResponse<List<TimeSlot>> = transport.execute(
         ResultResponse.serializer(ListSerializer(TimeSlot.serializer())), HttpMethod.Get, "api/sport/time_slots",
-    ) {
-        url { encodedPath = "/api/sport/time_slots" }
-    }
+    )
 
     override suspend fun getSportFilters(): ResultResponse<SportFilters> = transport.execute(
         ResultResponse.serializer(SportFilters.serializer()), HttpMethod.Get, "api/sport/sign/schedule/filters",
-    ) {
-        url { encodedPath = "/api/sport/sign/schedule/filters" }
-    }
+    )
 
     override suspend fun getSportSchedule(dateStart: LocalDate, dateEnd: LocalDate, buildingId: Long?, sportTypeIds: List<Long>?, teacherIsu: List<Long>?): ResultResponse<List<SportSchedule>> = transport.execute(
         ResultResponse.serializer(ListSerializer(SportSchedule.serializer())), HttpMethod.Get, "api/sport/sign/schedule",
     ) {
-        url { encodedPath = "/api/sport/sign/schedule" }
         parameter("date_start", dateStart.toQueryValue())
         parameter("date_end", dateEnd.toQueryValue())
         if (buildingId != null) parameter("building_id", buildingId)
@@ -92,44 +86,32 @@ internal class SportApiImpl(private val transport: ItmoTransport) : SportApi, Sp
     override suspend fun getSportScore(semesterId: Long?): ResultResponse<SportScore> = transport.execute(
         ResultResponse.serializer(SportScore.serializer()), HttpMethod.Get, "api/sport/personal/score",
     ) {
-        url { encodedPath = "/api/sport/personal/score" }
         if (semesterId != null) parameter("semester_id", semesterId)
     }
 
     override suspend fun getSportAttempts(): ResultResponse<SportAttempts> = transport.execute(
         ResultResponse.serializer(SportAttempts.serializer()), HttpMethod.Get, "api/sport/personal/have_attempts",
-    ) {
-        url { encodedPath = "/api/sport/personal/have_attempts" }
-    }
+    )
 
     override suspend fun getSportSemesters(): ResultResponse<List<SportSemesterOption>> = transport.execute(
         ResultResponse.serializer(ListSerializer(SportSemesterOption.serializer())), HttpMethod.Get, "api/sport/semesters/list",
-    ) {
-        url { encodedPath = "/api/sport/semesters/list" }
-    }
+    )
 
     override suspend fun getCurrentSportSemester(): ResultResponse<SportSemester> = transport.execute(
         ResultResponse.serializer(SportSemester.serializer()), HttpMethod.Get, "api/sport/semesters/current",
-    ) {
-        url { encodedPath = "/api/sport/semesters/current" }
-    }
+    )
 
     override suspend fun getSportSignLimits(): ResultResponse<Map<Long, Map<Long, SportSignLimit>>> = transport.execute(
         ResultResponse.serializer(MapSerializer(Long.serializer(), MapSerializer(Long.serializer(), SportSignLimit.serializer()))), HttpMethod.Get, "api/sport/sign/schedule/limits",
-    ) {
-        url { encodedPath = "/api/sport/sign/schedule/limits" }
-    }
+    )
 
     override suspend fun getChosenSportSections(): ResultResponse<List<ChosenSportSection>> = transport.execute(
         ResultResponse.serializer(ListSerializer(ChosenSportSection.serializer())), HttpMethod.Get, "api/sport/sign/chosen",
-    ) {
-        url { encodedPath = "/api/sport/sign/chosen" }
-    }
+    )
 
     override suspend fun signInLessons(lessonIds: List<Long>): ResultResponse<List<Long>> = transport.execute(
         ResultResponse.serializer(ListSerializer(Long.serializer())), HttpMethod.Post, "api/sport/sign/schedule/lessons",
     ) {
-        url { encodedPath = "/api/sport/sign/schedule/lessons" }
         contentType(ContentType.Application.Json)
         setBody(ItmoApiJson.encodeToString(ListSerializer(Long.serializer()), lessonIds))
     }
@@ -137,7 +119,6 @@ internal class SportApiImpl(private val transport: ItmoTransport) : SportApi, Sp
     override suspend fun signOutLessons(lessonIds: List<Long>): ResultResponse<List<Long>> = transport.execute(
         ResultResponse.serializer(ListSerializer(Long.serializer())), HttpMethod.Delete, "api/sport/sign/schedule/lessons",
     ) {
-        url { encodedPath = "/api/sport/sign/schedule/lessons" }
         contentType(ContentType.Application.Json)
         setBody(ItmoApiJson.encodeToString(ListSerializer(Long.serializer()), lessonIds))
     }
