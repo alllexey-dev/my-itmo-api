@@ -23,7 +23,7 @@ public class CallbackUrl(redirectUri: String, private val issuer: String) {
     } == true
 
     /** Returns a code only after origin/path, duplicate-query, state and issuer checks.
-     * Issuer absence preserves the owner-approved 1.x contract; every present issuer must match exactly.
+     * An absent issuer is accepted, as in 1.x; every present issuer must match exactly.
      * OAuth error callbacks and absent/empty/oversized codes are rejected; never log returned codes.
      */
     public fun extractCode(url: String, expectedState: String): String? {

@@ -16,7 +16,7 @@ import io.ktor.http.URLBuilder
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.cancel
 
-/** Stateless BARS browser login and ADR 0012 cookie replay, without a password flow or shared SSO.
+/** Stateless BARS browser login and caller-owned cookie replay, without a password flow or shared SSO.
  * BARS exchanges its public-client code itself, so this authorization URL intentionally has no PKCE.
  * Inject [dev.alllexey.itmoapi.core.defaultEngine] for the verified no-cookie/no-cache/native-redirect policy;
  * a custom engine must already meet that precondition. The caller owns and closes the injected engine.
@@ -50,7 +50,7 @@ public class BarsLogin(
     public fun isAllowedPage(url: String): Boolean = callback.isAllowedPage(url)
 
     /** Returns a code only after strict callback/state/query checks.
-     * Every present iss must equal the issuer; absence preserves the owner-approved 1.x policy.
+     * Every present iss must equal the issuer; an absent iss is accepted, as in 1.x.
      */
     public fun extractCode(url: String, expectedState: String): String? = callback.extractCode(url, expectedState)
 

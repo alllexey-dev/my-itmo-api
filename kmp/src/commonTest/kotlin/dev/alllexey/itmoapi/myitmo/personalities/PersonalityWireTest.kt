@@ -13,7 +13,7 @@ import kotlin.test.assertTrue
 
 class PersonalityWireTest {
     @Test
-    fun sp02SeedKeepsNumericIsuBooleanExchangeAndTypedNestedFields() {
+    fun personKeepsNumericIsuBooleanExchangeAndTypedNestedFields() {
         val profile = ItmoApiJson.decodeFromString(ResultResponse.serializer(Personality.serializer()),
             fixture("personalities/person.json")).requireResult()
         assertEquals(100001L, profile.isu)

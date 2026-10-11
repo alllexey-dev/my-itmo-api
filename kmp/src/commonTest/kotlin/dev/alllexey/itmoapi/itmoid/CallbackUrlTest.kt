@@ -66,7 +66,7 @@ class CallbackUrlTest {
     }
 
     @Test
-    fun absentIssuerPreservesTheOwnerApprovedOneXContract() {
+    fun absentIssuerIsAccepted() {
         val url = URLBuilder(redirect).apply {
             parameters.append("state", state); parameters.append("code", code)
         }.buildString()

@@ -27,7 +27,7 @@ import kotlin.uuid.Uuid
  * The complete authorization response header is the session, lasting about 30 minutes.
  * Period selection changes the user's server setting, shared with the BARS web client.
  * No password flow, shared cookies or global token state is used.
- * Use core.defaultEngine for the verified ADR 0012 policy. An injected engine must already
+ * Use core.defaultEngine, which replays only caller-owned cookies. An injected engine must already
  * disable native cookies, caches and redirects: a prebuilt engine cannot be sanitized here.
  * Ktor redirects are disabled and no cookie-storage or cache plugin is installed.
  */
@@ -47,7 +47,7 @@ public class BarsClient(
     private val sessionMutex = Mutex()
     private val periodMutex = Mutex()
 
-    /** Compatibility with the injectable client shell's custom base URL. */
+    /** Client for a custom BARS REST base URL with the default configuration otherwise. */
     public constructor(engine: HttpClientEngine, baseUrl: Url) : this(engine, BarsConfiguration(restUrl = baseUrl))
 
     /** Exchanges an OIDC code once and persists the raw, validated response authorization header. */

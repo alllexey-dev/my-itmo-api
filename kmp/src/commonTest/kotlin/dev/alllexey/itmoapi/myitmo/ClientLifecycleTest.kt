@@ -14,10 +14,10 @@ import kotlin.test.assertFalse
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
-class ClientShellTest {
+class ClientLifecycleTest {
     @Test
     fun everyAreaIsStableAndDoesNotMakeRequestsWhenConstructed() {
-        val engine = MockEngine { error("A shell must not make a request") }
+        val engine = MockEngine { error("An unused client must not make a request") }
         val client = MyItmoClient(MyItmoConfiguration(baseUrl = Url("https://example.invalid/")), TokenTestStorage(), engine, TokenTestClock())
         try {
             assertSame(client.schedule, client.schedule)
@@ -37,8 +37,8 @@ class ClientShellTest {
     }
 
     @Test
-    fun identityAndBarsShellsDoNotInitializeTransportJustToClose() {
-        val engine = MockEngine { error("A shell must not make a request") }
+    fun identityAndBarsClientsDoNotInitializeTransportJustToClose() {
+        val engine = MockEngine { error("An unused client must not make a request") }
         val identity = ItmoIdClient(engine, object : Clock { override fun now(): Instant = Instant.parse("2026-10-03T09:00:00Z") })
         val bars = BarsClient(engine)
         try {
@@ -54,7 +54,7 @@ class ClientShellTest {
 
     @Test
     fun separateMyItmoClientsOwnIndependentAreasWithoutOwningInjectedEngine() {
-        val engine = MockEngine { error("A shell must not make a request") }
+        val engine = MockEngine { error("An unused client must not make a request") }
         val first = MyItmoClient(MyItmoConfiguration.DEFAULT, TokenTestStorage(), engine, TokenTestClock())
         val second = MyItmoClient(MyItmoConfiguration.DEFAULT, TokenTestStorage(), engine, TokenTestClock())
         try {

@@ -93,7 +93,7 @@ public class MyItmoClient(
     /** Lazily constructs the system area without initializing unused areas. */
     public val system: SystemApi by lazy { SystemApiImpl(transport.value) }
 
-    /** Releases an initialized HTTP client; an unused shell stays entirely uninitialized. */
+    /** Releases an initialized HTTP client; an unused client stays entirely uninitialized. */
     public fun close(): Unit {
         if (transport.isInitialized()) transport.value.client.close()
         identity.close()
