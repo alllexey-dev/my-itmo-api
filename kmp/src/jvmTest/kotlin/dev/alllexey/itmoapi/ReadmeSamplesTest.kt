@@ -18,7 +18,6 @@ import kotlinx.datetime.LocalDate
 import kotlin.time.Clock
 // README imports end
 import java.io.File
-import dev.alllexey.itmoapi.parity.ParityCompletenessTest
 import dev.alllexey.itmoapi.bars.BarsConfiguration
 import dev.alllexey.itmoapi.bars.RuntimeBarsStorage
 import dev.alllexey.itmoapi.core.MyItmoException
@@ -241,16 +240,4 @@ class ReadmeSamplesTest {
             assertTrue(readme.contains("```kotlin\n$sample\n```"), "README sample differs: $name")
         }
     }
-
-    @Test
-    fun migrationGuideContainsTheFullFreshlyGeneratedMemberMap() {
-        ParityCompletenessTest().allLegacyModelsAndMembersAreAccountedFor()
-        val root = repositoryRoot()
-        val generated = File(root, "kmp/build/parity/member-map.md").readText()
-        val migration = File(root, "docs/migration.md").readText()
-        val embedded = migration.substringAfter("<!-- Generated member map begin -->\n")
-            .substringBefore("\n<!-- Generated member map end -->")
-        assertEquals(generated, embedded)
-    }
-
 }

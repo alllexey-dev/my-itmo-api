@@ -1,5 +1,6 @@
 package dev.alllexey.itmoapi.myitmo.election
 
+import dev.alllexey.itmoapi.testing.mockExchange
 import dev.alllexey.itmoapi.core.*
 import dev.alllexey.itmoapi.testing.fixture
 import io.ktor.http.HttpMethod
@@ -11,7 +12,7 @@ import kotlin.time.Instant
 class ElectionApiTest {
     @Test
     fun campaignRetainsStatusTimesAndAcademicSemester() = runTest {
-        val campaign = myItmoAreaExchange("election/students/availability", fixture("election/availability.json")) {
+        val campaign = mockExchange("/api/election/students/availability", fixture("election/availability.json")) {
             ElectionApiImpl(it).getElectionAvailability().requireResult()
         }
         assertEquals(1, campaign.id)
@@ -29,7 +30,7 @@ class ElectionApiTest {
 
     @Test
     fun disciplinesRetainOpaqueGroupFlowAndCompatibility() = runTest {
-        val discipline = myItmoAreaExchange("election/students/available_disciplines", fixture("election/disciplines.json")) {
+        val discipline = mockExchange("/api/election/students/available_disciplines", fixture("election/disciplines.json")) {
             ElectionApiImpl(it).getAvailableDisciplines().requireResult()
         }.single()
         assertEquals(11L, discipline.dcId)
@@ -48,7 +49,7 @@ class ElectionApiTest {
     @Test
     fun validationPostsOrderedOpaqueStringsAndRetainsAllRuleCounts() = runTest {
         val ids = listOf("00a /+&?", "00a /+&?", "000b")
-        val validation = myItmoAreaExchange("election/students/group_flow_available_disciplines", fixture("election/validation.json"),
+        val validation = mockExchange("/api/election/students/group_flow_available_disciplines", fixture("election/validation.json"),
             method = HttpMethod.Post, body = "[\"00a /+&?\",\"00a /+&?\",\"000b\"]") {
             ElectionApiImpl(it).validateSelectedDisciplines(ids).requireResult()
         }
@@ -57,19 +58,19 @@ class ElectionApiTest {
 
     @Test
     fun limitsKeepOpaqueKeysAndStudentCapacities() = runTest {
-        val limits = myItmoAreaExchange("election/students/limits/flows", fixture("election/limits.json")) {
+        val limits = mockExchange("/api/election/students/limits/flows", fixture("election/limits.json")) {
             ElectionApiImpl(it).getFlowLimits().requireResult()
         }
         assertEquals(setOf("00a /+&?"), limits.keys)
         assertEquals(FlowLimit(20, 17, 3), limits.getValue("00a /+&?"))
-        assertTrue(myItmoAreaExchange("election/students/limits/flows", fixture("election/empty-limits.json")) {
+        assertTrue(mockExchange("/api/election/students/limits/flows", fixture("election/empty-limits.json")) {
             ElectionApiImpl(it).getFlowLimits().requireResult()
         }.isEmpty())
     }
 
     @Test
     fun orderedChainsRetainRecursiveModernFlowsWithoutDeprecatedModels() = runTest {
-        val chain = myItmoAreaExchange("election/students/ordered_flow_chains", fixture("election/chains.json")) {
+        val chain = mockExchange("/api/election/students/ordered_flow_chains", fixture("election/chains.json")) {
             ElectionApiImpl(it).getOrderedFlowChains().requireResult()
         }.single()
         assertEquals("00a /+&?", chain.groupFlow)
@@ -88,11 +89,11 @@ class ElectionApiTest {
 
     @Test
     fun chosenFlowIdsKeepOrderAndEmptyCollectionsRemainEmpty() = runTest {
-        assertEquals(listOf(101L, 102L), myItmoAreaExchange("election/students/chosen_flows", fixture("election/chosen.json")) {
+        assertEquals(listOf(101L, 102L), mockExchange("/api/election/students/chosen_flows", fixture("election/chosen.json")) {
             ElectionApiImpl(it).getChosenFlows().requireResult()
         })
         for (path in listOf("available_disciplines", "ordered_flow_chains", "chosen_flows")) {
-            val result = myItmoAreaExchange("election/students/$path", fixture("election/empty.json")) {
+            val result = mockExchange("/api/election/students/$path", fixture("election/empty.json")) {
                 val api = ElectionApiImpl(it)
                 when (path) {
                     "available_disciplines" -> api.getAvailableDisciplines().requireResult()
@@ -106,12 +107,12 @@ class ElectionApiTest {
 
     @Test
     fun orderChangeAndDisciplineSelectionPostExactJsonArrays() = runTest {
-        val flowResult = myItmoAreaExchange("election/students/order/change", fixture("election/change-flows.json"),
+        val flowResult = mockExchange("/api/election/students/order/change", fixture("election/change-flows.json"),
             method = HttpMethod.Post, body = "[101,102,101]") {
             ElectionApiImpl(it).changeSelectedFlows(listOf(101, 102, 101)).result
         }
         assertEquals(JsonArray(listOf(JsonPrimitive(101), JsonPrimitive(102))), flowResult!!.jsonObject["flows"])
-        val disciplineResult = myItmoAreaExchange("election/students/order/", fixture("election/change-disciplines.json"),
+        val disciplineResult = mockExchange("/api/election/students/order/", fixture("election/change-disciplines.json"),
             method = HttpMethod.Post, body = "[\"00a /+&?\",\"000b\"]") {
             ElectionApiImpl(it).changeSelectedDisciplines(listOf("00a /+&?", "000b")).result
         }
@@ -123,7 +124,7 @@ class ElectionApiTest {
         for (case in listOf("order-object", "order-array", "order-scalar", "clear")) {
             val expected = ItmoApiJson.parseToJsonElement(fixture("election/$case.json")).jsonObject["result"]
             for (operation in listOf("change", "clear", "")) {
-                val result = myItmoAreaExchange("election/students/order/$operation", fixture("election/$case.json"),
+                val result = mockExchange("/api/election/students/order/$operation", fixture("election/$case.json"),
                     method = HttpMethod.Post, body = if (operation == "clear") null else "[]") {
                     val api = ElectionApiImpl(it)
                     when (operation) {
@@ -153,7 +154,7 @@ class ElectionApiTest {
         for ((path, operation) in operations) {
             val post = path.startsWith("order/") || path.startsWith("group_flow")
             val failure = assertFailsWith<MyItmoException.Api> {
-                myItmoAreaExchange("election/students/$path", fixture("election/error.json"),
+                mockExchange("/api/election/students/$path", fixture("election/error.json"),
                     method = if (post) HttpMethod.Post else HttpMethod.Get,
                     body = if (post && path != "order/clear") "[]" else null, status = 400) {
                     operation(ElectionApiImpl(it))

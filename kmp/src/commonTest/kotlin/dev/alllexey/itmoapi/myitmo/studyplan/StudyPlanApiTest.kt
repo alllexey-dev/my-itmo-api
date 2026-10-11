@@ -2,7 +2,7 @@ package dev.alllexey.itmoapi.myitmo.studyplan
 
 import dev.alllexey.itmoapi.core.MyItmoException
 import dev.alllexey.itmoapi.core.requireResult
-import dev.alllexey.itmoapi.myitmo.recordbook.recordBookExchange
+import dev.alllexey.itmoapi.testing.mockExchange
 import dev.alllexey.itmoapi.testing.fixture
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -15,7 +15,7 @@ import kotlin.test.assertTrue
 class StudyPlanApiTest {
     @Test
     fun programsDecodePlanIdsAndNullableSpecialization() = runTest {
-        val result = recordBookExchange("/api/eduPlanNew/programs", fixture("studyplan/programs.json")) {
+        val result = mockExchange("/api/eduPlanNew/programs", fixture("studyplan/programs.json")) {
             StudyPlanApiImpl(it).getStudyPlanPrograms().requireResult()
         }
         assertEquals(100001L, result.isu)
@@ -32,7 +32,7 @@ class StudyPlanApiTest {
 
     @Test
     fun studyPlanSendsSpecializationAndDecodesAllNineModels() = runTest {
-        val plan = recordBookExchange(
+        val plan = mockExchange(
             "/api/eduPlanNew/study_plan/50001", fixture("studyplan/study-plan.json"),
             query = mapOf("spec_id" to listOf("50011")),
         ) { StudyPlanApiImpl(it).getStudyPlan(50001L, 50011L).requireResult() }
@@ -96,7 +96,7 @@ class StudyPlanApiTest {
 
     @Test
     fun noSpecializationOmitsQueryAndPreservesAbsentNodeFields() = runTest {
-        val plan = recordBookExchange("/api/eduPlanNew/study_plan/50002", fixture("studyplan/absence.json")) {
+        val plan = mockExchange("/api/eduPlanNew/study_plan/50002", fixture("studyplan/absence.json")) {
             StudyPlanApiImpl(it).getStudyPlan(50002L).requireResult()
         }
         assertEquals(50002L, plan.id)
@@ -110,7 +110,7 @@ class StudyPlanApiTest {
 
     @Test
     fun explicitNullSpecializationAlsoOmitsQuery() = runTest {
-        val plan = recordBookExchange("/api/eduPlanNew/study_plan/50002", fixture("studyplan/absence.json")) {
+        val plan = mockExchange("/api/eduPlanNew/study_plan/50002", fixture("studyplan/absence.json")) {
             StudyPlanApiImpl(it).getStudyPlan(50002L, null).requireResult()
         }
         assertEquals(50002L, plan.id)
@@ -118,7 +118,7 @@ class StudyPlanApiTest {
 
     @Test
     fun emptyProgramsRemainEmpty() = runTest {
-        val result = recordBookExchange("/api/eduPlanNew/programs", fixture("studyplan/empty-programs.json")) {
+        val result = mockExchange("/api/eduPlanNew/programs", fixture("studyplan/empty-programs.json")) {
             StudyPlanApiImpl(it).getStudyPlanPrograms().requireResult()
         }
         assertEquals(100001L, result.isu)
@@ -128,7 +128,7 @@ class StudyPlanApiTest {
     @Test
     fun numericApiFailureIsMappedBeforeReturningStudyPlan() = runTest {
         val failure = assertFailsWith<MyItmoException.Api> {
-            recordBookExchange("/api/eduPlanNew/study_plan/50001", fixture("errors/error-envelope-400.json"), status = 400) {
+            mockExchange("/api/eduPlanNew/study_plan/50001", fixture("errors/error-envelope-400.json"), status = 400) {
                 StudyPlanApiImpl(it).getStudyPlan(50001L)
             }
         }

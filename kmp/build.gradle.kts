@@ -68,7 +68,6 @@ kotlin {
         }
         jvmTest.dependencies {
             implementation(libs.mockwebserver)
-            implementation(libs.myitmoapi.legacy)
         }
     }
 }

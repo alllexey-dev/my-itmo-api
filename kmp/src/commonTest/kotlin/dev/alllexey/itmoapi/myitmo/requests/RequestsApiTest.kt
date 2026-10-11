@@ -1,7 +1,7 @@
 package dev.alllexey.itmoapi.myitmo.requests
 
 import dev.alllexey.itmoapi.core.*
-import dev.alllexey.itmoapi.myitmo.election.myItmoAreaExchange
+import dev.alllexey.itmoapi.testing.mockExchange
 import dev.alllexey.itmoapi.testing.fixture
 import kotlinx.coroutines.test.runTest
 import kotlin.test.*
@@ -10,7 +10,7 @@ import kotlin.time.Instant
 class RequestsApiTest {
     @Test
     fun currentUserRequestsKeepNoticeExtensibleStatusAndBothInstants() = runTest {
-        val request = myItmoAreaExchange("requests/my", fixture("requests/my.json")) {
+        val request = mockExchange("/api/requests/my", fixture("requests/my.json")) {
             RequestsApiImpl(it).getMyRequests().requireResult()
         }.single()
         assertEquals(RequestSummary(7001, "Synthetic request", "Synthetic notice", 91, "Synthetic status",
@@ -19,11 +19,11 @@ class RequestsApiTest {
 
     @Test
     fun emptyRequestsAndHttp400Api100ArePreserved() = runTest {
-        assertTrue(myItmoAreaExchange("requests/my", fixture("requests/empty.json")) {
+        assertTrue(mockExchange("/api/requests/my", fixture("requests/empty.json")) {
             RequestsApiImpl(it).getMyRequests().requireResult()
         }.isEmpty())
         val failure = assertFailsWith<MyItmoException.Api> {
-            myItmoAreaExchange("requests/my", fixture("requests/error.json"), status = 400) {
+            mockExchange("/api/requests/my", fixture("requests/error.json"), status = 400) {
                 RequestsApiImpl(it).getMyRequests()
             }
         }

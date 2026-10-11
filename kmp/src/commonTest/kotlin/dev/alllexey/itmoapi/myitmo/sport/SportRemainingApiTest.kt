@@ -1,5 +1,6 @@
 package dev.alllexey.itmoapi.myitmo.sport
 
+import dev.alllexey.itmoapi.testing.mockExchange
 import dev.alllexey.itmoapi.core.ItmoApiJson
 import dev.alllexey.itmoapi.core.MyItmoException
 import dev.alllexey.itmoapi.core.requireResult
@@ -12,13 +13,13 @@ import kotlin.time.Instant
 class SportRemainingApiTest {
     @Test
     fun sportsTypeCatalogKeepsServerIdentifiersAndLabels() = runTest {
-        val types = sportExchange("sport_types", fixture("sport/sport-types.json")) {
+        val types = mockExchange("/api/sport/sport_types", fixture("sport/sport-types.json")) {
             val api: SportApi = SportApiImpl(it)
             api.getSportTypes().requireResult()
         }
         assertEquals(listOf(2L, 7L), types.map { it.id })
         assertEquals("Тестовый вид спорта", types.first().value)
-        assertTrue(sportExchange("sport_types", fixture("sport/sport-types-empty.json")) {
+        assertTrue(mockExchange("/api/sport/sport_types", fixture("sport/sport-types-empty.json")) {
             SportApiImpl(it).getSportTypes().requireResult()
         }.isEmpty())
     }
@@ -26,7 +27,7 @@ class SportRemainingApiTest {
     @Test
     fun signAttemptsIsAnIntegerCounterIncludingZero() = runTest {
         for ((name, expected) in listOf("sign-attempts" to 3, "sign-attempts-zero" to 0)) {
-            val count: Int = sportExchange("personal/sign_attempts", fixture("sport/$name.json")) {
+            val count: Int = mockExchange("/api/sport/personal/sign_attempts", fixture("sport/$name.json")) {
                 SportApiImpl(it).getSportSignAttempts().requireResult()
             }
             assertEquals(expected, count)
@@ -36,7 +37,7 @@ class SportRemainingApiTest {
     @Test
     fun calendarUsesZeroPaddedInclusiveDatesAndPreservesLessonsNullAndEmptyDays() = runTest {
         val query = mapOf("date_start" to listOf("2026-01-05"), "date_end" to listOf("2026-01-11"))
-        val days = sportExchange("personal/calendar", fixture("sport/calendar.json"), query) {
+        val days = mockExchange("/api/sport/personal/calendar", fixture("sport/calendar.json"), query) {
             SportApiImpl(it).getPersonalSportCalendar(LocalDate(2026, 1, 5), LocalDate(2026, 1, 11)).requireResult()
         }
         assertEquals(LocalDate(2026, 10, 5), days.first().date)
@@ -49,18 +50,18 @@ class SportRemainingApiTest {
         assertEquals(-1L, lessons.last().roomId)
         assertNull(days[1].lessons)
         assertEquals(emptyList(), days[2].lessons)
-        assertTrue(sportExchange("personal/calendar", fixture("sport/calendar-empty.json"), query) {
+        assertTrue(mockExchange("/api/sport/personal/calendar", fixture("sport/calendar-empty.json"), query) {
             SportApiImpl(it).getPersonalSportCalendar(LocalDate(2026, 1, 5), LocalDate(2026, 1, 11)).requireResult()
         }.isEmpty())
     }
 
     @Test
     fun debtKeepsFractionalPointsAndOptionalSpecialAttempts() = runTest {
-        val debt = sportExchange("personal/debt", fixture("sport/debt.json")) {
+        val debt = mockExchange("/api/sport/personal/debt", fixture("sport/debt.json")) {
             SportApiImpl(it).getSportDebt().requireResult()
         }
         assertEquals(SportDebt(true, 12.5, 2), debt)
-        val none = sportExchange("personal/debt", fixture("sport/debt-none.json")) {
+        val none = mockExchange("/api/sport/personal/debt", fixture("sport/debt-none.json")) {
             SportApiImpl(it).getSportDebt().requireResult()
         }
         assertFalse(none.havingDebt)
@@ -70,15 +71,15 @@ class SportRemainingApiTest {
 
     @Test
     fun externshipKeepsAcceptedDeclinedAndAbsentApplicationStates() = runTest {
-        val accepted = sportExchange("personal/externat", fixture("sport/externat.json")) {
+        val accepted = mockExchange("/api/sport/personal/externat", fixture("sport/externat.json")) {
             SportApiImpl(it).getSportExternat().requireResult()
         }
         assertEquals(SportExternat(true, 12, null), accepted)
-        val declined = sportExchange("personal/externat", fixture("sport/externat-declined.json")) {
+        val declined = mockExchange("/api/sport/personal/externat", fixture("sport/externat-declined.json")) {
             SportApiImpl(it).getSportExternat().requireResult()
         }
         assertEquals(SportExternat(false, 13, "Synthetic refusal"), declined)
-        val none = sportExchange("personal/externat", fixture("sport/externat-none.json")) {
+        val none = mockExchange("/api/sport/personal/externat", fixture("sport/externat-none.json")) {
             SportApiImpl(it).getSportExternat().requireResult()
         }
         assertEquals(SportExternat(), none)
@@ -86,7 +87,7 @@ class SportRemainingApiTest {
 
     @Test
     fun healthGroupStaysInsideItsNestedResponse() = runTest {
-        val response = sportExchange("personal/health_level", fixture("sport/health-level.json")) {
+        val response = mockExchange("/api/sport/personal/health_level", fixture("sport/health-level.json")) {
             SportApiImpl(it).getSportHealthLevel().requireResult()
         }
         assertEquals(SportHealthLevel(1, 200001, "Основная группа здоровья"), response.healthLevel)
@@ -94,21 +95,21 @@ class SportRemainingApiTest {
 
     @Test
     fun selectionsKeepQualificationLevelsAndEmptyLists() = runTest {
-        val selections = sportExchange("personal/selections", fixture("sport/selections.json")) {
+        val selections = mockExchange("/api/sport/personal/selections", fixture("sport/selections.json")) {
             SportApiImpl(it).getSportSelections().requireResult()
         }
         assertEquals(31L, selections.first().id)
         assertEquals("Тестовая дисциплина", selections.first().name)
         assertEquals(SportRequisite(41, "Сборная команда", "Тестовый отбор"), selections.first().requisites.single())
         assertTrue(selections.last().requisites.isEmpty())
-        assertTrue(sportExchange("personal/selections", fixture("sport/selections-empty.json")) {
+        assertTrue(mockExchange("/api/sport/personal/selections", fixture("sport/selections-empty.json")) {
             SportApiImpl(it).getSportSelections().requireResult()
         }.isEmpty())
     }
 
     @Test
     fun projectsKeepCapacityPrerequisitesInstructionAndOptionalSupportingDocument() = runTest {
-        val projects = sportExchange("projects/list", fixture("sport/projects.json")) {
+        val projects = mockExchange("/api/sport/projects/list", fixture("sport/projects.json")) {
             SportApiImpl(it).getSportProjects().requireResult()
         }
         val project = projects.first()
@@ -126,7 +127,7 @@ class SportRemainingApiTest {
         assertFalse(projects.last().requisiteAvailable)
         assertEquals(0, projects.last().available)
         assertNull(projects.last().link)
-        assertTrue(sportExchange("projects/list", fixture("sport/projects-empty.json")) {
+        assertTrue(mockExchange("/api/sport/projects/list", fixture("sport/projects-empty.json")) {
             SportApiImpl(it).getSportProjects().requireResult()
         }.isEmpty())
     }
@@ -150,7 +151,7 @@ class SportRemainingApiTest {
             } else emptyMap()
             for (status in listOf(200, 400)) {
                 val failure = assertFailsWith<MyItmoException.Api> {
-                    sportExchange(path, fixture("sport/remaining-error.json"), query, status = status) {
+                    mockExchange("/api/sport/$path", fixture("sport/remaining-error.json"), query, status = status) {
                         action(SportApiImpl(it))
                     }
                 }

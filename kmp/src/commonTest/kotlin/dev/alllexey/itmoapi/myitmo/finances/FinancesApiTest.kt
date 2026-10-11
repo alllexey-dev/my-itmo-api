@@ -1,7 +1,7 @@
 package dev.alllexey.itmoapi.myitmo.finances
 
 import dev.alllexey.itmoapi.core.*
-import dev.alllexey.itmoapi.myitmo.election.myItmoAreaExchange
+import dev.alllexey.itmoapi.testing.mockExchange
 import dev.alllexey.itmoapi.testing.fixture
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
@@ -16,7 +16,7 @@ class FinancesApiTest {
                 if (from != null) put("dateFrom", listOf("2026-01-05"))
                 if (to != null) put("dateTo", listOf("2026-01-09"))
             }
-            val total = myItmoAreaExchange("finances/scholarship/total", fixture("finances/totals.json"), query) {
+            val total = mockExchange("/api/finances/scholarship/total", fixture("finances/totals.json"), query) {
                 FinancesApiImpl(it).getScholarshipTotals(from, to).requireResult()
             }.single()
             assertEquals(ScholarshipTotal(901, " \nSynthetic scholarship\n ", 12345), total)
@@ -25,11 +25,11 @@ class FinancesApiTest {
 
     @Test
     fun emptyTotalsAndHttp400Api100ArePreserved() = runTest {
-        assertTrue(myItmoAreaExchange("finances/scholarship/total", fixture("finances/empty.json")) {
+        assertTrue(mockExchange("/api/finances/scholarship/total", fixture("finances/empty.json")) {
             FinancesApiImpl(it).getScholarshipTotals().requireResult()
         }.isEmpty())
         val failure = assertFailsWith<MyItmoException.Api> {
-            myItmoAreaExchange("finances/scholarship/total", fixture("finances/error.json"), status = 400) {
+            mockExchange("/api/finances/scholarship/total", fixture("finances/error.json"), status = 400) {
                 FinancesApiImpl(it).getScholarshipTotals()
             }
         }
