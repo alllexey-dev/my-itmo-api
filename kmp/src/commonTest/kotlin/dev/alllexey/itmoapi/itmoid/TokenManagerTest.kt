@@ -6,7 +6,10 @@ import io.ktor.client.engine.mock.respond
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
+import io.ktor.http.content.OutgoingContent
+import io.ktor.http.parseQueryString
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
@@ -185,6 +188,41 @@ class TokenManagerTest {
             assertEquals(1, storage.writes)
             assertEquals(2, lockEntries)
             assertFalse(locked)
+        } finally { identity.close(); engine.close() }
+    }
+
+    @Test
+    fun managerThatLosesARotationRaceToAnotherManagerUsesTheStoredRotation() = runTest {
+        val stored = testTokens(clock, expired = true)
+        val storage = TokenTestStorage(stored)
+        val rotation = testTokens(clock)
+        var validRefreshToken = stored.refreshToken
+        var refreshes = 0
+        val winnerDone = CompletableDeferred<Unit>()
+        // The identity provider rotates refresh tokens: the old one is rejected once used.
+        val engine = MockEngine { request ->
+            refreshes++
+            val form = parseQueryString((request.body as OutgoingContent.ByteArrayContent).bytes().decodeToString())
+            if (form["refresh_token"] == validRefreshToken) {
+                validRefreshToken = rotation.refreshToken
+                delay(10)
+                respond(tokenBody(rotation), headers = headersOf(HttpHeaders.ContentType, "application/json"))
+            } else {
+                winnerDone.await()
+                respond("""{"error":"invalid_grant"}""", HttpStatusCode.BadRequest)
+            }
+        }
+        val identity = ItmoIdClient(engine, clock)
+        val first = TokenManager(storage, identity, clock)
+        val second = TokenManager(storage, identity, clock)
+        try {
+            val results = listOf(first, second).map { manager ->
+                async { manager.validAccessToken().also { winnerDone.complete(Unit) } }
+            }.awaitAll()
+            assertTrue(results.all { it == rotation.accessToken }, "Both managers use the stored rotation")
+            assertEquals(2, refreshes)
+            assertEquals(1, storage.writes)
+            assertTrue(storage.snapshot?.refreshToken == rotation.refreshToken, "Winner rotation persisted")
         } finally { identity.close(); engine.close() }
     }
 
