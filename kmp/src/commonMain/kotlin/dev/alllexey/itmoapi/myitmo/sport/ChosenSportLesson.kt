@@ -5,7 +5,9 @@ import kotlin.time.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-/** Concrete future lesson within a selected group. */
+/** Concrete future lesson within a selected group.
+ * Instants are absolute; show them in [dev.alllexey.itmoapi.core.MOSCOW], not the device time zone.
+ */
 @Serializable
 public data class ChosenSportLesson(
     /** Lesson identifier. */
@@ -18,9 +20,9 @@ public data class ChosenSportLesson(
     @SerialName("date_end") public val dateEnd: Instant? = null,
     /** Time slot identifier. */
     @SerialName("time_slot_id") public val timeSlotId: Long = 0,
-    /** Local start time, HH:mm. */
+    /** Start time, HH:mm, Moscow time. */
     @SerialName("time_start") public val timeStart: String = "",
-    /** Local end time, HH:mm. */
+    /** End time, HH:mm, Moscow time. */
     @SerialName("time_end") public val timeEnd: String = "",
     /** Raw room identifier; -1 denotes Online. */
     @SerialName("room_id") public val roomId: Long = 0,

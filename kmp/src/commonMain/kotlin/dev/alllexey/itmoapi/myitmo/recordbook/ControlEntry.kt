@@ -5,7 +5,9 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.time.Instant
 
-/** Assessment inside a recordbook discipline; parentId links the flat tree. */
+/** Assessment inside a recordbook discipline; parentId links the flat tree.
+ * Instants are absolute; show them in [dev.alllexey.itmoapi.core.MOSCOW], not the device time zone.
+ */
 @Serializable
 public data class ControlEntry(
     /** Assessment identifier. */

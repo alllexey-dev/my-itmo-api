@@ -1,6 +1,7 @@
 package dev.alllexey.itmoapi.core
 
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
 import kotlinx.datetime.UtcOffset
 import kotlinx.datetime.format.char
 import kotlinx.datetime.format.optional
@@ -13,9 +14,14 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlin.time.Instant
 
+/** ITMO's time zone, Europe/Moscow. Show API instants in it rather than the device zone;
+ * schedule and sport HH:mm strings are already Moscow time.
+ */
+public val MOSCOW: TimeZone = TimeZone.of("Europe/Moscow")
+
 /** Offset date-times become instants; Gson-written wire dates may omit zero seconds.
  * Observed precision ranges from minutes to nanoseconds. Encoding normalizes to UTC.
- * BARS epoch values are Long and must not use this serializer.
+ * BARS epoch values are Long and must not use this serializer. Display instants in [MOSCOW].
  */
 public object WireInstantSerializer : KSerializer<Instant> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("WireInstant", PrimitiveKind.STRING)

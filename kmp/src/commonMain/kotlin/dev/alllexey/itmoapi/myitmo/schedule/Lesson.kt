@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /** Lesson in the personal academic timetable. Nullable properties have observed null/absence.
- * Times are local HH:mm strings, not instants; IDs are raw university identifiers. */
+ * Times are HH:mm strings in Moscow time, not instants; IDs are raw university identifiers. */
 @Serializable
 public data class Lesson(
     /** Unique scheduled pair identifier. */
@@ -17,9 +17,9 @@ public data class Lesson(
     public val note: String? = null,
     /** Server lesson type label, e.g. lecture or practice. */
     public val type: String = "",
-    /** Local start time in HH:mm. */
+    /** Start time, HH:mm, Moscow time. */
     @SerialName("time_start") public val timeStart: String = "",
-    /** Local end time in HH:mm. */
+    /** End time, HH:mm, Moscow time. */
     @SerialName("time_end") public val timeEnd: String = "",
     /** Teacher ISU; may be absent. */
     @SerialName("teacher_id") public val teacherId: Long? = null,

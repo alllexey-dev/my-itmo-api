@@ -5,7 +5,9 @@ import kotlin.time.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-/** Sports lesson available for enrollment or shown in the personal calendar. */
+/** Sports lesson available for enrollment or shown in the personal calendar.
+ * Instants are absolute; show them in [dev.alllexey.itmoapi.core.MOSCOW], not the device time zone.
+ */
 @Serializable
 public data class SportLesson(
     /** Lesson identifier. */
@@ -42,9 +44,9 @@ public data class SportLesson(
     public val comment: String? = null,
     /** Time slot identifier. */
     @SerialName("time_slot_id") public val timeSlotId: Long = 0,
-    /** Local start time, HH:mm. */
+    /** Start time, HH:mm, Moscow time. */
     @SerialName("time_slot_start") public val timeSlotStart: String = "",
-    /** Local end time, HH:mm. */
+    /** End time, HH:mm, Moscow time. */
     @SerialName("time_slot_end") public val timeSlotEnd: String = "",
     /** Whether this lesson overlaps another user event. */
     public val intersection: Boolean = false,
@@ -76,9 +78,9 @@ public data class SportLesson(
         @SerialName("evaluation_name") public val evaluationName: String? = null,
         /** Time slot identifier. */
         @SerialName("time_slot_id") public val timeSlotId: Long = 0,
-        /** Local start time, HH:mm. */
+        /** Start time, HH:mm, Moscow time. */
         @SerialName("time_slot_start") public val timeSlotStart: String = "",
-        /** Local end time, HH:mm. */
+        /** End time, HH:mm, Moscow time. */
         @SerialName("time_slot_end") public val timeSlotEnd: String = "",
         /** Whether this alternative repeats. */
         public val repeatable: Boolean = false,
