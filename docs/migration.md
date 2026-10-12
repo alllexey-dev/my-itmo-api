@@ -10,15 +10,16 @@ iosSimulatorArm64. Source builds use JDK 17 and Kotlin language/API 2.2.
 
 | 1.x entry point | 2.x entry point under `dev.alllexey.itmoapi` |
 |---|---|
-| `api.myitmo.MyItmo` | `myitmo.MyItmoClient` |
+| `api.myitmo.MyItmo` | `MyItmo` (quick start: `login`, `fromRefreshToken`, `fromStorage`) or `myitmo.MyItmoClient` |
 | `api.myitmo.utils.MyItmoConfiguration` | `myitmo.MyItmoConfiguration`, `itmoid.ItmoIdConfiguration` |
 | `MyItmo.getApi()` / `api.myitmo.MyItmoApi` | Separate area interfaces accessed through client properties below |
 | `api.myitmo.storage.Storage` | `itmoid.TokenStorage`, `itmoid.TokenSet` |
-| `api.myitmo.storage.RuntimeStorage` | Consumer-owned `TokenStorage`; no built-in persistent or runtime token storage |
+| `api.myitmo.storage.RuntimeStorage` | `itmoid.InMemoryTokenStorage` (the `MyItmo` default); `itmoid.FileTokenStorage` on the JVM |
 | `forceRefreshTokens()` | `client.tokens.forceRefresh()` on `itmoid.TokenManager` |
 | Authorization-code exchange | `client.identity.exchange(code, verifier)`, then `client.tokens.replaceTokens(snapshot)` |
 | BARS client / `api.bars.BarsApi` | `bars.BarsClient` exposes suspend endpoint methods directly |
 | BARS configuration/storage/code supplier | `bars.BarsConfiguration`, `BarsStorage`, `RuntimeBarsStorage`, `BarsCodeSupplier` |
+| `Bars.auth(username, password)` | `MyItmo.bars` after `MyItmo.login(username, password)` |
 | `api.bars.utils.BarsAuthHelper` | `bars.auth.BarsLogin` |
 | `api.bars.utils.BarsSessionCode` | `bars.auth.BarsSessionCode`, including nested `Outcome` |
 | `api.myitmo.model` response envelopes | `core.ResultResponse`, `DataResponse`, `SimpleResponse`, `CountWrapper`, `IdValuePair` |
@@ -61,7 +62,8 @@ operations or `ElectionFlow`/`ElectionFlowChain`.
 ## Suspend, envelopes and errors
 
 Replace `Call.execute()`/callbacks with suspend calls in a caller-owned coroutine.
-There is no blocking facade. Public suspend operations declare
+From Java, call any suspend function through the JVM-only `Blocking.call(c -> ...)`,
+passing the lambda's continuation last. Public suspend operations declare
 `@Throws(MyItmoException::class, CancellationException::class)` for interop;
 cancellation remains cancellation and is never converted into authentication.
 MyITMO methods return typed envelopes, not bare payloads. Use `core.requireResult`
@@ -88,7 +90,8 @@ callback URLs, codes, verifier/state, tokens or cookie headers safe to log.
 
 `TokenStorage.read()` returns one atomic `TokenSet?`; `write()` atomically
 replaces all five fields. `null` removes the session. Supply secure persistence
-in the consumer; the README's `MemoryTokens` is a single-owner sample only.
+in the consumer; `InMemoryTokenStorage` and the README's `MemoryTokens` are
+single-owner, and `FileTokenStorage` is one process per file.
 Route login/logout through `TokenManager.replaceTokens`, not parallel storage
 writes. `validAccessToken()` refreshes near expiry; `forceRefresh()` handles
 explicit refresh, including the consumer's missing-QR-pass retry.
@@ -136,9 +139,12 @@ callback with `extractCode`, then call `BarsClient.login`. `isCallback` and
 `isAllowedPage` expose strict HTTPS navigation checks; present `iss` must
 match the configured issuer. BARS uses its observed public-client OIDC flow
 without PKCE, unlike MyITMO's `Pkce` authorization-code exchange.
-Password authentication, `authWithSession`, shared-client SSO and
-`obtainCodeFromSession` are deliberately absent. Do not emulate them by sharing
-a cookie-enabled engine. `BarsLogin.requestCodeWithCookies` replays only the
+`MyItmo.login(username, password)` ports the 1.x MyITMO password form flow
+(same public client and PKCE; the form action must be on the issuer host) and
+keeps the resulting ITMO.ID cookies in that object only, to renew `MyItmo.bars`
+through `requestCodeWithCookies`. Wrong credentials or an extra step such as 2FA
+are `Auth`. `authWithSession`, shared-client SSO and `obtainCodeFromSession`
+remain absent. Do not emulate them by sharing a cookie-enabled engine. `BarsLogin.requestCodeWithCookies` replays only the
 explicit caller Cookie header, makes one request without redirects/body reads,
 and returns all `Set-Cookie` headers to caller-owned cookie storage:
 

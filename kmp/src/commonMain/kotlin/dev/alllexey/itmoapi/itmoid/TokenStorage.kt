@@ -2,6 +2,8 @@ package dev.alllexey.itmoapi.itmoid
 
 import dev.alllexey.itmoapi.core.MyItmoException
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /** Consumer-owned persistent session. Each operation reads or replaces all five values atomically.
  * Implementations use Android Keystore, iOS Keychain or a Backend database; null means no session.
@@ -26,4 +28,18 @@ public fun interface TokenRefreshGuard {
     /** Serializes the read/refresh/write transaction and returns its complete snapshot. */
     @Throws(MyItmoException::class, CancellationException::class)
     public suspend fun withLock(action: suspend () -> TokenSet?): TokenSet?
+}
+
+/** Keeps the session in memory only: it ends with the process. The default of [dev.alllexey.itmoapi.MyItmo]. */
+public class InMemoryTokenStorage : TokenStorage {
+    private val mutex = Mutex()
+    private var tokens: TokenSet? = null
+
+    @Throws(MyItmoException::class, CancellationException::class)
+    override suspend fun read(): TokenSet? = mutex.withLock { tokens }
+
+    @Throws(MyItmoException::class, CancellationException::class)
+    override suspend fun write(tokens: TokenSet?): Unit = mutex.withLock { this.tokens = tokens }
+
+    override fun toString(): String = "InMemoryTokenStorage(redacted)"
 }

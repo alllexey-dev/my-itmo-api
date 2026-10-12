@@ -43,11 +43,12 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.ktor.client.core)
+            // Types of these three appear in the public API (engines, LocalDate, JsonElement).
+            api(libs.ktor.client.core)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
-            implementation(libs.kotlinx.serialization.json)
-            implementation(libs.kotlinx.datetime)
+            api(libs.kotlinx.serialization.json)
+            api(libs.kotlinx.datetime)
             implementation(libs.kotlinx.coroutines.core)
         }
         jvmMain.dependencies {
@@ -70,6 +71,11 @@ kotlin {
             implementation(libs.mockwebserver)
         }
     }
+}
+
+// The Java README sample in jvmTest compiles against the same JVM 11 target as Kotlin.
+tasks.withType<JavaCompile>().configureEach {
+    options.release.set(11)
 }
 
 tasks.withType<KotlinNativeSimulatorTest>().configureEach {
