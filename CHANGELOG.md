@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.1.0 - unreleased
+## 2.1.0 - 2026-10-12
 
 Additive: existing types and the advanced setup are unchanged.
 
@@ -27,10 +27,8 @@ Additive: existing types and the advanced setup are unchanged.
   decision: network, non-2xx status, session or access codes, missing result).
   A default method over `signInLessons`, so existing implementations compile.
 
-## 2.0.1 - development
+### Also since 2.0.0 (2.0.1 was never released)
 
-- Move `kmp/` to `2.0.1-SNAPSHOT` after the 2.0.0 release; the README points
-  at `dev.alllexey:my-itmo-api-kmp:2.0.0` on Maven Central.
 - Add `LICENSE` (MIT, as declared in the POMs) and a contributor section in the
   README; `scripts/verify.sh` runs without build-slot tooling outside this
   machine. Drop internal planning IDs from KDoc and comments.
