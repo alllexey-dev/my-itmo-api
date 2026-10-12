@@ -118,7 +118,7 @@ class FixtureDecodeTest {
             put("sport/$name.json", ResultResponse.serializer(MapSerializer(Long.serializer(), MapSerializer(Long.serializer(), SportSignLimit.serializer()))))
         }
         put("sport/chosen.json", ResultResponse.serializer(ListSerializer(ChosenSportSection.serializer())))
-        for (name in listOf("lessons", "sign-in-error", "sign-out-error")) {
+        for (name in listOf("lessons", "sign-in-error", "sign-in-full", "sign-out-error")) {
             put("sport/$name.json", ResultResponse.serializer(ListSerializer(Long.serializer())))
         }
         for (name in listOf("sport-types", "sport-types-empty")) {
