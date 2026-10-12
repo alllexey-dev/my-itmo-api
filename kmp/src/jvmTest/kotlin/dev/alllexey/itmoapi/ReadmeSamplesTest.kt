@@ -8,6 +8,7 @@ import dev.alllexey.itmoapi.bars.model.Discipline
 import dev.alllexey.itmoapi.bars.model.Term
 import dev.alllexey.itmoapi.core.requireResult
 import dev.alllexey.itmoapi.itmoid.CallbackUrl
+import dev.alllexey.itmoapi.itmoid.FileTokenStorage
 import dev.alllexey.itmoapi.itmoid.TokenSet
 import dev.alllexey.itmoapi.itmoid.TokenStorage
 import dev.alllexey.itmoapi.myitmo.MyItmoClient
@@ -15,6 +16,7 @@ import dev.alllexey.itmoapi.myitmo.MyItmoConfiguration
 import dev.alllexey.itmoapi.myitmo.schedule.Schedule
 import io.ktor.client.engine.HttpClientEngine
 import kotlinx.datetime.LocalDate
+import kotlin.io.path.Path
 import kotlin.time.Clock
 // README imports end
 import java.io.File
@@ -41,6 +43,13 @@ import kotlin.test.assertTrue
 import kotlin.time.Instant
 
 class ReadmeSamplesTest {
+    // README file begin
+    suspend fun openSession(username: String, password: String): MyItmo {
+        val storage = FileTokenStorage(Path("itmo-tokens.json"))
+        return if (storage.read() != null) MyItmo.fromStorage(storage) else MyItmo.login(username, password, storage)
+    }
+    // README file end
+
     // README storage begin
     class MemoryTokens : TokenStorage {
         private var snapshot: TokenSet? = null
@@ -232,12 +241,21 @@ class ReadmeSamplesTest {
     @Test
     fun readmeContainsTheActualCompiledSampleBlocks() {
         val root = repositoryRoot()
-        val source = File(root, "kmp/src/jvmTest/kotlin/dev/alllexey/itmoapi/ReadmeSamplesTest.kt").readText()
         val readme = File(root, "README.md").readText()
-        for (name in listOf("storage", "client", "login", "schedule", "bars", "cookies")) {
-            val sample = source.substringAfter("// README $name begin\n").substringBefore("// README $name end")
-                .trimIndent().trimEnd()
-            assertTrue(readme.contains("```kotlin\n$sample\n```"), "README sample differs: $name")
+        val tests = "kmp/src/jvmTest"
+        val samples = listOf(
+            Triple("kotlin", "$tests/kotlin/dev/alllexey/itmoapi/ReadmeSamplesTest.kt", listOf("file", "storage", "client", "login", "schedule", "bars", "cookies")),
+            Triple("kotlin", "$tests/kotlin/dev/alllexey/itmoapi/readme/QuickStart.kt", listOf("quickstart")),
+            Triple("kotlin", "$tests/kotlin/dev/alllexey/itmoapi/readme/Android.kt", listOf("android")),
+            Triple("java", "$tests/java/dev/alllexey/itmoapi/readme/Main.java", listOf("java")),
+        )
+        for ((language, path, names) in samples) {
+            val source = File(root, path).readText()
+            for (name in names) {
+                val sample = source.substringAfter("// README $name begin\n").substringBefore("// README $name end")
+                    .trimIndent().trimEnd()
+                assertTrue(readme.contains("```$language\n$sample\n```"), "README sample differs: $name")
+            }
         }
     }
 }

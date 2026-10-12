@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.1.0 - unreleased
+
+Additive: existing types and the advanced setup are unchanged.
+
+- Add `MyItmo`, a quick-start facade over `MyItmoClient` that owns its engine:
+  `MyItmo.login(username, password)` (the 1.x ITMO.ID form flow with PKCE; the
+  form action must be on the issuer host, credentials are never stored),
+  `MyItmo.fromRefreshToken(token)` and `MyItmo.fromStorage(storage)`, every
+  MyITMO area as a property, `close()`/`use`.
+- `MyItmo.bars` gets and renews its BARS session from the ITMO.ID cookies of
+  `MyItmo.login`, kept in that object only.
+- Add `InMemoryTokenStorage` (the `MyItmo` default) and, on the JVM,
+  `FileTokenStorage` (atomic, owner-only file).
+- Add `Blocking.call` on the JVM to call suspend functions from Java;
+  `MyItmo` factories are `@JvmStatic` with Java overloads.
+- Publish ktor-client-core, kotlinx-datetime and kotlinx-serialization-json as
+  `api` dependencies: their types are in the public API (engines, `LocalDate`,
+  `JsonElement`), so consumers no longer add them by hand.
+- README: a three-step quick start for Kotlin/JVM, Java and Android, sections on
+  token storage, errors, Moscow time, BARS, advanced setup and a 1.x mapping;
+  the Java and Android samples are compiled by the tests too.
+
 ## 2.0.1 - development
 
 - Move `kmp/` to `2.0.1-SNAPSHOT` after the 2.0.0 release; the README points

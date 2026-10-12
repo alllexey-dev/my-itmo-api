@@ -4,9 +4,10 @@ Every file here is synthetic and hand-made. None is a captured university
 response or account export: names, ISU numbers, identifiers, tokens and codes
 are made-up test values. Never add real data, even redacted.
 
-Layout: `<area>/<case>.json` (and `errors/*.html` for non-JSON bodies). The
-`generateFixtures` Gradle task embeds the whole tree into common test sources,
-so the same fixtures run on JVM and iOS.
+Layout: `<area>/<case>.json` (and `errors/*.html`, `itmoid/*.html` for non-JSON
+bodies such as the ITMO.ID login page). The `generateFixtures` Gradle task
+embeds the whole tree into common test sources, so the same fixtures run on JVM
+and iOS.
 
 ## Adding a fixture
 
