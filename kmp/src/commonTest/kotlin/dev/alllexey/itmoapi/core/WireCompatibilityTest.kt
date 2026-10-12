@@ -3,6 +3,8 @@ package dev.alllexey.itmoapi.core
 import dev.alllexey.itmoapi.testing.fixture
 import dev.alllexey.itmoapi.testing.fixturePaths
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
@@ -112,6 +114,12 @@ class WireCompatibilityTest {
     fun wireInstantRoundTripNormalizesToUtc() {
         val dated = ItmoApiJson.decodeFromString<Dated>("""{"time":"2026-10-03T12:00+03:00"}""")
         assertEquals("""{"time":"2026-10-03T09:00:00Z"}""", ItmoApiJson.encodeToString(dated))
+    }
+
+    @Test
+    fun moscowShowsAnUtcInstantAsMoscowWallClockTime() {
+        assertEquals("Europe/Moscow", MOSCOW.id)
+        assertEquals(LocalDateTime(2026, 10, 3, 12, 0), Instant.parse("2026-10-03T09:00:00Z").toLocalDateTime(MOSCOW))
     }
 
     @Test

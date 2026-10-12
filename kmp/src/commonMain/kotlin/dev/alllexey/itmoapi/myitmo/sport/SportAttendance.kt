@@ -5,7 +5,9 @@ import kotlin.time.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-/** Sports points awarded for a lesson, competition or other activity. */
+/** Sports points awarded for a lesson, competition or other activity.
+ * Instants are absolute; show them in [dev.alllexey.itmoapi.core.MOSCOW], not the device time zone.
+ */
 @Serializable
 public data class SportAttendance(
     /** Observed lesson and competition; this set may expand. */

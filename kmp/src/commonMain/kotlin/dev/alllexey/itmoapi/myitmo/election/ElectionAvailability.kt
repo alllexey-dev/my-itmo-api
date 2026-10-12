@@ -6,6 +6,7 @@ import kotlin.time.Instant
 
 /** Campaign status and enrollment dates; id 1 denotes an open campaign.
  * Non-null defaults are client fallbacks, not evidence of wire optionality.
+ * Instants are absolute; show them in [dev.alllexey.itmoapi.core.MOSCOW], not the device time zone.
  */
 @Serializable
 public data class ElectionAvailability(
@@ -25,9 +26,9 @@ public data class ElectionAvailability(
     /** Enrollment closing instant. */
     @Serializable(with = WireInstantSerializer::class)
     public val dateEnd: Instant = Instant.fromEpochSeconds(0),
-    /** Local enrollment opening time text. */
+    /** Enrollment opening time text, Moscow time. */
     public val timeStart: String = "",
-    /** Local enrollment closing time text. */
+    /** Enrollment closing time text, Moscow time. */
     public val timeEnd: String = "",
     /** Academic year label. */
     public val studyYear: String = "",

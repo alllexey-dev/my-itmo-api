@@ -7,6 +7,7 @@ import kotlin.time.Instant
 
 /** Summary of a request belonging to the current user.
  * Non-null defaults are client fallbacks, not evidence of wire optionality.
+ * Instants are absolute; show them in [dev.alllexey.itmoapi.core.MOSCOW], not the device time zone.
  */
 @Serializable
 public data class RequestSummary(

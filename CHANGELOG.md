@@ -15,6 +15,14 @@
   member map in `docs/migration.md`; `FixtureDecodeTest` decodes every endpoint
   fixture into its 2.x model. Merge the MockEngine test helpers.
 - Add `CONTRIBUTING.md` and a single fixture README; shorten `AGENTS.md`.
+- Behaviour change: HTTP 403 from MyITMO or BARS is now `MyItmoException.Http(403)`,
+  not `Auth`; only 401 means the session has ended (as in 1.x BARS). Consumers
+  that signed the user out on 403 now keep the session.
+- A `TokenManager` whose refresh is rejected re-reads storage and uses a
+  snapshot another manager on the same storage rotated meanwhile, instead of
+  failing with `Auth`. A shared `TokenRefreshGuard` is still required.
+- Add `core.MOSCOW` (Europe/Moscow) and document that instants are shown in it
+  and that HH:mm schedule strings are already Moscow time.
 
 ## 2.0.0 - 2026-10-10
 

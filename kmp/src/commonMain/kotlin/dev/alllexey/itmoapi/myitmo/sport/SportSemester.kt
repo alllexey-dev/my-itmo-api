@@ -5,7 +5,9 @@ import kotlin.time.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-/** Complete sports semester with enrollment control periods. */
+/** Complete sports semester with enrollment control periods.
+ * Instants are absolute; show them in [dev.alllexey.itmoapi.core.MOSCOW], not the device time zone.
+ */
 @Serializable
 public data class SportSemester(
     /** Semester identifier. */

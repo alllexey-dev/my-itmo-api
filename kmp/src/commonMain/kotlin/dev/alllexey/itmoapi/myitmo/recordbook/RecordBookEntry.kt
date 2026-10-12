@@ -5,7 +5,9 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.time.Instant
 
-/** Final record for one discipline in the recordbook. Dates become UTC instants. */
+/** Final record for one discipline in the recordbook. Dates become UTC instants.
+ * Instants are absolute; show them in [dev.alllexey.itmoapi.core.MOSCOW], not the device time zone.
+ */
 @Serializable
 public data class RecordBookEntry(
     /** Discipline name; surrounding whitespace has been observed and is preserved. */

@@ -75,7 +75,7 @@ return `ResultResponse<JsonElement?>`, not the legacy `ChangeResult` type;
 | `Network(cause)` | Engine I/O failure; preserve session and retry according to consumer policy. Cause is retained for classification, not logging. |
 | `Http(status)` | Unsuccessful HTTP status without a recognized API error envelope. Refresh 5xx is always this subtype, never `Auth`, even with an OAuth error body. |
 | `Api(status, errorCode, message)` | Recognized MyITMO error, including error envelopes with HTTP 200/400. Raw `serverMessage` is untrusted and only for explicit domain classification. |
-| `Auth(status)` | Missing/expired local session, recognized OAuth rejection, or unauthenticated request (401/403 without a more specific API error). Consumer decides when to show login. |
+| `Auth(status)` | Missing/expired local session, recognized OAuth rejection, or unauthenticated request (401 without a more specific API error; MyITMO retries once after a refresh). Consumer decides when to show login. 403 is `Http(403)`, as 1.x BARS treated only 401 as unauthorized. |
 | `Decode` | Invalid or incomplete successful payload; preserve storage and report/retry separately from ended authentication. |
 
 Do not clear stored credentials on `Network`, `Http` or `Decode`. ITMO.ID
@@ -97,11 +97,15 @@ Concurrent successful refreshes coalesce within one manager. Clients/processes
 sharing storage must share a `TokenRefreshGuard` whose action runs once under
 an exclusive lock and releases it even on cancellation. Do not run a legacy
 refresher against that storage simultaneously.
+Without a shared guard, a manager whose refresh is rejected re-reads storage
+and uses the snapshot another manager stored meanwhile, if its refresh token
+differs; this is a fallback, not a replacement for the guard.
 
 Token expiry uses `kotlin.time.Instant`, not epoch milliseconds; token lifetimes
 from ITMO.ID are seconds converted with the injected `kotlin.time.Clock`.
 Offset date-times become `kotlin.time.Instant` through `core.WireInstantSerializer`,
-which normalizes serialization to UTC. Calendar dates use
+which normalizes serialization to UTC. Display instants in `core.MOSCOW`
+(Europe/Moscow); timetable HH:mm strings are already Moscow time. Calendar dates use
 `kotlinx.datetime.LocalDate`; timetable HH:mm fields remain strings. BARS
 created/updated epoch values remain `Long` milliseconds. Do not blanket-convert
 every date or timestamp to Instant.

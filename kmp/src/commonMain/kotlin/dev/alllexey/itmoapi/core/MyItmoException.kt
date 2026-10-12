@@ -9,7 +9,9 @@ public sealed class MyItmoException protected constructor(message: String, cause
      */
     public class Network(cause: Throwable) : MyItmoException("Network request failed", cause)
 
-    /** Unsuccessful HTTP status without a recognized API error envelope. */
+    /** Unsuccessful HTTP status without a recognized API error envelope, including 403:
+     * the session is still valid but lacks access, so it is not [Auth].
+     */
     public class Http(public val status: Int) : MyItmoException("HTTP request failed (status=$status)")
 
     /** API error, including error envelopes returned with HTTP 200 or HTTP 400.
@@ -22,7 +24,10 @@ public sealed class MyItmoException protected constructor(message: String, cause
         public val serverMessage: String? = message
     }
 
-    /** The request is unauthenticated (HTTP 401 or 403), without a more specific API error. */
+    /** The session has ended and the user must sign in again: HTTP 401 without a more specific
+     * API error (after one refresh attempt for MyITMO), a missing or expired stored session,
+     * or a recognized ITMO.ID rejection of the refresh token. HTTP 403 is [Http], not this.
+     */
     public class Auth(public val status: Int) : MyItmoException("Authentication required (status=$status)")
 
     /** A successful body cannot be decoded or its required payload is absent.

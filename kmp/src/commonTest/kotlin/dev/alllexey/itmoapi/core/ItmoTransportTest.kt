@@ -152,16 +152,25 @@ class ItmoTransportTest {
 
     @Test
     fun unauthenticatedStatusMapsAuthForEveryEnvelope() = runTest {
-        val decoders = listOf(ResultResponse.serializer(Int.serializer()), DataResponse.serializer(Int.serializer()), SimpleResponse.serializer(Int.serializer()))
-        for (status in listOf(401, 403)) {
-            decoders.forEach { decoder ->
-                val failure = assertFailsWith<MyItmoException.Auth> {
-                    exchange("{}", status) { it.execute(decoder, HttpMethod.Get, "sample") }
-                }
-                assertEquals(status, failure.status)
+        decoders.forEach { decoder ->
+            val failure = assertFailsWith<MyItmoException.Auth> {
+                exchange("{}", 401) { it.execute(decoder, HttpMethod.Get, "sample") }
             }
+            assertEquals(401, failure.status)
         }
     }
+
+    @Test
+    fun forbiddenIsHttpNotAuthForEveryEnvelope() = runTest {
+        decoders.forEach { decoder ->
+            val failure = assertFailsWith<MyItmoException.Http> {
+                exchange("{}", 403) { it.execute(decoder, HttpMethod.Get, "sample") }
+            }
+            assertEquals(403, failure.status)
+        }
+    }
+
+    private val decoders = listOf(ResultResponse.serializer(Int.serializer()), DataResponse.serializer(Int.serializer()), SimpleResponse.serializer(Int.serializer()))
 
     @Test
     fun specificApiErrorTakesPrecedenceOverAuthenticationStatus() = runTest {
