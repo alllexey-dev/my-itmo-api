@@ -21,6 +21,11 @@ Additive: existing types and the advanced setup are unchanged.
 - README: a three-step quick start for Kotlin/JVM, Java and Android, sections on
   token storage, errors, Moscow time, BARS, advanced setup and a 1.x mapping;
   the Java and Android samples are compiled by the tests too.
+- Add `SportApi.signInLesson(lessonId)` returning `SportSignResult`: `Booked`,
+  `Full` (the legacy "no free places" refusal with its context), `Rejected`
+  (another MyITMO refusal on HTTP 2xx, such as code 137) or `RetryLater` (no
+  decision: network, non-2xx status, session or access codes, missing result).
+  A default method over `signInLessons`, so existing implementations compile.
 
 ## 2.0.1 - development
 

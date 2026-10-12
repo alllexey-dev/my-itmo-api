@@ -4,6 +4,7 @@ import dev.alllexey.itmoapi.core.ItmoApiJson
 import dev.alllexey.itmoapi.core.ItmoTransport
 import dev.alllexey.itmoapi.core.MyItmoException
 import dev.alllexey.itmoapi.core.ResultResponse
+import dev.alllexey.itmoapi.core.requireResult
 import dev.alllexey.itmoapi.core.toQueryValue
 import io.ktor.client.request.parameter
 import io.ktor.client.request.setBody
@@ -57,6 +58,18 @@ public interface SportApi : SportRemainingApi {
     /** POST /api/sport/sign/schedule/lessons; Enroll in lesson IDs; returns successful enrollment IDs. Code 137 carries localized reasons in error_message (daily/weekly limit or overlapping enrollment). */
     @Throws(MyItmoException::class, CancellationException::class)
     public suspend fun signInLessons(lessonIds: List<Long>): ResultResponse<List<Long>>
+
+    /**
+     * POST /api/sport/sign/schedule/lessons with one lesson ID through [signInLessons], classified: booked, full,
+     * refused by another rule, or no decision. Every [MyItmoException] becomes a result; see [SportSignResult].
+     */
+    @Throws(CancellationException::class)
+    public suspend fun signInLesson(lessonId: Long): SportSignResult = try {
+        signInLessons(listOf(lessonId)).requireResult()
+        SportSignResult.Booked
+    } catch (failure: MyItmoException) {
+        sportSignResultOf(failure)
+    }
 
     /** DELETE /api/sport/sign/schedule/lessons; Withdraw from lesson IDs using DELETE with a JSON body; returns withdrawn IDs. Code 130 carries reasons in error_message, including not enrolled. */
     @Throws(MyItmoException::class, CancellationException::class)
