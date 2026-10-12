@@ -200,11 +200,15 @@ class TokenManagerTest {
         var refreshes = 0
         val winnerDone = CompletableDeferred<Unit>()
         // The identity provider rotates refresh tokens: the old one is rejected once used.
+        // MockEngine may serve both requests on different threads: the check-and-rotate must be atomic.
+        val idp = Mutex()
         val engine = MockEngine { request ->
-            refreshes++
             val form = parseQueryString((request.body as OutgoingContent.ByteArrayContent).bytes().decodeToString())
-            if (form["refresh_token"] == validRefreshToken) {
-                validRefreshToken = rotation.refreshToken
+            val accepted = idp.withLock {
+                refreshes++
+                (form["refresh_token"] == validRefreshToken).also { if (it) validRefreshToken = rotation.refreshToken }
+            }
+            if (accepted) {
                 delay(10)
                 respond(tokenBody(rotation), headers = headersOf(HttpHeaders.ContentType, "application/json"))
             } else {
