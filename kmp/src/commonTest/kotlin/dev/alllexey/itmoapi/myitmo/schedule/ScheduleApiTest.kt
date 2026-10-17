@@ -60,6 +60,25 @@ class ScheduleApiTest {
     }
 
     @Test
+    fun teacherScheduleUsesTheIsuPathAndKeepsParallelGroupsApart() = runTest {
+        val days = mockExchange("/api/schedule/teacher/200001", fixture("schedule/teacher.json"), dates) {
+            ScheduleApiImpl(it).getTeacherSchedule(200001, LocalDate(2026, 1, 5), LocalDate(2026, 1, 11)).requireResult()
+        }
+        assertEquals(listOf(LocalDate(2026, 10, 19), LocalDate(2026, 10, 20)), days.map { it.date })
+        val (onSite, online) = days.first().lessons
+        assertEquals(listOf("T3100", "T3101"), listOf(onSite.group, online.group))
+        assertEquals(onSite.timeStart, online.timeStart)
+        assertEquals(200001L, onSite.teacherId)
+        assertEquals("2202", onSite.room)
+        assertNull(online.room)
+        assertNull(online.building)
+        assertNull(online.bldId)
+        assertEquals(9, online.flowTypeId)
+        assertEquals("Синтетическая заметка", online.note)
+        assertTrue(days.last().lessons.isEmpty())
+    }
+
+    @Test
     fun timeSlotsDecodeFlattenedLegacyFieldsAndOrder() = runTest {
         val slots = mockExchange("/api/schedule/meta/time_slots", fixture("schedule/time-slots.json")) {
             ScheduleApiImpl(it).getTimeSlots().requireResult()

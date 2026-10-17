@@ -1,7 +1,7 @@
 # Migrating from MyItmoApi 1.x to 2.x
 
 2.x is a separate Kotlin Multiplatform artifact, not a binary-compatible update
-of the Java artifact. `dev.alllexey:my-itmo-api-kmp:2.1.1` is the current release on
+of the Java artifact. `dev.alllexey:my-itmo-api-kmp:2.2.0` is the current release on
 Maven Central. 1.x stays in the root as `dev.alllexey:my-itmo-api`.
 Targets are JVM (JVM 11 bytecode, also Android minSdk 26), iosArm64 and
 iosSimulatorArm64. Source builds use JDK 17 and Kotlin language/API 2.2.
@@ -40,7 +40,7 @@ Every listed interface is public under `dev.alllexey.itmoapi.myitmo.<area>`.
 
 | Client property / interface | Methods |
 |---|---|
-| `schedule` / `ScheduleApi` | `getPersonalSchedule`, `getTimeSlots` |
+| `schedule` / `ScheduleApi` | `getPersonalSchedule`, `getTeacherSchedule`, `getTimeSlots` |
 | `recordBook` / `RecordBookApi` | `getSpecializations`, `getRecordBook`, `getControlEntries` |
 | `personalities` / `PersonalitiesApi` | `getPersonality`, `searchPersonalities` |
 | `studyplan` / `StudyPlanApi` | `getStudyPlanPrograms`, `getStudyPlan` |

@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.2.0 - 2026-10-17
+
+- Add `ScheduleApi.getTeacherSchedule(isu, dateStart, dateEnd)`:
+  `GET /api/schedule/teacher/{isu}`, the lessons a teacher gives in the same
+  `Schedule` day model as the personal schedule. An ISU that teaches nothing
+  in the range answers with days without lessons; lessons at the same time for
+  several groups come as separate lessons.
+- Document the observed `work_type_id` 9 (graded credit) and 131 (meeting, a
+  room reservation) and `flow_type_id` 9 (online lessons in teacher schedules,
+  meaning unknown).
+
 ## 2.1.1 - 2026-10-17
 
 - Add `normalizedSportLessonEnd` and `SportLesson.normalizedDateEnd` /

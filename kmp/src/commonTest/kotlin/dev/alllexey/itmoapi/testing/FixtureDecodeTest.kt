@@ -100,7 +100,7 @@ class FixtureDecodeTest {
         for (name in listOf("my", "empty", "error")) {
             put("requests/$name.json", ResultResponse.serializer(ListSerializer(RequestSummary.serializer())))
         }
-        for (name in listOf("personal", "empty", "error")) {
+        for (name in listOf("personal", "teacher", "empty", "error")) {
             put("schedule/$name.json", DataResponse.serializer(ListSerializer(Schedule.serializer())))
         }
         put("schedule/time-slots.json", DataResponse.serializer(ListSerializer(ExtendedTimeSlot.serializer())))

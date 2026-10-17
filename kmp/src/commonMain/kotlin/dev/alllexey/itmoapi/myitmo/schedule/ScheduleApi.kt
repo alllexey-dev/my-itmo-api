@@ -10,13 +10,21 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.builtins.ListSerializer
 
-/** Personal academic schedule; both endpoints use DataResponse rather than ResultResponse. */
+/** Academic schedules; every endpoint uses DataResponse rather than ResultResponse. */
 public interface ScheduleApi {
     /** GET /api/schedule/schedule/personal for an inclusive date range.
      * date_start and date_end are explicitly formatted as ISO yyyy-MM-dd calendar dates.
      */
     @Throws(MyItmoException::class, CancellationException::class)
     public suspend fun getPersonalSchedule(dateStart: LocalDate, dateEnd: LocalDate): DataResponse<List<Schedule>>
+
+    /** GET /api/schedule/teacher/{isu} for an inclusive date range: the lessons a teacher gives, in the same day model
+     * as the personal schedule (one entry per calendar day, empty days included). Any signed-in user may read it.
+     * An ISU that teaches nothing in the range, a student's or an unknown one, answers with days without lessons.
+     * Lessons at the same time for several groups come as separate lessons with their own pair_id and group.
+     */
+    @Throws(MyItmoException::class, CancellationException::class)
+    public suspend fun getTeacherSchedule(isu: Long, dateStart: LocalDate, dateEnd: LocalDate): DataResponse<List<Schedule>>
 
     /** GET /api/schedule/meta/time_slots; returns standard lesson intervals with display order. */
     @Throws(MyItmoException::class, CancellationException::class)
@@ -29,6 +37,16 @@ internal class ScheduleApiImpl(private val transport: ItmoTransport) : ScheduleA
             DataResponse.serializer(ListSerializer(Schedule.serializer())),
             HttpMethod.Get,
             "api/schedule/schedule/personal",
+        ) {
+            parameter("date_start", dateStart.toQueryValue())
+            parameter("date_end", dateEnd.toQueryValue())
+        }
+
+    override suspend fun getTeacherSchedule(isu: Long, dateStart: LocalDate, dateEnd: LocalDate): DataResponse<List<Schedule>> =
+        transport.execute(
+            DataResponse.serializer(ListSerializer(Schedule.serializer())),
+            HttpMethod.Get,
+            "api/schedule/teacher/$isu",
         ) {
             parameter("date_start", dateStart.toQueryValue())
             parameter("date_end", dateEnd.toQueryValue())

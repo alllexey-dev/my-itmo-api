@@ -13,7 +13,7 @@
 Gradle (Kotlin, Android):
 
 ```kotlin
-implementation("dev.alllexey:my-itmo-api-kmp:2.1.1")
+implementation("dev.alllexey:my-itmo-api-kmp:2.2.0")
 ```
 
 Maven (Java):
@@ -22,7 +22,7 @@ Maven (Java):
 <dependency>
     <groupId>dev.alllexey</groupId>
     <artifactId>my-itmo-api-kmp-jvm</artifactId>
-    <version>2.1.1</version>
+    <version>2.2.0</version>
 </dependency>
 ```
 
