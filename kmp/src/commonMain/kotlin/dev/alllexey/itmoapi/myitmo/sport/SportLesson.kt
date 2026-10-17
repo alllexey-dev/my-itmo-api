@@ -15,7 +15,7 @@ public data class SportLesson(
     /** Start offset date-time, exposed as an instant. */
     @Serializable(with = WireInstantSerializer::class)
     public val date: Instant = Instant.fromEpochMilliseconds(0),
-    /** End offset date-time, exposed as an instant. */
+    /** End offset date-time, exposed as an instant, as sent: it may be on the wrong date; use [normalizedDateEnd]. */
     @Serializable(with = WireInstantSerializer::class)
     @SerialName("date_end") public val dateEnd: Instant = Instant.fromEpochMilliseconds(0),
     /** Section identifier. */

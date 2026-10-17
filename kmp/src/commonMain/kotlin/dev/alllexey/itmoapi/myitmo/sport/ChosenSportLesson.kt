@@ -15,7 +15,7 @@ public data class ChosenSportLesson(
     /** Start offset date-time; absent for weekday-only slots. */
     @Serializable(with = WireInstantSerializer::class)
     @SerialName("date_start") public val dateStart: Instant? = null,
-    /** End offset date-time; absent for weekday-only slots. */
+    /** End offset date-time as sent; absent for weekday-only slots. It may be on the wrong date; use [normalizedDateEnd]. */
     @Serializable(with = WireInstantSerializer::class)
     @SerialName("date_end") public val dateEnd: Instant? = null,
     /** Time slot identifier. */

@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.1.1 - unreleased
+
+- Add `normalizedSportLessonEnd` and `SportLesson.normalizedDateEnd` /
+  `ChosenSportLesson.normalizedDateEnd`: My ITMO sends some lessons with a
+  `date_end` on the wrong date (observed: a weekly series ending two days
+  before it starts). An end not after the start or on another Moscow date is
+  rebuilt on the start's Moscow date from the time slot end (else the raw time
+  of day) and must be 15 minutes to 6 hours after the start, otherwise null.
+  `dateEnd` keeps the raw value.
+
 ## 2.1.0 - 2026-10-12
 
 Additive: existing types and the advanced setup are unchanged.

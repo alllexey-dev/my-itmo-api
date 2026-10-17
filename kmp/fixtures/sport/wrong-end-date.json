@@ -1,0 +1,74 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": [
+    {
+      "date": "2026-10-15",
+      "lessons": [
+        {
+          "id": 500011,
+          "date": "2026-10-15T19:00:00+03:00",
+          "date_end": "2026-10-13T21:00:00+03:00",
+          "section_id": 33,
+          "section_name": "Тестовая секция",
+          "section_level": 1,
+          "lesson_group_id": 43,
+          "lesson_level": 1,
+          "type_id": 2,
+          "building_id": 13,
+          "room_id": 1001,
+          "room_name": "Спортзал 1",
+          "limit": 20,
+          "available": 5,
+          "comment": null,
+          "time_slot_id": 7,
+          "time_slot_start": "19:00",
+          "time_slot_end": "21:00",
+          "intersection": false,
+          "can_sign_in": {
+            "can_sign_in": true,
+            "unavailable_reasons": []
+          },
+          "other_lessons": [],
+          "signed": false,
+          "teacher_isu": 200003,
+          "teacher_fio": "Тренер Тестовый"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-22",
+      "lessons": [
+        {
+          "id": 500012,
+          "date": "2026-10-22T19:00:00+03:00",
+          "date_end": "2026-10-20T21:00:00+03:00",
+          "section_id": 33,
+          "section_name": "Тестовая секция",
+          "section_level": 1,
+          "lesson_group_id": 43,
+          "lesson_level": 1,
+          "type_id": 2,
+          "building_id": 13,
+          "room_id": 1001,
+          "room_name": "Спортзал 1",
+          "limit": 20,
+          "available": 5,
+          "comment": null,
+          "time_slot_id": 7,
+          "time_slot_start": "19:00",
+          "time_slot_end": "21:00",
+          "intersection": false,
+          "can_sign_in": {
+            "can_sign_in": true,
+            "unavailable_reasons": []
+          },
+          "other_lessons": [],
+          "signed": false,
+          "teacher_isu": 200003,
+          "teacher_fio": "Тренер Тестовый"
+        }
+      ]
+    }
+  ]
+}

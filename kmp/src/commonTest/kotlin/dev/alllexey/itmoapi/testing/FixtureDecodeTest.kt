@@ -107,7 +107,7 @@ class FixtureDecodeTest {
 
         put("sport/time-slots.json", ResultResponse.serializer(ListSerializer(TimeSlot.serializer())))
         put("sport/filters.json", ResultResponse.serializer(SportFilters.serializer()))
-        for (name in listOf("schedule", "external-venue", "empty", "calendar", "calendar-empty")) {
+        for (name in listOf("schedule", "external-venue", "wrong-end-date", "empty", "calendar", "calendar-empty")) {
             put("sport/$name.json", ResultResponse.serializer(ListSerializer(SportSchedule.serializer())))
         }
         for (name in listOf("score", "score-empty")) put("sport/$name.json", ResultResponse.serializer(SportScore.serializer()))
