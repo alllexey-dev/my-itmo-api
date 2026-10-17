@@ -1,0 +1,75 @@
+{
+  "code": 0,
+  "message": null,
+  "data": [
+    {
+      "day_number": 1,
+      "week_number": 9,
+      "date": "2026-10-19",
+      "note": null,
+      "type": null,
+      "intersections": [[9100001, 9100002]],
+      "lessons": [
+        {
+          "pair_id": 9100001,
+          "subject": "Тестовая дисциплина",
+          "subject_id": 70001,
+          "note": null,
+          "type": "Лабораторные занятия",
+          "time_start": "11:40",
+          "time_end": "13:10",
+          "teacher_id": 200001,
+          "teacher_name": "Преподаватель Тестовый",
+          "room": "2202",
+          "building": "Кронверкский пр., д.49, лит.А",
+          "format": "Очно",
+          "work_type": "Лабораторные занятия",
+          "work_type_id": 2,
+          "group": "T3100",
+          "flow_type_id": 2,
+          "flow_id": 80001,
+          "zoom_url": null,
+          "zoom_password": null,
+          "zoom_info": null,
+          "bld_id": 13,
+          "format_id": 1,
+          "main_bld_id": 13
+        },
+        {
+          "pair_id": 9100002,
+          "subject": "Тестовая дисциплина",
+          "subject_id": 70001,
+          "note": "Синтетическая заметка",
+          "type": "Лабораторные занятия",
+          "time_start": "11:40",
+          "time_end": "13:10",
+          "teacher_id": 200001,
+          "teacher_name": "Преподаватель Тестовый",
+          "room": null,
+          "building": null,
+          "format": "Дистанционно",
+          "work_type": "Лабораторные занятия",
+          "work_type_id": 2,
+          "group": "T3101",
+          "flow_type_id": 9,
+          "flow_id": 80002,
+          "zoom_url": null,
+          "zoom_password": null,
+          "zoom_info": null,
+          "bld_id": null,
+          "format_id": 3,
+          "main_bld_id": null
+        }
+      ]
+    },
+    {
+      "day_number": 2,
+      "week_number": 9,
+      "date": "2026-10-20",
+      "note": null,
+      "type": null,
+      "intersections": [],
+      "lessons": []
+    }
+  ]
+}

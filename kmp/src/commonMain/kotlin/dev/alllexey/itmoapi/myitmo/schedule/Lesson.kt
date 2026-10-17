@@ -33,11 +33,13 @@ public data class Lesson(
     public val format: String = "",
     /** Work label, e.g. lecture, practice or laboratory. */
     @SerialName("work_type") public val workType: String = "",
-    /** Observed IDs: 1 lecture, 2 laboratory, 3 practice, 5 exam, 6 credit, 10 consultation, 11 sport. */
+    /** Observed IDs: 1 lecture, 2 laboratory, 3 practice, 5 exam, 6 credit, 9 graded credit, 10 consultation, 11 sport,
+     * 131 meeting (a room reservation). */
     @SerialName("work_type_id") public val workTypeId: Int = 0,
     /** Academic group label. */
     public val group: String = "",
-    /** Observed flow types: 2 academic lessons, 3 sport, 5 room reservations. */
+    /** Observed flow types: 2 academic lessons, 3 sport, 5 room reservations; 9 seen on online lessons in teacher
+     * schedules, meaning unknown. */
     @SerialName("flow_type_id") public val flowTypeId: Int = 0,
     /** Raw flow identifier. */
     @SerialName("flow_id") public val flowId: Int = 0,
