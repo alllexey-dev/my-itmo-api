@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.1.1 - unreleased
+## 2.1.1 - 2026-10-17
 
 - Add `normalizedSportLessonEnd` and `SportLesson.normalizedDateEnd` /
   `ChosenSportLesson.normalizedDateEnd`: My ITMO sends some lessons with a
