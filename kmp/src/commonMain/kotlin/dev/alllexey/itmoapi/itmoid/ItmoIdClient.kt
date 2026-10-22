@@ -19,6 +19,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlin.time.Clock
@@ -93,11 +94,46 @@ public class ItmoIdClient(
         })
     }
 
+    /** Ends exactly the ITMO.ID session of [refreshToken] (OIDC logout, observed 204): its refresh tokens and
+     * SSO cookies stop working, other sessions of the account live. Needs no cookie, so every holder of a
+     * refresh token can end its own session. OAuth errors (such as an already ended session) are Auth.
+     */
+    @Throws(MyItmoException::class, CancellationException::class)
+    public suspend fun logout(refreshToken: String): Unit {
+        if (refreshToken.isBlank()) throw MyItmoException.Decode()
+        postForm(configuration.logoutEndpoint, Parameters.build {
+            append("client_id", configuration.clientId)
+            append("refresh_token", refreshToken)
+        })
+    }
+
     private suspend fun requestTokens(parameters: Parameters): TokenSet {
+        val tree = postForm(configuration.tokenEndpoint, parameters)
+        val wire = try {
+            if (tree == null) throw MyItmoException.Decode()
+            ItmoApiJson.decodeFromJsonElement(TokenWire.serializer(), tree)
+        } catch (_: SerializationException) {
+            throw MyItmoException.Decode()
+        }
+        if (wire.accessToken.isBlank() || wire.refreshToken.isBlank() || wire.idToken.isBlank() || wire.expiresIn < 0 || wire.refreshExpiresIn < 0) {
+            throw MyItmoException.Decode()
+        }
+        val accessLifetime = wire.expiresIn.seconds
+        val refreshLifetime = wire.refreshExpiresIn.seconds
+        if (!accessLifetime.isFinite() || !refreshLifetime.isFinite()) throw MyItmoException.Decode()
+        val issuedAt = clock.now()
+        val accessExpiresAt = issuedAt + accessLifetime
+        val refreshExpiresAt = issuedAt + refreshLifetime
+        if (accessExpiresAt - issuedAt != accessLifetime || refreshExpiresAt - issuedAt != refreshLifetime) throw MyItmoException.Decode()
+        return TokenSet(wire.accessToken, accessExpiresAt, wire.refreshToken, refreshExpiresAt, wire.idToken)
+    }
+
+    /** One form POST without redirects; null tree for an empty or non-JSON 2xx body. */
+    private suspend fun postForm(endpoint: String, parameters: Parameters): JsonElement? {
         val status: Int
         val body: String
         try {
-            val response = transport.value.client.post(configuration.tokenEndpoint) { setBody(FormDataContent(parameters)) }
+            val response = transport.value.client.post(endpoint) { setBody(FormDataContent(parameters)) }
             status = response.status.value
             body = response.bodyAsText()
         } catch (failure: CancellationException) {
@@ -116,23 +152,7 @@ public class ItmoIdClient(
         val error = ((tree as? JsonObject)?.get("error") as? JsonPrimitive)?.takeIf { it.isString }?.content
         if (!error.isNullOrBlank()) throw MyItmoException.Auth(status)
         if (status !in 200..299) throw MyItmoException.Http(status)
-        val wire = try {
-            if (tree == null) throw MyItmoException.Decode()
-            ItmoApiJson.decodeFromJsonElement(TokenWire.serializer(), tree)
-        } catch (_: SerializationException) {
-            throw MyItmoException.Decode()
-        }
-        if (wire.accessToken.isBlank() || wire.refreshToken.isBlank() || wire.idToken.isBlank() || wire.expiresIn < 0 || wire.refreshExpiresIn < 0) {
-            throw MyItmoException.Decode()
-        }
-        val accessLifetime = wire.expiresIn.seconds
-        val refreshLifetime = wire.refreshExpiresIn.seconds
-        if (!accessLifetime.isFinite() || !refreshLifetime.isFinite()) throw MyItmoException.Decode()
-        val issuedAt = clock.now()
-        val accessExpiresAt = issuedAt + accessLifetime
-        val refreshExpiresAt = issuedAt + refreshLifetime
-        if (accessExpiresAt - issuedAt != accessLifetime || refreshExpiresAt - issuedAt != refreshLifetime) throw MyItmoException.Decode()
-        return TokenSet(wire.accessToken, accessExpiresAt, wire.refreshToken, refreshExpiresAt, wire.idToken)
+        return tree
     }
 
     /** Releases an initialized client, without initializing an unused client or closing the injected engine. */

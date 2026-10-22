@@ -1,5 +1,29 @@
 # Changelog
 
+## 2.3.0 - 2026-10-22
+
+Additive: ITMO.ID sessions, as id.itmo.ru `/activity` shows and ends them.
+
+- Add `ItmoIdClient.logout(refreshToken)`: the OIDC logout
+  (`POST <issuer>/protocol/openid-connect/logout`, observed 204). It ends exactly
+  the session of that refresh token; other sessions live. OAuth errors are
+  `Auth`, server and network failures stay `Http`/`Network`.
+  `ItmoIdConfiguration.logoutEndpoint` is its address.
+- Add `TokenSet.sessionId`: the `sid` claim of the ID token (null without one),
+  the id `ItmoIdSessions` uses. The signature is not checked.
+- Add `ItmoIdSessions(engine, clock)` over the id.itmo.ru front's public client
+  `profile`: `profileToken(cookieHeader)` gets its access token silently from a
+  live SSO cookie (PKCE, no redirects followed, code checked against state and
+  redirect; null for a dead cookie), `list(bearer)` reads
+  `GET /api/profile/sessions` into `ItmoIdSession` (`sid`, `started`,
+  `lastAccess`, `expires`, `os`, `browser`, `ipAddress`, `mobile`), and
+  `end(bearer, sid)` sends `DELETE /api/account/sessions/{sid}` (204 and 404
+  are success). A MyITMO bearer gets 401 there, which is `Auth`.
+- Add `ItmoSessionLabel`: `browserUserAgent(platform)` (desktop Chrome 155 for
+  Linux, macOS or Windows) and `botUserAgent(client, name, version, platform)`
+  (`ITMO Widgets <client> <name> bot/<version> (<os>)`, which ITMO.ID shows as
+  is), since the sign-in User-Agent fixes a session's label for its whole life.
+
 ## 2.2.0 - 2026-10-17
 
 - Add `ScheduleApi.getTeacherSchedule(isu, dateStart, dateEnd)`:

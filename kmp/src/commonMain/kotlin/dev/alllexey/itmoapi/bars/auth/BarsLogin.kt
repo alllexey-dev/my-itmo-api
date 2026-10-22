@@ -8,6 +8,7 @@ import dev.alllexey.itmoapi.core.noCookieClient
 import dev.alllexey.itmoapi.core.readSetCookies
 import dev.alllexey.itmoapi.itmoid.CallbackUrl
 import dev.alllexey.itmoapi.itmoid.Pkce
+import dev.alllexey.itmoapi.itmoid.resolveLocation
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.request.header
 import io.ktor.client.request.prepareGet
@@ -72,7 +73,7 @@ public class BarsLogin(
                     if (status in 300..399) {
                         val location = response.headers[HttpHeaders.Location]
                             ?: return@execute BarsSessionCode(Outcome.HTTP_ERROR, null, status, cookies)
-                        val target = resolve(requestUrl, location)
+                        val target = resolveLocation(requestUrl, location)
                         if (target != null && isCallback(target)) {
                             val code = extractCode(target, state)
                             return@execute BarsSessionCode(if (code == null) Outcome.REJECTED else Outcome.CODE, code, status, cookies)
@@ -98,21 +99,6 @@ public class BarsLogin(
                 cause = cause.cause
             }
             throw MyItmoException.Decode()
-        }
-    }
-
-    private fun resolve(base: String, location: String): String? {
-        // Validate absolute redirects before Ktor can normalize away malicious syntax.
-        if (location.any { it.code !in 33..126 || it in "\\\"<>^`{|}" }) return null
-        if (Regex("^[A-Za-z][A-Za-z0-9+.-]*:").containsMatchIn(location)) return location
-        if (location.startsWith("//")) return "https:$location"
-        val authority = base.substring(0, base.indexOf('/', 8).let { if (it < 0) base.length else it })
-        val path = base.substring(authority.length).substringBefore('?')
-        return when {
-            location.isEmpty() -> base
-            location.startsWith('/') -> authority + location
-            location.startsWith('?') || location.startsWith('#') -> authority + path + location
-            else -> authority + path.substringBeforeLast('/') + "/" + location
         }
     }
 

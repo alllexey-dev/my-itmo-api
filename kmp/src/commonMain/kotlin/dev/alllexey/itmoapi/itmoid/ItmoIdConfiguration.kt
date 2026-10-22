@@ -19,4 +19,7 @@ public class ItmoIdConfiguration(
 
     /** Code exchange and refresh endpoint in the configured realm. */
     public val tokenEndpoint: String = issuer.trimEnd('/') + "/protocol/openid-connect/token"
+
+    /** OIDC logout endpoint; a refresh token posted here ends its session. */
+    public val logoutEndpoint: String = issuer.trimEnd('/') + "/protocol/openid-connect/logout"
 }

@@ -90,3 +90,19 @@ internal class StrictHttpsUrl(val host: String, val path: String, val query: Map
         private const val QUERY_KEY = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"
     }
 }
+
+/** Resolves a redirect Location against the request URL; null for syntax a strict check must not normalize. */
+internal fun resolveLocation(base: String, location: String): String? {
+    // Validate absolute redirects before Ktor can normalize away malicious syntax.
+    if (location.any { it.code !in 33..126 || it in "\\\"<>^`{|}" }) return null
+    if (Regex("^[A-Za-z][A-Za-z0-9+.-]*:").containsMatchIn(location)) return location
+    if (location.startsWith("//")) return "https:$location"
+    val authority = base.substring(0, base.indexOf('/', 8).let { if (it < 0) base.length else it })
+    val path = base.substring(authority.length).substringBefore('?')
+    return when {
+        location.isEmpty() -> base
+        location.startsWith('/') -> authority + location
+        location.startsWith('?') || location.startsWith('#') -> authority + path + location
+        else -> authority + path.substringBeforeLast('/') + "/" + location
+    }
+}
