@@ -207,6 +207,14 @@ class ItmoIdSessionsTest {
                 assertTrue(sid !in failure.toString(), "Diagnostics redacted")
             } finally { client.close(); engine.close() }
         }
+        val base64url = "pt6fMi91_abc-DEF0123456Q"
+        val (sending, sendingEngine) = sessions { request ->
+            assertEquals("https://id.itmo.ru/api/account/sessions/$base64url", request.url.toString())
+            respond("", HttpStatusCode.NoContent)
+        }
+        try {
+            sending.end(bearer, base64url)
+        } finally { sending.close(); sendingEngine.close() }
         val (client, engine) = sessions { error("Invalid input must not issue a request") }
         try {
             for (bad in listOf("", "../profile", "a/b", "x?y", "a".repeat(65))) {

@@ -89,12 +89,13 @@ public class ItmoIdSessions(engine: HttpClientEngine, clock: Clock) {
 
     /** `DELETE https://id.itmo.ru/api/account/sessions/{sid}` with `Accept: application/json` (without it Keycloak's
      * HTML console answers 405). Ends that session: its refresh tokens and SSO cookies die, other sessions live;
-     * a session may end itself. 204 and 404 (already gone) are success; 401 is Auth.
+     * a session may end itself. [sid] is a UUID or a base64url id (both are observed). 204 and 404 (already gone) are
+     * success; 401 is Auth.
      */
     @Throws(MyItmoException::class, CancellationException::class)
     public suspend fun end(bearer: String, sid: String): Unit {
         require(bearer.isNotBlank()) { "Bearer token is required" }
-        require(sid.isNotEmpty() && sid.length <= 64 && sid.all { it.isLetterOrDigit() && it.code < 128 || it == '-' }) { "Invalid session id" }
+        require(sid.isNotEmpty() && sid.length <= 64 && sid.all { it.isLetterOrDigit() && it.code < 128 || it == '-' || it == '_' }) { "Invalid session id" }
         send(HttpMethod.Delete, "$ACCOUNT_SESSIONS/$sid", bearer = bearer) { response ->
             if (response.status.value != 404) requireSuccess(response.status.value)
         }
