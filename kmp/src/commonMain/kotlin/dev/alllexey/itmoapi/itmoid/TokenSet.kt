@@ -1,5 +1,9 @@
 package dev.alllexey.itmoapi.itmoid
 
+import dev.alllexey.itmoapi.core.ItmoApiJson
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlin.io.encoding.Base64
 import kotlin.time.Instant
 
 /** Atomic token snapshot with the same five values as 1.x Storage.
@@ -21,6 +25,22 @@ public class TokenSet(
     init {
         require(accessToken.isNotBlank() && refreshToken.isNotBlank() && idToken.isNotBlank()) { "Incomplete token set" }
     }
+
+    /** ITMO.ID session id: the `sid` claim of [idToken], the `id` of [ItmoIdSession]; null when the
+     * ID token is not a JWT or has no `sid`. The signature is not checked: use it to tell sessions apart, not as proof.
+     * Never log it.
+     */
+    public val sessionId: String?
+        get() {
+            val part = idToken.split('.').getOrNull(1) ?: return null
+            return try {
+                val payload = Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT_OPTIONAL).decode(part).decodeToString()
+                val sid = (ItmoApiJson.parseToJsonElement(payload) as? JsonObject)?.get("sid") as? JsonPrimitive
+                sid?.takeIf { it.isString }?.content?.takeIf { it.isNotBlank() }
+            } catch (_: IllegalArgumentException) {
+                null // Base64 and JSON failures, including SerializationException
+            }
+        }
 
     /** Redacted diagnostics disclose no token values. The observed wire session_state is intentionally
      * not retained: the set mirrors the five-field 1.x Storage snapshot, not every TokenResponse member.

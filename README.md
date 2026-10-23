@@ -13,7 +13,7 @@
 Gradle (Kotlin, Android):
 
 ```kotlin
-implementation("dev.alllexey:my-itmo-api-kmp:2.2.0")
+implementation("dev.alllexey:my-itmo-api-kmp:2.3.0")
 ```
 
 Maven (Java):
@@ -22,7 +22,7 @@ Maven (Java):
 <dependency>
     <groupId>dev.alllexey</groupId>
     <artifactId>my-itmo-api-kmp-jvm</artifactId>
-    <version>2.2.0</version>
+    <version>2.3.0</version>
 </dependency>
 ```
 
@@ -301,6 +301,24 @@ suspend fun replayBarsLogin(
 }
 ```
 
+### Сессии ITMO.ID
+
+Каждый вход по паролю - отдельная сессия ITMO.ID на 90 дней, она видна на
+`https://id.itmo.ru/activity`. `ItmoIdClient.logout(refreshToken)` завершает
+ровно сессию этого токена, остальные живут. `TokenSet.sessionId` - её `sid`.
+
+Список и завершение любых сессий аккаунта идут через `ItmoIdSessions` с токеном
+клиента `profile` (страницы id.itmo.ru), токен MyITMO для этого не подходит:
+`profileToken(cookieHeader)` получает его по живой cookie ITMO.ID без пароля
+(`null`, если cookie мертва), `list(bearer)` возвращает `ItmoIdSession`, а
+`end(bearer, sid)` завершает сессию (уже завершённая - тоже успех). Cookie
+ITMO.ID - это весь аккаунт: не передавайте её дальше устройства.
+
+Подпись строки на `/activity` задаёт User-Agent входа, и потом она не меняется.
+`ItmoSessionLabel.browserUserAgent(platform)` - обычный десктопный Chrome,
+`ItmoSessionLabel.botUserAgent(client, name, version, platform)` - честная
+подпись вида `Linux, Browser: ITMO Widgets agent nas bot/1.2`.
+
 ## Переход с 1.x
 
 Java-библиотека `dev.alllexey:my-itmo-api:1.8.2` остаётся в корне репозитория и
@@ -325,6 +343,8 @@ Java-библиотека `dev.alllexey:my-itmo-api:1.8.2` остаётся в �
 
 - Вход по логину и паролю, refresh token или в браузере через ITMO.ID (OAuth с
   PKCE) и автоматическое обновление токенов.
+- Сессии ITMO.ID: выход из своей сессии, список и завершение сессий аккаунта,
+  подпись сессии через User-Agent.
 - Личное расписание и временные слоты пар.
 - Зачётка, специализации и дерево контрольных мероприятий.
 - Учебный план.

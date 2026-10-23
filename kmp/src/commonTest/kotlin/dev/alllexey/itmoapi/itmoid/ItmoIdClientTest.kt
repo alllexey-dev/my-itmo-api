@@ -313,4 +313,58 @@ class ItmoIdClientTest {
             assertEquals(0, clock.reads)
         } finally { client.close(); engine.close() }
     }
+
+    @Test
+    fun logoutPostsClientAndRefreshTokenToLogoutEndpoint() = runTest {
+        val refresh = Uuid.random().toString()
+        var requests = 0
+        val engine = MockEngine { request ->
+            requests++
+            assertEquals(HttpMethod.Post, request.method)
+            assertEquals("/realm/protocol/openid-connect/logout", request.url.encodedPath)
+            val body = (request.body as OutgoingContent.ByteArrayContent).bytes().decodeToString()
+            assertTrue(parseQueryString(body).entries().associate { it.key to it.value.single() } == mapOf(
+                "client_id" to config.clientId, "refresh_token" to refresh,
+            ), "Logout form")
+            respond("", HttpStatusCode.NoContent)
+        }
+        val clock = FixedClock()
+        val client = ItmoIdClient(engine, clock, config)
+        try {
+            client.logout(refresh)
+            assertEquals(1, requests)
+            assertEquals(0, clock.reads)
+        } finally { client.close(); engine.close() }
+    }
+
+    @Test
+    fun logoutMapsOAuthErrorToAuthAndServerFailureToHttp() = runTest {
+        val refresh = Uuid.random().toString()
+        val engine = engine(fixture("itmoid/oauth-error.json"), 400)
+        val client = ItmoIdClient(engine, FixedClock(), config)
+        try {
+            val failure = assertFailsWith<MyItmoException.Auth> { client.logout(refresh) }
+            assertTrue(refresh !in failure.toString(), "Auth diagnostics redacted")
+        } finally { client.close(); engine.close() }
+        val unavailable = engine(fixture("itmoid/oauth-error.json"), 503)
+        val second = ItmoIdClient(unavailable, FixedClock(), config)
+        try {
+            assertEquals(503, assertFailsWith<MyItmoException.Http> { second.logout(refresh) }.status)
+            assertFailsWith<MyItmoException.Decode> { second.logout(" ") }
+        } finally { second.close(); unavailable.close() }
+    }
+
+    @Test
+    fun sessionIdIsTheSidClaimOfTheIdTokenOrNull() {
+        val sid = Uuid.random().toString()
+        val instant = FixedClock().instant
+        fun jwt(payload: String) = "eyJhbGciOiJSUzI1NiJ9." +
+            kotlin.io.encoding.Base64.UrlSafe.withPadding(kotlin.io.encoding.Base64.PaddingOption.ABSENT).encode(payload.encodeToByteArray()) + ".signature"
+        fun tokens(id: String) = TokenSet("a", instant, "r", instant, id)
+        assertEquals(sid, tokens(jwt("""{"sub":"x","sid":"$sid","typ":"ID"}""")).sessionId)
+        for (id in listOf(Uuid.random().toString(), jwt("""{"sub":"x"}"""), jwt("""{"sid":42}"""), jwt("""{"sid":""}"""), jwt("[]"), "a.%%%.b", "a.bm90IGpzb24.b")) {
+            assertNull(tokens(id).sessionId)
+        }
+        assertEquals("TokenSet(redacted)", tokens(jwt("""{"sid":"$sid"}""")).toString())
+    }
 }
