@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.3.1 - 2026-10-23
+
+- Fix `ItmoIdSessions.end` refusing base64url session ids: ITMO.ID's `sid`s are 24
+  base64url characters and may contain `_`, which threw `IllegalArgumentException`
+  before any request, so such a session was never ended.
+
 ## 2.3.0 - 2026-10-22
 
 Additive: ITMO.ID sessions, as id.itmo.ru `/activity` shows and ends them.
