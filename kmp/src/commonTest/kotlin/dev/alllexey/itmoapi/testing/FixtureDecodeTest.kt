@@ -11,6 +11,10 @@ import dev.alllexey.itmoapi.core.IdValuePair
 import dev.alllexey.itmoapi.core.ItmoApiJson
 import dev.alllexey.itmoapi.core.ResultResponse
 import dev.alllexey.itmoapi.core.SimpleResponse
+import dev.alllexey.itmoapi.myitmo.dormitory.DormitoryContract
+import dev.alllexey.itmoapi.myitmo.dormitory.DormitoryContractPeriod
+import dev.alllexey.itmoapi.myitmo.dormitory.DormitoryDocument
+import dev.alllexey.itmoapi.myitmo.dormitory.DormitoryStatus
 import dev.alllexey.itmoapi.myitmo.election.AvailableDiscipline
 import dev.alllexey.itmoapi.myitmo.election.ChangeResult
 import dev.alllexey.itmoapi.myitmo.election.DisciplineSelectionValidation
@@ -65,6 +69,19 @@ class FixtureDecodeTest {
         for (name in listOf("disciplines", "empty-disciplines")) put("bars/$name.json", ListSerializer(Discipline.serializer()))
         for (name in listOf("groups", "empty-groups")) put("bars/$name.json", ListSerializer(GroupOrFlow.serializer()))
         for (name in listOf("journal", "empty-journal")) put("bars/$name.json", StudentJournal.serializer())
+
+        for (name in listOf("status", "status-queue", "status-empty", "error")) {
+            put("dormitory/$name.json", ResultResponse.serializer(DormitoryStatus.serializer()))
+        }
+        for (name in listOf("periods", "periods-empty")) {
+            put("dormitory/$name.json", ResultResponse.serializer(ListSerializer(DormitoryContractPeriod.serializer())))
+        }
+        for (name in listOf("contracts", "contracts-empty")) {
+            put("dormitory/$name.json", ResultResponse.serializer(ListSerializer(DormitoryContract.serializer())))
+        }
+        for (name in listOf("documents", "documents-empty")) {
+            put("dormitory/$name.json", ResultResponse.serializer(ListSerializer(DormitoryDocument.serializer())))
+        }
 
         put("election/availability.json", ResultResponse.serializer(ElectionAvailability.serializer()))
         for (name in listOf("disciplines", "empty")) {

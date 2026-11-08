@@ -6,6 +6,8 @@ import dev.alllexey.itmoapi.itmoid.ItmoIdClient
 import dev.alllexey.itmoapi.itmoid.TokenManager
 import dev.alllexey.itmoapi.itmoid.TokenRefreshGuard
 import dev.alllexey.itmoapi.itmoid.TokenStorage
+import dev.alllexey.itmoapi.myitmo.dormitory.DormitoryApi
+import dev.alllexey.itmoapi.myitmo.dormitory.DormitoryApiImpl
 import dev.alllexey.itmoapi.myitmo.election.ElectionApi
 import dev.alllexey.itmoapi.myitmo.election.ElectionApiImpl
 import dev.alllexey.itmoapi.myitmo.finances.FinancesApi
@@ -86,6 +88,9 @@ public class MyItmoClient(
 
     /** Lazily constructs the finances area without initializing unused areas. */
     public val finances: FinancesApi by lazy { FinancesApiImpl(transport.value) }
+
+    /** Lazily constructs the dormitory area without initializing unused areas. */
+    public val dormitory: DormitoryApi by lazy { DormitoryApiImpl(transport.value) }
 
     /** Lazily constructs the requests area without initializing unused areas. */
     public val requests: RequestsApi by lazy { RequestsApiImpl(transport.value) }
