@@ -22,6 +22,8 @@ import dev.alllexey.itmoapi.myitmo.election.ElectionAvailability
 import dev.alllexey.itmoapi.myitmo.election.ElectionFlowChain
 import dev.alllexey.itmoapi.myitmo.election.FlowLimit
 import dev.alllexey.itmoapi.myitmo.finances.ScholarshipTotal
+import dev.alllexey.itmoapi.myitmo.finances.TuitionContract
+import dev.alllexey.itmoapi.myitmo.finances.TuitionPaymentContract
 import dev.alllexey.itmoapi.myitmo.personalities.Personality
 import dev.alllexey.itmoapi.myitmo.personalities.PersonalityMin
 import dev.alllexey.itmoapi.myitmo.qr.QrData
@@ -101,6 +103,12 @@ class FixtureDecodeTest {
         for (name in listOf("totals", "empty", "error")) {
             put("finances/$name.json", ResultResponse.serializer(ListSerializer(ScholarshipTotal.serializer())))
         }
+        for (name in listOf("tuition-available", "tuition-unavailable")) {
+            put("finances/$name.json", ResultResponse.serializer(Boolean.serializer()))
+        }
+        put("finances/tuition-contracts.json", ResultResponse.serializer(ListSerializer(TuitionContract.serializer())))
+        put("finances/tuition-payments.json", ResultResponse.serializer(ListSerializer(TuitionPaymentContract.serializer())))
+        put("finances/null-result.json", ResultResponse.serializer(ListSerializer(TuitionPaymentContract.serializer())))
         for (name in listOf("person", "student", "employee", "service", "missing-person")) {
             put("personalities/$name.json", ResultResponse.serializer(Personality.serializer()))
         }
