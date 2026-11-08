@@ -23,7 +23,7 @@ public interface FinancesApi {
     @Throws(MyItmoException::class, CancellationException::class)
     public suspend fun getTuitionAvailability(): ResultResponse<Boolean>
 
-    /** GET /api/finances/edupayments/contracts; tuition agreements, newest first as the site shows them.
+    /** GET /api/finances/edupayments/contracts; tuition agreements; the site shows the first one as current and the rest as archived.
      * State-funded students get an empty list; the published schema also allows a null result, read it as empty.
      */
     @Throws(MyItmoException::class, CancellationException::class)
