@@ -28,6 +28,7 @@ class ClientLifecycleTest {
             assertSame(client.sport, client.sport)
             assertSame(client.election, client.election)
             assertSame(client.finances, client.finances)
+            assertSame(client.dormitory, client.dormitory)
             assertSame(client.requests, client.requests)
             assertSame(client.system, client.system)
         } finally {

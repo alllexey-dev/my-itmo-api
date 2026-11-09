@@ -12,6 +12,7 @@ import dev.alllexey.itmoapi.itmoid.PasswordLogin
 import dev.alllexey.itmoapi.itmoid.TokenStorage
 import dev.alllexey.itmoapi.myitmo.MyItmoClient
 import dev.alllexey.itmoapi.myitmo.MyItmoConfiguration
+import dev.alllexey.itmoapi.myitmo.dormitory.DormitoryApi
 import dev.alllexey.itmoapi.myitmo.election.ElectionApi
 import dev.alllexey.itmoapi.myitmo.finances.FinancesApi
 import dev.alllexey.itmoapi.myitmo.personalities.PersonalitiesApi
@@ -54,6 +55,7 @@ public class MyItmo private constructor(
     public val sport: SportApi get() = client.sport
     public val election: ElectionApi get() = client.election
     public val finances: FinancesApi get() = client.finances
+    public val dormitory: DormitoryApi get() = client.dormitory
     public val requests: RequestsApi get() = client.requests
     public val system: SystemApi get() = client.system
 

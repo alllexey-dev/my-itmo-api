@@ -13,7 +13,7 @@
 Gradle (Kotlin, Android):
 
 ```kotlin
-implementation("dev.alllexey:my-itmo-api-kmp:2.3.1")
+implementation("dev.alllexey:my-itmo-api-kmp:2.4.0")
 ```
 
 Maven (Java):
@@ -22,7 +22,7 @@ Maven (Java):
 <dependency>
     <groupId>dev.alllexey</groupId>
     <artifactId>my-itmo-api-kmp-jvm</artifactId>
-    <version>2.3.1</version>
+    <version>2.4.0</version>
 </dependency>
 ```
 
@@ -58,9 +58,9 @@ suspend fun main() {
   запросов к сети.
 
 Разделы: `schedule`, `recordBook`, `personalities`, `studyplan`, `qr`, `sport`,
-`election`, `finances`, `requests`, `system` и `bars`. Методы MyITMO возвращают
-ответ-обёртку; `requireResult()` достаёт результат или бросает ошибку. `close()`
-(или `use`) освобождает HTTP-клиент.
+`election`, `finances`, `dormitory`, `requests`, `system` и `bars`. Методы MyITMO
+возвращают ответ-обёртку; `requireResult()` достаёт результат или бросает
+ошибку. `close()` (или `use`) освобождает HTTP-клиент.
 
 Java: любой `suspend`-метод вызывается через `Blocking.call`, последним
 аргументом передаётся `c`. Результат присваивайте переменной с типом.
@@ -359,6 +359,10 @@ Java-библиотека `dev.alllexey:my-itmo-api:1.8.2` остаётся в �
 - Главный экран, меню и каталог сервисов MyITMO.
 - Заявки пользователя.
 - Суммарные выплаты по категориям.
+- Оплата обучения: договоры, баланс и график платежей.
+- Общежитие: этап и место в очереди, назначенное общежитие с инструкцией по
+  заселению, документы для заселения, договоры найма с балансом и графиком
+  платежей. Только чтение.
 - QR-пропуск в корпуса в HEX-формате.
 - БАРС: вход через ITMO.ID, выбор учебного периода, каталоги дисциплин и потоков,
   журнал с баллами и подтверждёнными оценками.

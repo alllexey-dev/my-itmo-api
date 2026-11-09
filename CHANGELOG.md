@@ -1,5 +1,29 @@
 # Changelog
 
+## 2.4.0 - 2026-11-08
+
+Additive: read-only dormitory and tuition calls on my.itmo.ru. Settlement
+registration, cancellation, category change and payment sessions are not exposed.
+
+- Add `DormitoryApi` (`MyItmoClient.dormitory`, `MyItmo.dormitory`):
+  `getDormitoryStatus()` (`GET /api/dormitory/status/full`) into
+  `DormitoryStatus` (`statusId` 1-4, `queuePlace`, `dormType`,
+  `assignedDormitory` with address and HTML `settlementProcedureText`; a null
+  result means no dormitory application), `getDormitoryContractPeriods()`
+  (`GET /api/dormitory/payments/contracts/periods`) into
+  `DormitoryContractPeriod`, `getDormitoryContracts(dateFrom, dateTo)`
+  (`GET /api/dormitory/payments/contracts?from&to`) into `DormitoryContract`
+  with `balance` and `DormitoryPayment`s, and `getDormitoryDocuments()`
+  (`GET /api/dormitory/documents`) into `DormitoryDocument`.
+- Add tuition reads to `FinancesApi`: `getTuitionAvailability()`
+  (`GET /api/finances/edupayments/availability`, a boolean),
+  `getTuitionContracts()` (`GET /api/finances/edupayments/contracts`) into
+  `TuitionContract`, and `getTuitionPayments()`
+  (`GET /api/finances/edupayments/payments`) into `TuitionPaymentContract` with
+  `TuitionPayment`s. State-funded students get empty lists (a null result is
+  allowed too). Non-empty tuition answers have not been observed yet; their
+  fields follow the my.itmo site and the dormitory agreement shape.
+
 ## 2.3.1 - 2026-10-23
 
 - Fix `ItmoIdSessions.end` refusing base64url session ids: ITMO.ID's `sid`s are 24
