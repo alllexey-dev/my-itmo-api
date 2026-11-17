@@ -241,7 +241,8 @@ class ReadmeSamplesTest {
     @Test
     fun readmeContainsTheActualCompiledSampleBlocks() {
         val root = repositoryRoot()
-        val readme = File(root, "README.md").readText()
+        // The quick start lives in README.md, the advanced setup in docs/advanced.md.
+        val readme = File(root, "README.md").readText() + "\n" + File(root, "docs/advanced.md").readText()
         val tests = "kmp/src/jvmTest"
         val samples = listOf(
             Triple("kotlin", "$tests/kotlin/dev/alllexey/itmoapi/ReadmeSamplesTest.kt", listOf("file", "storage", "client", "login", "schedule", "bars", "cookies")),
