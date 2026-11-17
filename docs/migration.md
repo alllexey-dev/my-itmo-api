@@ -91,7 +91,8 @@ callback URLs, codes, verifier/state, tokens or cookie headers safe to log.
 
 `TokenStorage.read()` returns one atomic `TokenSet?`; `write()` atomically
 replaces all five fields. `null` removes the session. Supply secure persistence
-in the consumer; `InMemoryTokenStorage` and the README's `MemoryTokens` are
+in the consumer; `InMemoryTokenStorage` and the `MemoryTokens` of
+[advanced.md](advanced.md#клиент) are
 single-owner, and `FileTokenStorage` is one process per file.
 Route login/logout through `TokenManager.replaceTokens`, not parallel storage
 writes. `validAccessToken()` refreshes near expiry; `forceRefresh()` handles
@@ -167,7 +168,7 @@ BARS and MyITMO identifiers are not interchangeable.
 
 ## Verification
 
-README Kotlin snippets are copied from and exercised by `ReadmeSamplesTest`
+README and [advanced.md](advanced.md) Kotlin snippets are copied from and exercised by `ReadmeSamplesTest`
 with MockEngine, injected time and synthetic issuer.invalid/callback.invalid
 addresses. Run `./gradlew -p kmp jvmTest` to compile and execute them. No
 real university services are involved.
