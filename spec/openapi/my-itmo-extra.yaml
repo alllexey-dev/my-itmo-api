@@ -5,8 +5,8 @@ info:
   summary: Read-only my.itmo.ru endpoints that are not in the verified contract my-itmo.yaml.
   description: |
     Same host, authentication and envelopes as `my-itmo.yaml`: an ITMO.ID access token for the
-    public client `student-personal-cabinet` as `Authorization: Bearer` ([auth.md](../auth.md)),
-    payloads wrapped in `ResultResponse` ([conventions.md](../conventions.md)).
+    public client `student-personal-cabinet` as `Authorization: Bearer` ([auth.md](https://github.com/alllexey-dev/my-itmo-api/blob/master/spec/auth.md)),
+    payloads wrapped in `ResultResponse` ([conventions.md](https://github.com/alllexey-dev/my-itmo-api/blob/master/spec/conventions.md)).
 
     Verification status: research. Schemas are inferred from live responses of one student account
     (2026-10-05) and from the portal code where a response was empty; those places say

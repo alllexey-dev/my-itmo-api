@@ -6,8 +6,8 @@ info:
   description: |
     Unofficial contract of separate ITMO backends that the my.itmo Android app calls directly. They accept the
     same ITMO.ID access token as my.itmo.ru (client `student-personal-cabinet`) as `Authorization: Bearer`
-    ([auth.md](../auth.md)). Every path has its own `servers` entry: the backends live on different hosts
-    ([hosts.md](../hosts.md)). Envelopes differ per backend, see [conventions.md](../conventions.md).
+    ([auth.md](https://github.com/alllexey-dev/my-itmo-api/blob/master/spec/auth.md)). Every path has its own `servers` entry: the backends live on different hosts
+    ([hosts.md](https://github.com/alllexey-dev/my-itmo-api/blob/master/spec/hosts.md)). Envelopes differ per backend, see [conventions.md](https://github.com/alllexey-dev/my-itmo-api/blob/master/spec/conventions.md).
 
     Verification status: research. Responses were taken live on one student account (2026-10-05) and
     matched these schemas; where a response was empty the model comes from the client code and says

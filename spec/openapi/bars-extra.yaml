@@ -5,8 +5,8 @@ info:
   summary: Read-only BARS endpoints that are not in the verified contract bars.yaml.
   description: |
     Same host, session and conventions as `bars.yaml`: the BARS session from `barsLogin` as
-    `Authorization` ([auth.md](../auth.md)), bare JSON responses
-    ([conventions.md](../conventions.md)).
+    `Authorization` ([auth.md](https://github.com/alllexey-dev/my-itmo-api/blob/master/spec/auth.md)), bare JSON responses
+    ([conventions.md](https://github.com/alllexey-dev/my-itmo-api/blob/master/spec/conventions.md)).
 
     Verification status: research. Schemas come from live responses of one student account and,
     where they were empty, from the BARS frontend code; those places say "Observed empty". The

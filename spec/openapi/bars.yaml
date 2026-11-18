@@ -10,7 +10,7 @@ info:
     `https://bars.itmo.ru/rest/login` (scope `openid`, no PKCE), then call `barsLogin`. The session
     is the raw value of the `authorization` response header (`Bearer ...`); it lives about 30 minutes
     and is sent back as the `Authorization` request header. The whole flow, step by step:
-    [auth.md](../auth.md).
+    [auth.md](https://github.com/alllexey-dev/my-itmo-api/blob/master/spec/auth.md).
 
     Data is scoped to the period selected in the user's personal settings (`selected_year`,
     `selected_term`). Changing the period (`POST /config/personal`) also changes it in the web UI,
@@ -20,8 +20,8 @@ info:
     -> `type` + `identifier` -> `getStudentJournal`.
 
     Responses are bare JSON without an envelope; errors are Spring error bodies. Timestamps
-    (`created_at`, `updated_at`) are epoch milliseconds. See [conventions.md](../conventions.md)
-    and [services/bars.md](../services/bars.md).
+    (`created_at`, `updated_at`) are epoch milliseconds. See [conventions.md](https://github.com/alllexey-dev/my-itmo-api/blob/master/spec/conventions.md)
+    and [services/bars.md](https://github.com/alllexey-dev/my-itmo-api/blob/master/spec/services/bars.md).
 
     Verification status: every operation is checked against live responses of a student account.
 

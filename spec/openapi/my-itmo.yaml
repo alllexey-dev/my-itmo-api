@@ -7,18 +7,18 @@ info:
     Unofficial, reverse-engineered contract of https://my.itmo.ru used by the ITMO web portal.
     Authentication is an ITMO.ID (Keycloak realm `itmo`) access token for the public client
     `student-personal-cabinet`, sent as `Authorization: Bearer`. How to obtain and refresh it:
-    [auth.md](../auth.md). Responses are localized by `Accept-Language` (`ru` or `en`).
+    [auth.md](https://github.com/alllexey-dev/my-itmo-api/blob/master/spec/auth.md). Responses are localized by `Accept-Language` (`ru` or `en`).
 
     Most endpoints wrap payloads in `ResultResponse` (`error_code` 0 means success); schedule
     endpoints use `DataResponse` (`code` 0 means success). Envelopes, error codes, date formats
-    and known quirks: [conventions.md](../conventions.md). Schemas allow unknown properties:
+    and known quirks: [conventions.md](https://github.com/alllexey-dev/my-itmo-api/blob/master/spec/conventions.md). Schemas allow unknown properties:
     the server adds fields without notice.
 
     Verification status: every GET operation is checked against live responses of a student
     account. Of the write operations, sport lesson sign-up and cancellation, room booking and
     cancellation, the request form update, request submission and withdrawal were performed
     on a live account and rolled back; lesson group and competition sign-up are modelled from
-    the portal code. The service documents in [services/](../services/) give the status of
+    the portal code. The service documents in [services/](https://github.com/alllexey-dev/my-itmo-api/tree/master/spec/services) give the status of
     every endpoint.
 
     This file is the source of the generated client in

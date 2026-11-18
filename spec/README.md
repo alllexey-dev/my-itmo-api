@@ -184,13 +184,15 @@ HTTP 200 ещё не значит успех. Почти все ответы my.
 
 ## Спецификации OpenAPI
 
+"Открыть" показывает спецификацию в браузере через Redoc: операции, параметры и схемы ответов.
+
 | Файл | Что описывает | Насколько проверено | Последняя проверка |
 |---|---|---|---|
-| [openapi/my-itmo.yaml](openapi/my-itmo.yaml) | my.itmo.ru: расписание, зачётка, учебный план, люди, физкультура, финансы, общежитие, бронирование, заявки, очереди | Перепроверяемое: все GET сверены с живыми ответами через `verify:live`. Записи выполнялись вживую один раз и откатаны либо взяты из кода сайта, статус каждой - в документе сервиса | 2026-10-05 |
-| [openapi/bars.yaml](openapi/bars.yaml) | БАРС: вход, пользователь, дисциплины, журнал студента | Перепроверяемое: все операции сверены с живыми ответами через `verify:live` | 2026-10-05 |
-| [openapi/my-itmo-extra.yaml](openapi/my-itmo-extra.yaml) | Ещё 74 читающие ручки my.itmo.ru | Снято один раз: схемы выведены из живых ответов одного аккаунта; автоматически проверяется только соответствие сохранённых примеров схемам | 2026-10-05 |
-| [openapi/bars-extra.yaml](openapi/bars-extra.yaml) | Дедлайны, личные настройки, планы контрольных точек и история оценок БАРС | Снято один раз, как выше; три ответа из четырёх были пустыми | 2026-10-05 |
-| [openapi/itmo-services.yaml](openapi/itmo-services.yaml) | Бэкенды вне прокси my.itmo.ru: клубы, достижения, загруженность помещений, события и другие | Снято один раз, как выше | 2026-10-05 |
+| [openapi/my-itmo.yaml](openapi/my-itmo.yaml) ([открыть](https://redocly.github.io/redoc/?url=https://raw.githubusercontent.com/alllexey-dev/my-itmo-api/master/spec/openapi/my-itmo.yaml)) | my.itmo.ru: расписание, зачётка, учебный план, люди, физкультура, финансы, общежитие, бронирование, заявки, очереди | Перепроверяемое: все GET сверены с живыми ответами через `verify:live`. Записи выполнялись вживую один раз и откатаны либо взяты из кода сайта, статус каждой - в документе сервиса | 2026-10-05 |
+| [openapi/bars.yaml](openapi/bars.yaml) ([открыть](https://redocly.github.io/redoc/?url=https://raw.githubusercontent.com/alllexey-dev/my-itmo-api/master/spec/openapi/bars.yaml)) | БАРС: вход, пользователь, дисциплины, журнал студента | Перепроверяемое: все операции сверены с живыми ответами через `verify:live` | 2026-10-05 |
+| [openapi/my-itmo-extra.yaml](openapi/my-itmo-extra.yaml) ([открыть](https://redocly.github.io/redoc/?url=https://raw.githubusercontent.com/alllexey-dev/my-itmo-api/master/spec/openapi/my-itmo-extra.yaml)) | Ещё 74 читающие ручки my.itmo.ru | Снято один раз: схемы выведены из живых ответов одного аккаунта; автоматически проверяется только соответствие сохранённых примеров схемам | 2026-10-05 |
+| [openapi/bars-extra.yaml](openapi/bars-extra.yaml) ([открыть](https://redocly.github.io/redoc/?url=https://raw.githubusercontent.com/alllexey-dev/my-itmo-api/master/spec/openapi/bars-extra.yaml)) | Дедлайны, личные настройки, планы контрольных точек и история оценок БАРС | Снято один раз, как выше; три ответа из четырёх были пустыми | 2026-10-05 |
+| [openapi/itmo-services.yaml](openapi/itmo-services.yaml) ([открыть](https://redocly.github.io/redoc/?url=https://raw.githubusercontent.com/alllexey-dev/my-itmo-api/master/spec/openapi/itmo-services.yaml)) | Бэкенды вне прокси my.itmo.ru: клубы, достижения, загруженность помещений, события и другие | Снято один раз, как выше | 2026-10-05 |
 
 Подробнее о файлах и примерах: [openapi/README.md](openapi/README.md). Ручки, которых нет ни в одной спецификации,
 описаны только таблицами в документах сервисов. Образцы ответов: для исследовательских спецификаций -

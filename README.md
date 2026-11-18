@@ -151,6 +151,9 @@ public class Main {
 - [общие правила ответов](spec/conventions.md): конверты ответов, коды ошибок, даты;
 - [документы по сервисам](spec/services/) и [спецификации OpenAPI](spec/openapi/) с примерами ответов.
 
+Спецификации можно полистать в браузере: [my.itmo.ru](https://redocly.github.io/redoc/?url=https://raw.githubusercontent.com/alllexey-dev/my-itmo-api/master/spec/openapi/my-itmo.yaml) и [БАРС](https://redocly.github.io/redoc/?url=https://raw.githubusercontent.com/alllexey-dev/my-itmo-api/master/spec/openapi/bars.yaml);
+остальные три - в [spec/openapi](spec/openapi/README.md).
+
 ## Требования
 
 - JVM 11 или новее, Android с minSdk 26, iOS (`iosArm64`, `iosSimulatorArm64`).
