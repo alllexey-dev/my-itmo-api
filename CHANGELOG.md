@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.5.0 - unreleased
+## 2.5.0 - 2026-11-18
 
 Breaking: My ITMO calls return the payload, not an envelope.
 
