@@ -59,10 +59,10 @@ class EnvelopesTest {
     }
 
     @Test
-    fun missingAndNullSuccessPayloadsAreDecodeFailures() {
-        assertFailsWith<MyItmoException.Decode> { ResultResponse<String>().unwrap() }
-        assertFailsWith<MyItmoException.Decode> { DataResponse<String>().unwrap() }
-        assertFailsWith<MyItmoException.Decode> { SimpleResponse<String>().unwrap() }
+    fun missingAndNullSuccessPayloadsAreEmptyNotDecodeFailures() {
+        assertFailsWith<MyItmoException.Empty> { ResultResponse<String>().unwrap() }
+        assertFailsWith<MyItmoException.Empty> { DataResponse<String>().unwrap() }
+        assertFailsWith<MyItmoException.Empty> { SimpleResponse<String>().unwrap() }
     }
 
     @Test

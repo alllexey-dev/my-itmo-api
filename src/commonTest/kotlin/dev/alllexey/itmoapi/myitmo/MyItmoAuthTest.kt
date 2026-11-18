@@ -118,7 +118,7 @@ class MyItmoAuthTest {
             respond("""{"response":{"qr_hex":"001122"}}""", headers = headersOf(HttpHeaders.ContentType, "application/json"))
         }
         val client = MyItmoClient(MyItmoConfiguration.DEV, TokenTestStorage(snapshot), engine, clock)
-        try { assertEquals("001122", client.qr.getQrCode().qrHex) }
+        try { assertEquals("001122", client.qr.getQrCode()?.qrHex) }
         finally { client.close(); engine.close() }
     }
 
@@ -146,7 +146,7 @@ class MyItmoAuthTest {
         }
         val client = MyItmoClient(MyItmoConfiguration.DEFAULT, storage, engine, clock)
         try {
-            assertEquals("001122", client.qr.getQrCode().qrHex)
+            assertEquals("001122", client.qr.getQrCode()?.qrHex)
             assertEquals(1, refreshes)
             assertEquals(2, apiCalls)
             assertEquals(1, storage.writes)

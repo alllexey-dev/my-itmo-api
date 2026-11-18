@@ -8,23 +8,30 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 
 class QrApiTest {
     @Test
     fun passUsesAbsoluteQrHostAndPreservesBearerAndHexadecimalLeadingZeroes() = runTest {
         val pass = mockExchange("/v1/user/pass", fixture("qr/pass.json"), host = "qr.itmo.su") {
             QrApiImpl(it).getQrCode()
-        }
+        }!!
         assertEquals("001122aabb", pass.qrHex)
         assertFalse(pass.toString().contains(pass.qrHex))
     }
 
     @Test
-    fun nullPassCannotBeUnwrappedAsSuccess() = runTest {
+    fun anAnswerWithoutAPassIsNullNotAFailure() = runTest {
+        for (body in listOf("""{"response":null}""", "{}", """{"response":{}}""", """{"response":{"qr_hex":""}}""")) {
+            val pass = mockExchange("/v1/user/pass", body, host = "qr.itmo.su") { QrApiImpl(it).getQrCode() }
+            assertNull(pass, body)
+        }
+    }
+
+    @Test
+    fun anUnreadableAnswerIsStillADecodeFailure() = runTest {
         assertFailsWith<MyItmoException.Decode> {
-            mockExchange("/v1/user/pass", """{"response":null}""", host = "qr.itmo.su") {
-                QrApiImpl(it).getQrCode()
-            }
+            mockExchange("/v1/user/pass", "not JSON", host = "qr.itmo.su") { QrApiImpl(it).getQrCode() }
         }
     }
 

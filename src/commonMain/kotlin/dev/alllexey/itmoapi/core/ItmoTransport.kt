@@ -39,13 +39,13 @@ internal class ItmoTransport(internal val client: HttpClient, private val baseUr
         return false
     }
 
-    /** A `result` payload of the standard envelope; a missing or null one is a decode failure. */
+    /** A `result` payload of the standard envelope; a missing or null one is [MyItmoException.Empty]. */
     suspend fun <T : Any> result(
         payload: KSerializer<T>,
         method: HttpMethod,
         path: String,
         configure: HttpRequestBuilder.() -> Unit = {},
-    ): T = resultOrNull(payload, method, path, configure) ?: throw MyItmoException.Decode()
+    ): T = resultOrNull(payload, method, path, configure) ?: throw MyItmoException.Empty()
 
     /** A `result` payload where the server answers success with null for "none". */
     suspend fun <T : Any> resultOrNull(
@@ -68,13 +68,13 @@ internal class ItmoTransport(internal val client: HttpClient, private val baseUr
         configure: HttpRequestBuilder.() -> Unit = {},
     ): T = execute(DataResponse.serializer(payload), method, path, configure).unwrap()
 
-    /** A `response` payload of an external service such as the QR pass. */
-    suspend fun <T : Any> response(
+    /** A `response` payload of an external service such as the QR pass; null when the service sends none. */
+    suspend fun <T : Any> responseOrNull(
         payload: KSerializer<T>,
         method: HttpMethod,
         path: String,
         configure: HttpRequestBuilder.() -> Unit = {},
-    ): T = execute(SimpleResponse.serializer(payload), method, path, configure).unwrap()
+    ): T? = execute(SimpleResponse.serializer(payload), method, path, configure).response
 
     suspend fun <T> execute(
         deserializer: DeserializationStrategy<T>,

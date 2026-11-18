@@ -47,7 +47,7 @@ class SportSignResultTest {
             Triple(sessionCode, 200, MyItmoException.Api::class),
             Triple("<html>Bad Gateway</html>", 502, MyItmoException.Http::class),
             Triple("{}", 401, MyItmoException.Auth::class),
-            Triple(missingResult, 200, MyItmoException.Decode::class),
+            Triple(missingResult, 200, MyItmoException.Empty::class),
         )
         for ((response, status, cause) in cases) {
             val retry = assertIs<SportSignResult.RetryLater>(signIn(response, status))

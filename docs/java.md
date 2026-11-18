@@ -84,7 +84,7 @@ static List<Schedule> weekOrNull(BlockingMyItmo itmo, LocalDate monday) {
     } catch (MyItmoException.Auth e) {
         return null; // сессия закончилась: нужен новый вход
     } catch (MyItmoException e) {
-        return null; // Api, Http, Network, Decode
+        return null; // Api, Http, Network, Decode, Empty
     }
 }
 ```

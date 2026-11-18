@@ -9,7 +9,8 @@
 | `Api` | My ITMO вернул код ошибки: `errorCode` и HTTP-статус в `status` | Разобрать код; повтор обычно не поможет |
 | `Http` | Неуспешный HTTP-статус без кода ошибки, в том числе 403: сессия действительна, но доступа к ресурсу нет | 5xx - повторить позже |
 | `Network` | Сбой сети | Повторить позже |
-| `Decode` | Ответ не удалось разобрать или в нём нет обязательных данных | Повторить позже; если повторяется - сообщить об ошибке |
+| `Decode` | Ответ не удалось разобрать | Повторить позже; если повторяется - сообщить об ошибке |
+| `Empty` | Сервер ответил успехом, но без данных, которые должен вернуть этот метод | Считать, что данных нет, или повторить позже |
 
 ```kotlin
 suspend fun weekOrNull(itmo: MyItmo, monday: LocalDate): List<Schedule>? = try {
@@ -19,7 +20,7 @@ suspend fun weekOrNull(itmo: MyItmo, monday: LocalDate): List<Schedule>? = try {
 } catch (error: MyItmoException.Api) {
     null // My ITMO отказал: error.errorCode
 } catch (error: MyItmoException) {
-    null // Network, Http, Decode: можно повторить позже
+    null // Network, Http, Decode, Empty: можно повторить позже
 }
 ```
 
@@ -29,7 +30,9 @@ suspend fun weekOrNull(itmo: MyItmo, monday: LocalDate): List<Schedule>? = try {
   успешный вход, обновление токена и `logout()`. Что делать после `Auth` - в
   [auth.md](auth.md#когда-сохранённая-сессия-перестала-работать).
 - "Ничего нет" - не ошибка. Там, где сервер так отвечает, метод возвращает пустой список или `null`: например,
-  `dormitory.getDormitoryStatus()` возвращает `null`, если заявки на общежитие нет.
+  `dormitory.getDormitoryStatus()` возвращает `null`, если заявки на общежитие нет, а `qr.getQrCode()` - если
+  пропуска нет. Для остальных методов ответ без данных - это `Empty`: его можно отличить от нечитаемого ответа
+  (`Decode`).
 - Известные коды `Api` собраны в [spec/conventions.md](../spec/conventions.md#известные-коды-ошибок).
 
 ## Что нельзя писать в логи
