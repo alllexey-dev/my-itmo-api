@@ -1,0 +1,42 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": [
+    {
+      "discipline_name": "synthetic-0",
+      "name": "synthetic-1",
+      "date": "2026-09-01T10:00:01+03:00",
+      "old_value": 1002,
+      "new_value": 12.5,
+      "teacher": {
+        "surname": "synthetic-3",
+        "name": "synthetic-4",
+        "patronymic": "synthetic-5"
+      }
+    },
+    {
+      "discipline_name": "synthetic-6",
+      "name": "synthetic-7",
+      "date": "2026-09-01T10:00:59+03:00",
+      "old_value": 12.5,
+      "new_value": 1008,
+      "teacher": {
+        "surname": "synthetic-9",
+        "name": "synthetic-10",
+        "patronymic": "synthetic-11"
+      }
+    },
+    {
+      "discipline_name": "synthetic-12",
+      "name": "synthetic-13",
+      "date": "2026-09-01T10:00:46+03:00",
+      "old_value": 1014,
+      "new_value": 1015,
+      "teacher": {
+        "surname": "synthetic-16",
+        "name": "synthetic-17",
+        "patronymic": "synthetic-18"
+      }
+    }
+  ]
+}

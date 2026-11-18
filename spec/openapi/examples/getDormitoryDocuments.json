@@ -1,0 +1,30 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": [
+    {
+      "documentType": 1000,
+      "documentTypeName": "synthetic-1",
+      "status": 1002,
+      "status_name": "synthetic-3",
+      "requestId": null,
+      "templateId": 1004
+    },
+    {
+      "documentType": 1005,
+      "documentTypeName": "synthetic-6",
+      "status": 1007,
+      "status_name": "synthetic-8",
+      "requestId": null,
+      "templateId": 1009
+    },
+    {
+      "documentType": 1010,
+      "documentTypeName": "synthetic-11",
+      "status": 1012,
+      "status_name": "synthetic-13",
+      "requestId": null,
+      "templateId": 1014
+    }
+  ]
+}

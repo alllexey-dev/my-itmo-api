@@ -1,0 +1,66 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": [
+    {
+      "mark": 1000,
+      "tags": [
+        {
+          "emoji": "synthetic-1",
+          "id": 1002,
+          "text": "synthetic-3"
+        },
+        {
+          "emoji": "synthetic-4",
+          "id": 1005,
+          "text": "synthetic-6"
+        },
+        {
+          "emoji": "synthetic-7",
+          "id": 1008,
+          "text": "synthetic-9"
+        }
+      ]
+    },
+    {
+      "mark": 1010,
+      "tags": [
+        {
+          "emoji": "synthetic-11",
+          "id": 1012,
+          "text": "synthetic-13"
+        },
+        {
+          "emoji": "synthetic-14",
+          "id": 1015,
+          "text": "synthetic-16"
+        },
+        {
+          "emoji": "synthetic-17",
+          "id": 1018,
+          "text": "synthetic-19"
+        }
+      ]
+    },
+    {
+      "mark": 1020,
+      "tags": [
+        {
+          "emoji": "synthetic-21",
+          "id": 1022,
+          "text": "synthetic-23"
+        },
+        {
+          "emoji": "synthetic-24",
+          "id": 1025,
+          "text": "synthetic-26"
+        },
+        {
+          "emoji": "synthetic-27",
+          "id": 1028,
+          "text": "synthetic-29"
+        }
+      ]
+    }
+  ]
+}

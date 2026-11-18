@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1000,
+    "name": "synthetic-1",
+    "terms": [
+      1002,
+      1003,
+      1004
+    ],
+    "programs": []
+  },
+  {
+    "id": 1005,
+    "name": "synthetic-6",
+    "terms": [
+      1007
+    ],
+    "programs": []
+  },
+  {
+    "id": 1008,
+    "name": "synthetic-9",
+    "terms": [
+      1010,
+      1011
+    ],
+    "programs": []
+  }
+]

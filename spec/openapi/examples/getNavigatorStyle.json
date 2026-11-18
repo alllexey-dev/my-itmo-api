@@ -1,0 +1,58 @@
+{
+  "version": 1000,
+  "name": "synthetic-1",
+  "center": [
+    1002,
+    1003
+  ],
+  "zoom": 1004,
+  "bearing": 1005,
+  "pitch": 1006,
+  "sources": {},
+  "sprite": "synthetic-7",
+  "glyphs": "synthetic-8",
+  "layers": [
+    {
+      "id": "synthetic-9",
+      "type": "synthetic-10",
+      "paint": {
+        "background-color": "synthetic-11"
+      }
+    },
+    {
+      "id": "synthetic-12",
+      "type": "synthetic-13",
+      "source": "synthetic-14",
+      "source-layer": "synthetic-15",
+      "layout": {
+        "visibility": "synthetic-16"
+      },
+      "paint": {
+        "fill-color": "synthetic-17",
+        "fill-outline-color": "synthetic-18"
+      }
+    },
+    {
+      "id": "synthetic-19",
+      "type": "synthetic-20",
+      "source": "synthetic-21",
+      "source-layer": "synthetic-22",
+      "filter": [
+        "synthetic-23",
+        [
+          "synthetic-24",
+          "synthetic-25",
+          "100026"
+        ]
+      ],
+      "layout": {
+        "visibility": "synthetic-27"
+      },
+      "paint": {
+        "fill-color": "synthetic-28",
+        "fill-outline-color": "synthetic-29"
+      }
+    }
+  ],
+  "id": "synthetic-30"
+}

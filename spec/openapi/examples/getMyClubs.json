@@ -1,0 +1,13 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": [
+    {
+      "id": 1000,
+      "name": "synthetic-1",
+      "short_description": null,
+      "is_owner": false,
+      "card_image": null
+    }
+  ]
+}

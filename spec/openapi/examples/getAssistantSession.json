@@ -1,0 +1,29 @@
+{
+  "session": {
+    "id": "synthetic-0",
+    "workspace_id": "synthetic-1",
+    "title": "synthetic-2",
+    "created_at": "2026-09-01T10:00:19.241264Z",
+    "updated_at": "2026-09-01T10:00:19.427210Z"
+  },
+  "messages": [
+    {
+      "id": "synthetic-3",
+      "session_id": "synthetic-4",
+      "role": "synthetic-5",
+      "content": "synthetic-6",
+      "tokens_used": 1007,
+      "sources": null,
+      "created_at": "2026-09-01T10:00:19.291635Z"
+    },
+    {
+      "id": "synthetic-8",
+      "session_id": "synthetic-9",
+      "role": "synthetic-10",
+      "content": "synthetic-11",
+      "tokens_used": 1012,
+      "sources": null,
+      "created_at": "2026-09-01T10:00:19.417042Z"
+    }
+  ]
+}

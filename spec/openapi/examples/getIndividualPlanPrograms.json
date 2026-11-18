@@ -1,0 +1,21 @@
+{
+  "error_code": null,
+  "error_message": null,
+  "result": [
+    {
+      "id": 1000,
+      "name": "synthetic-1",
+      "enrollment_year": 1002
+    },
+    {
+      "id": 1003,
+      "name": "synthetic-4",
+      "enrollment_year": 1005
+    },
+    {
+      "id": 1006,
+      "name": "synthetic-7",
+      "enrollment_year": 1008
+    }
+  ]
+}

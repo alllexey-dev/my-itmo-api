@@ -1,0 +1,20 @@
+{
+  "error_code": null,
+  "error_message": null,
+  "result": [
+    {
+      "key": "synthetic-0",
+      "enabled": false
+    },
+    {
+      "key": "synthetic-1",
+      "enabled": true,
+      "cron": "synthetic-2"
+    },
+    {
+      "key": "synthetic-3",
+      "enabled": true,
+      "cron": "synthetic-4"
+    }
+  ]
+}

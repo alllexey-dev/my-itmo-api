@@ -1,0 +1,34 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": {
+    "isu": 1000,
+    "mainPlanId": 1001,
+    "chosenContents": [
+      {
+        "moduleId": 1002,
+        "disciplineId": 1003,
+        "contentId": 1004,
+        "semester": 1005,
+        "locked": true,
+        "blockId": 1006
+      },
+      {
+        "moduleId": 1007,
+        "disciplineId": 1008,
+        "contentId": 1009,
+        "semester": 1010,
+        "locked": true,
+        "blockId": 1011
+      },
+      {
+        "moduleId": 1012,
+        "disciplineId": 1013,
+        "contentId": 1014,
+        "semester": 1015,
+        "locked": true,
+        "blockId": 1016
+      }
+    ]
+  }
+}

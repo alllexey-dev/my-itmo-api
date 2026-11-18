@@ -1,0 +1,495 @@
+openapi: 3.1.0
+info:
+  title: bars.itmo.ru (unofficial)
+  version: 0.1.0
+  summary: Verified read-only subset of the ITMO point-rating system (BARS) REST API for students.
+  description: |
+    Unofficial, reverse-engineered contract of the BARS backend used by https://bars.itmo.ru.
+
+    Login: obtain an ITMO.ID authorization code for the public client `bars` with redirect URI
+    `https://bars.itmo.ru/rest/login` (scope `openid`, no PKCE), then call `barsLogin`. The session
+    is the raw value of the `authorization` response header (`Bearer ...`); it lives about 30 minutes
+    and is sent back as the `Authorization` request header. The whole flow, step by step:
+    [auth.md](../auth.md).
+
+    Data is scoped to the period selected in the user's personal settings (`selected_year`,
+    `selected_term`). Changing the period (`POST /config/personal`) also changes it in the web UI,
+    so this read-only contract does not include it.
+
+    Student journal lookup: `getDisciplines` -> `checkpoint_plan_ids` -> `getGroupsAndFlows(checkpointPlanId)`
+    -> `type` + `identifier` -> `getStudentJournal`.
+
+    Responses are bare JSON without an envelope; errors are Spring error bodies. Timestamps
+    (`created_at`, `updated_at`) are epoch milliseconds. See [conventions.md](../conventions.md)
+    and [services/bars.md](../services/bars.md).
+
+    Verification status: every operation is checked against live responses of a student account.
+
+    This file is the source of the generated client in
+    [itmo-mcp](https://github.com/alllexey-dev/itmo-mcp); additional endpoints of the same host
+    are in `bars-extra.yaml`.
+  license:
+    name: MIT
+    identifier: MIT
+servers:
+  - url: https://bars.itmo.ru/backend/rest
+security:
+  - barsSession: []
+tags:
+  - name: auth
+  - name: users
+  - name: journal
+paths:
+  /login:
+    get:
+      operationId: barsLogin
+      tags: [auth]
+      summary: Exchange an ITMO.ID authorization code for a BARS session
+      security: []
+      parameters:
+        - name: code
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: customRedirectUri
+          in: query
+          required: true
+          schema:
+            type: string
+            const: https://bars.itmo.ru/rest/login
+      responses:
+        "200":
+          description: Session created; the session is in the `authorization` header
+          headers:
+            authorization:
+              required: true
+              schema:
+                type: string
+                pattern: "^Bearer "
+        default:
+          $ref: "#/components/responses/Error"
+  /users/current_user/:
+    get:
+      operationId: getCurrentUser
+      tags: [users]
+      summary: Current user, roles and selected study period
+      responses:
+        "200":
+          description: User
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        default:
+          $ref: "#/components/responses/Error"
+  /config/:
+    get:
+      operationId: getConfig
+      tags: [users]
+      summary: Global settings, including current_year and current_term
+      responses:
+        "200":
+          description: Settings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Setting"
+        default:
+          $ref: "#/components/responses/Error"
+  /journal/disciplines:
+    get:
+      operationId: getDisciplines
+      tags: [journal]
+      summary: Disciplines of the selected period
+      parameters:
+        - name: withCheckpointPlansOnly
+          in: query
+          schema:
+            type: boolean
+        - name: distinctByCheckpointPlans
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Disciplines
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Discipline"
+        default:
+          $ref: "#/components/responses/Error"
+  /journal/groups-and-flows:
+    get:
+      operationId: getGroupsAndFlows
+      tags: [journal]
+      summary: Groups and flows that address a journal
+      description: >-
+        Both filters work for students (checked 2026-11-18). An unknown identifier returns an empty list;
+        a non-integer value returns 400.
+      parameters:
+        - name: checkpointPlanId
+          in: query
+          schema:
+            type: integer
+            format: int64
+        - name: disciplineId
+          in: query
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Groups and flows
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GroupOrFlow"
+        default:
+          $ref: "#/components/responses/Error"
+  /marks/{checkpointPlanId}/{type}/{identifier}/student:
+    get:
+      operationId: getStudentJournal
+      tags: [journal]
+      summary: The current student's marks for one discipline journal, with checkpoint headers
+      parameters:
+        - name: checkpointPlanId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: type
+          in: path
+          required: true
+          description: "`GroupOrFlow.type`, e.g. flow or group"
+          schema:
+            type: string
+        - name: identifier
+          in: path
+          required: true
+          description: "`GroupOrFlow.identifier`"
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Journal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentJournal"
+        default:
+          $ref: "#/components/responses/Error"
+components:
+  securitySchemes:
+    barsSession:
+      type: http
+      scheme: bearer
+      description: |
+        BARS session from barsLogin. The `authorization` response header of barsLogin already has the form
+        `Bearer <token>`; the bearer token of this scheme is the part after `Bearer `. A hand-written client
+        sends the header value back unchanged as `Authorization`. A generated client that adds `Bearer `
+        itself must be given the value without that prefix, otherwise it sends `Bearer Bearer ...`.
+  responses:
+    Error:
+      description: Spring error body
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              timestamp:
+                type: string
+              status:
+                type: integer
+              error:
+                type: string
+              message:
+                type: string
+              path:
+                type: string
+  schemas:
+    EpochMillis:
+      type: [integer, "null"]
+      description: Epoch milliseconds
+    Setting:
+      type: object
+      required: [name]
+      properties:
+        id:
+          type: [integer, "null"]
+        name:
+          type: string
+        value:
+          type: [string, "null"]
+    UserRole:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+    User:
+      type: object
+      required: [id, login]
+      properties:
+        id:
+          type: integer
+        login:
+          type: string
+          description: ISU number
+        first_name:
+          type: [string, "null"]
+        middle_name:
+          type: [string, "null"]
+        last_name:
+          type: [string, "null"]
+        user_roles:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserRole"
+        selected_role:
+          $ref: "#/components/schemas/UserRole"
+        selected_year:
+          type: string
+          description: Academic year, e.g. 2025/2026
+        selected_term:
+          type: integer
+          description: 1 autumn, 2 spring
+        personal_config:
+          type: array
+          items:
+            $ref: "#/components/schemas/Setting"
+        can_change_user:
+          type: boolean
+        restricted_to_have_read_only_access:
+          type: boolean
+    Discipline:
+      type: object
+      required: [id, name, checkpoint_plan_ids]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        terms:
+          type: array
+          items:
+            type: integer
+        checkpoint_plan_ids:
+          type: array
+          items:
+            type: integer
+            format: int64
+    GroupOrFlow:
+      type: object
+      required: [type, identifier]
+      properties:
+        type:
+          type: string
+        name:
+          type: string
+        identifier:
+          type: string
+        checkpoint_plan_ids:
+          type: array
+          items:
+            type: integer
+            format: int64
+    Checkpoint:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: integer
+        gid:
+          type: [string, "null"]
+        name:
+          type: [string, "null"]
+        type:
+          type: string
+          description: e.g. current, final
+        type_id:
+          type: [integer, "null"]
+        week:
+          type: [integer, "null"]
+        group:
+          type: [boolean, "null"]
+        key:
+          type: [boolean, "null"]
+          description: Key checkpoint that must be passed
+        min_grade:
+          type: [number, "null"]
+        max_grade:
+          type: [number, "null"]
+        test_name:
+          type: [string, "null"]
+        sub_checkpoints:
+          type: [array, "null"]
+          items:
+            $ref: "#/components/schemas/Checkpoint"
+        parent_checkpoint_id:
+          type: [integer, "null"]
+    CheckpointPlan:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: integer
+          format: int64
+        year:
+          type: [string, "null"]
+        terms:
+          type: array
+          items:
+            type: integer
+        discipline:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            course_project:
+              type: [boolean, "null"]
+        point_distribution:
+          type: [number, "null"]
+        additional_points:
+          type: [boolean, "null"]
+        regular_checkpoints:
+          type: array
+          items:
+            $ref: "#/components/schemas/Checkpoint"
+        final_checkpoint:
+          oneOf:
+            - $ref: "#/components/schemas/Checkpoint"
+            - type: "null"
+        course_project_checkpoint:
+          oneOf:
+            - $ref: "#/components/schemas/Checkpoint"
+            - type: "null"
+        has_course_project:
+          type: [boolean, "null"]
+    Mark:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: integer
+        checkpoint_id:
+          type: [integer, "null"]
+        checkpoint_plan_id:
+          type: integer
+        mark:
+          type: [number, "null"]
+        type:
+          type: string
+        is_absent:
+          type: boolean
+        is_not_bigger_than_max:
+          type: boolean
+        created_at:
+          $ref: "#/components/schemas/EpochMillis"
+        updated_at:
+          $ref: "#/components/schemas/EpochMillis"
+        created_by_name:
+          type: [string, "null"]
+        updated_by_name:
+          type: [string, "null"]
+    Approval:
+      type: object
+      properties:
+        id:
+          type: integer
+        student_id:
+          type: integer
+        student_login:
+          type: string
+        checkpoint_plan_id:
+          type: integer
+        attempt:
+          type: integer
+        marks_sum:
+          type: [number, "null"]
+        mark_string:
+          type: [string, "null"]
+          description: Final grade label, e.g. "Удвл., E"
+        is_active:
+          type: boolean
+        is_invalid:
+          type: boolean
+        is_absent:
+          type: boolean
+        was_recalculated:
+          type: boolean
+        course:
+          type: boolean
+        gradeCode:
+          type: [string, "null"]
+        created_at:
+          $ref: "#/components/schemas/EpochMillis"
+        updated_at:
+          $ref: "#/components/schemas/EpochMillis"
+    StudentMarks:
+      type: object
+      properties:
+        regular:
+          type: array
+          items:
+            $ref: "#/components/schemas/Mark"
+        final:
+          oneOf:
+            - $ref: "#/components/schemas/Mark"
+            - type: "null"
+        additional:
+          oneOf:
+            - $ref: "#/components/schemas/Mark"
+            - type: "null"
+        regularSum:
+          type: [number, "null"]
+        total:
+          type: [number, "null"]
+        active_approvals:
+          type: array
+          items:
+            $ref: "#/components/schemas/Approval"
+    StudentJournal:
+      type: object
+      required: [students, headers]
+      properties:
+        students:
+          type: array
+          items:
+            type: object
+            properties:
+              student_name:
+                type: string
+              student_login:
+                type: string
+              student_id:
+                type: integer
+              marks:
+                $ref: "#/components/schemas/StudentMarks"
+              wants_to_increase_marks:
+                type: [boolean, "null"]
+        headers:
+          type: object
+          properties:
+            plan:
+              $ref: "#/components/schemas/CheckpointPlan"
+            deadlines:
+              type: array
+            type:
+              type: string
+            identifier:
+              type: string
+            name:
+              type: string

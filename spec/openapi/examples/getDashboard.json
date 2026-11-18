@@ -1,0 +1,63 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": [
+    {
+      "i": "synthetic-0",
+      "x": 1001,
+      "y": 1002,
+      "w": 1003,
+      "h": 1004,
+      "widget": "synthetic-5",
+      "min_w": null,
+      "min_h": null,
+      "max_w": null,
+      "max_h": null,
+      "is_draggable": null,
+      "is_resizable": null,
+      "static": true,
+      "drag_ignore_from": null,
+      "drag_allow_from": null,
+      "resize_ignore_from": null,
+      "preserve_aspect_ratio": null
+    },
+    {
+      "i": "synthetic-6",
+      "x": 1007,
+      "y": 1008,
+      "w": 1009,
+      "h": 1010,
+      "widget": "synthetic-11",
+      "min_w": null,
+      "min_h": null,
+      "max_w": null,
+      "max_h": null,
+      "is_draggable": null,
+      "is_resizable": null,
+      "static": true,
+      "drag_ignore_from": null,
+      "drag_allow_from": null,
+      "resize_ignore_from": null,
+      "preserve_aspect_ratio": null
+    },
+    {
+      "i": "synthetic-12",
+      "x": 1013,
+      "y": 1014,
+      "w": 1015,
+      "h": 1016,
+      "widget": "synthetic-17",
+      "min_w": null,
+      "min_h": null,
+      "max_w": null,
+      "max_h": null,
+      "is_draggable": null,
+      "is_resizable": null,
+      "static": true,
+      "drag_ignore_from": null,
+      "drag_allow_from": null,
+      "resize_ignore_from": null,
+      "preserve_aspect_ratio": null
+    }
+  ]
+}

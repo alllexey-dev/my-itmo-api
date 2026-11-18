@@ -1,0 +1,90 @@
+{
+  "type": "synthetic-0",
+  "name": "synthetic-1",
+  "features": [
+    {
+      "type": "synthetic-2",
+      "geometry": {
+        "type": "synthetic-3",
+        "coordinates": [
+          12.5,
+          12.5,
+          1004
+        ]
+      },
+      "properties": {
+        "id": 1005,
+        "area_id": 1006,
+        "transitions": [
+          {
+            "id": 1007,
+            "distance": 12.5,
+            "type": "synthetic-8",
+            "weight": 1009
+          },
+          {
+            "id": 1010,
+            "distance": 12.5,
+            "type": "synthetic-11",
+            "weight": 1012
+          },
+          {
+            "id": 1013,
+            "distance": 12.5,
+            "type": "synthetic-14",
+            "weight": 1015
+          }
+        ],
+        "level": 1016
+      }
+    },
+    {
+      "type": "synthetic-17",
+      "geometry": {
+        "type": "synthetic-18",
+        "coordinates": [
+          12.5,
+          12.5,
+          1019
+        ]
+      },
+      "properties": {
+        "id": 1020,
+        "area_id": 1021,
+        "transitions": [
+          {
+            "id": 1022,
+            "distance": 12.5,
+            "type": "synthetic-23",
+            "weight": 1024
+          }
+        ],
+        "level": 1025
+      }
+    },
+    {
+      "type": "synthetic-26",
+      "geometry": {
+        "type": "synthetic-27",
+        "coordinates": [
+          12.5,
+          12.5,
+          1028
+        ]
+      },
+      "properties": {
+        "id": 1029,
+        "area_id": 1030,
+        "transitions": [
+          {
+            "id": 1031,
+            "distance": 12.5,
+            "type": "synthetic-32",
+            "weight": 1033
+          }
+        ],
+        "level": 1034
+      }
+    }
+  ]
+}

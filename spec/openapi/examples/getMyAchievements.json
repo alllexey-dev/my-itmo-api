@@ -1,0 +1,57 @@
+{
+  "error_code": null,
+  "error_message": null,
+  "result": [
+    {
+      "type_id": 1000,
+      "achievement_id": 1001,
+      "au_id": 1002,
+      "name": "synthetic-3",
+      "level": 1004,
+      "current_progress": 1005,
+      "needed_progress": 1006,
+      "last_progress": "2026-09-01",
+      "completed_at": null,
+      "description": "synthetic-7",
+      "description_short": "synthetic-8",
+      "icon_link": "synthetic-9",
+      "started_at": "2026-09-01",
+      "tag_id": 1010,
+      "tag": "synthetic-11"
+    },
+    {
+      "type_id": 1012,
+      "achievement_id": 1013,
+      "au_id": 1014,
+      "name": "synthetic-15",
+      "level": 1016,
+      "current_progress": 1017,
+      "needed_progress": 1018,
+      "last_progress": "2026-09-01",
+      "completed_at": "2026-09-01",
+      "description": "synthetic-19",
+      "description_short": "synthetic-20",
+      "icon_link": "synthetic-21",
+      "started_at": "2026-09-01",
+      "tag_id": 1022,
+      "tag": "synthetic-23"
+    },
+    {
+      "type_id": 1024,
+      "achievement_id": 1025,
+      "au_id": 1026,
+      "name": "synthetic-27",
+      "level": 1028,
+      "current_progress": 1029,
+      "needed_progress": 1030,
+      "last_progress": "2026-09-01",
+      "completed_at": "2026-09-01",
+      "description": "synthetic-31",
+      "description_short": "synthetic-32",
+      "icon_link": "synthetic-33",
+      "started_at": "2026-09-01",
+      "tag_id": 1034,
+      "tag": "synthetic-35"
+    }
+  ]
+}

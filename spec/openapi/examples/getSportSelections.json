@@ -1,0 +1,17 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": [
+    {
+      "id": 1000,
+      "name": "synthetic-1",
+      "requisites": [
+        {
+          "id": 1002,
+          "level_name": "synthetic-3",
+          "name": "synthetic-4"
+        }
+      ]
+    }
+  ]
+}

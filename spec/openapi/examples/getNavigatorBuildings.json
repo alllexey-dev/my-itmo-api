@@ -1,0 +1,62 @@
+[
+  {
+    "building_id": 1000,
+    "name": "synthetic-1",
+    "version": "synthetic-2",
+    "bounds": [
+      12.5,
+      12.5,
+      12.5
+    ],
+    "center": [
+      12.5,
+      12.5
+    ],
+    "levels": [
+      1003,
+      1004,
+      1005
+    ],
+    "bearing": 1006
+  },
+  {
+    "building_id": 1007,
+    "name": "synthetic-8",
+    "version": "synthetic-9",
+    "bounds": [
+      12.5,
+      12.5,
+      12.5
+    ],
+    "center": [
+      12.5,
+      12.5
+    ],
+    "levels": [
+      1010,
+      1011,
+      1012
+    ],
+    "bearing": 1013
+  },
+  {
+    "building_id": 1014,
+    "name": "synthetic-15",
+    "version": "synthetic-16",
+    "bounds": [
+      12.5,
+      12.5,
+      12.5
+    ],
+    "center": [
+      12.5,
+      12.5
+    ],
+    "levels": [
+      1017,
+      1018,
+      1019
+    ],
+    "bearing": 1020
+  }
+]

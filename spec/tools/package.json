@@ -1,0 +1,21 @@
+{
+  "name": "my-itmo-api-spec-tools",
+  "private": true,
+  "description": "Lint and example checks for the OpenAPI files in spec/openapi",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "lint": "redocly lint --config ../redocly.yaml ../openapi/my-itmo.yaml ../openapi/bars.yaml ../openapi/my-itmo-extra.yaml ../openapi/bars-extra.yaml ../openapi/itmo-services.yaml",
+    "examples": "tsx validate-examples.ts"
+  },
+  "devDependencies": {
+    "@redocly/cli": "^2.57.0",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "tsx": "^4.23.15",
+    "yaml": "^2.9.1"
+  }
+}

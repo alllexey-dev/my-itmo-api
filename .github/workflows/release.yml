@@ -1,10 +1,10 @@
-name: Release
-run-name: Release run ${{ github.run_number }}
+name: release
+run-name: Release ${{ github.ref_name }}
 
 on:
   push:
     tags:
-      - '1.*'
+      - '2.*'
 
 permissions:
   contents: read
@@ -22,59 +22,48 @@ jobs:
         env:
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
-          [[ "$RELEASE_TAG" =~ ^1\.[0-9]+\.[0-9]+$ ]] || {
-            echo 'Expected a stable 1.x semver tag' >&2
+          [[ "$RELEASE_TAG" =~ ^2\.[0-9]+\.[0-9]+$ ]] || {
+            echo 'Expected a stable 2.x semver tag' >&2
             exit 1
           }
-          version=$(python3 -c 'import xml.etree.ElementTree as ET; print(ET.parse("pom.xml").getroot().findtext("{http://maven.apache.org/POM/4.0.0}version"))')
+          version=$(sed -n 's/^VERSION_NAME=//p' gradle.properties)
           [[ "$RELEASE_TAG" == "$version" ]] || {
-            echo 'Release tag does not equal the POM version' >&2
+            echo 'Release tag does not equal VERSION_NAME' >&2
             exit 1
           }
           git merge-base --is-ancestor "$GITHUB_SHA" origin/master
 
   release:
     needs: guard
+    # Linux x86_64 produces identical path-normalized Apple klibs.
     runs-on: ubuntu-latest
-
+    timeout-minutes: 30
     permissions:
       contents: write
-
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-
       - name: Set up JDK
         uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: '17'
-          server-id: 'central'
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_PASSWORD
-          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
-          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+      - uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5
+      - name: Stage signed publications in Maven Central
+        run: ./gradlew publishToMavenCentral
         env:
-          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
-
-      - name: Build & Deploy to Maven Central
-        run: ./mvnw -B -P release clean deploy
-        env:
-          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
-
-      - name: Collect artifacts
-        run: |
-          mkdir artifacts
-          cp target/*.jar artifacts/
-
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_PRIVATE_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
       - name: Create draft GitHub Release
         uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
           draft: true
-          files: artifacts/*.jar
+          files: |
+            build/publishing/mavenCentral/**/*.jar
+            build/publishing/mavenCentral/**/*.klib
+            build/publishing/mavenCentral/**/*.pom
+          fail_on_unmatched_files: true

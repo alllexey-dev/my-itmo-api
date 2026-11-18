@@ -1,0 +1,18 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": [
+    {
+      "id": 1000,
+      "value": "100001"
+    },
+    {
+      "id": 1002,
+      "value": "100003"
+    },
+    {
+      "id": 1004,
+      "value": "100005"
+    }
+  ]
+}

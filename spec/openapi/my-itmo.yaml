@@ -1,0 +1,2890 @@
+openapi: 3.1.0
+info:
+  title: my.itmo.ru (unofficial)
+  version: 0.1.0
+  summary: Verified subset of the ITMO University student portal API.
+  description: |
+    Unofficial, reverse-engineered contract of https://my.itmo.ru used by the ITMO web portal.
+    Authentication is an ITMO.ID (Keycloak realm `itmo`) access token for the public client
+    `student-personal-cabinet`, sent as `Authorization: Bearer`. How to obtain and refresh it:
+    [auth.md](../auth.md). Responses are localized by `Accept-Language` (`ru` or `en`).
+
+    Most endpoints wrap payloads in `ResultResponse` (`error_code` 0 means success); schedule
+    endpoints use `DataResponse` (`code` 0 means success). Envelopes, error codes, date formats
+    and known quirks: [conventions.md](../conventions.md). Schemas allow unknown properties:
+    the server adds fields without notice.
+
+    Verification status: every GET operation is checked against live responses of a student
+    account. Of the write operations, sport lesson sign-up and cancellation, room booking and
+    cancellation, the request form update, request submission and withdrawal were performed
+    on a live account and rolled back; lesson group and competition sign-up are modelled from
+    the portal code. The service documents in [services/](../services/) give the status of
+    every endpoint.
+
+    This file is the source of the generated client in
+    [itmo-mcp](https://github.com/alllexey-dev/itmo-mcp); additional endpoints of the same host
+    are in `my-itmo-extra.yaml`.
+  license:
+    name: MIT
+    identifier: MIT
+servers:
+  - url: https://my.itmo.ru
+  - url: https://dev.my.itmo.su
+    description: Development environment
+security:
+  - itmoId: []
+tags:
+  - name: schedule
+  - name: recordbook
+  - name: studyplan
+  - name: personalities
+  - name: sport
+  - name: finances
+  - name: requests
+  - name: dormitory
+  - name: booking
+  - name: queues
+  - name: election
+paths:
+  /api/schedule/schedule/personal:
+    get:
+      operationId: getPersonalSchedule
+      tags: [schedule]
+      summary: Personal academic timetable for an inclusive date range
+      parameters:
+        - $ref: "#/components/parameters/DateStart"
+        - $ref: "#/components/parameters/DateEnd"
+      responses:
+        "200":
+          description: One entry per calendar day in the range
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/DataResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/ScheduleDay"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/schedule/meta/time_slots:
+    get:
+      operationId: getScheduleTimeSlots
+      tags: [schedule]
+      summary: Standard academic lesson intervals ("pairs")
+      responses:
+        "200":
+          description: Time slots ordered by `order`
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/DataResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/ScheduleTimeSlot"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/record_book/specializations:
+    get:
+      operationId: getRecordBookSpecializations
+      tags: [recordbook]
+      summary: Educational programs that have a record book, with their semesters
+      responses:
+        "200":
+          description: Specializations
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Specialization"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/record_book/{specializationId}/{semester}:
+    get:
+      operationId: getRecordBook
+      tags: [recordbook]
+      summary: Final results per discipline for one semester
+      parameters:
+        - name: specializationId
+          in: path
+          required: true
+          description: "`Specialization.main_plan`"
+          schema:
+            type: integer
+            format: int64
+        - name: semester
+          in: path
+          required: true
+          description: Sequential semester number in the plan, starting at 1
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: Record book entries
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/RecordBookEntry"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/record_book/{entryId}:
+    get:
+      operationId: getRecordBookControlEntries
+      tags: [recordbook]
+      summary: Assessment tree of one record book entry (flat list linked by parent_id)
+      parameters:
+        - name: entryId
+          in: path
+          required: true
+          description: "`RecordBookEntry.est_id`"
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Control entries
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/ControlEntry"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/eduPlanNew/programs:
+    get:
+      operationId: getStudyPlanPrograms
+      tags: [studyplan]
+      summary: Study plans available to the current user
+      responses:
+        "200":
+          description: Programs
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        $ref: "#/components/schemas/StudyPlanPrograms"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/eduPlanNew/study_plan/{planId}:
+    get:
+      operationId: getStudyPlan
+      tags: [studyplan]
+      summary: Full recursive study plan (blocks, modules, disciplines, workloads)
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          description: "`StudyPlanProgram.planId`"
+          schema:
+            type: integer
+            format: int64
+        - name: spec_id
+          in: query
+          description: "`StudyPlanProgram.specializationId`, when present"
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Study plan
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        $ref: "#/components/schemas/StudyPlan"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/personalities/persons/{isu}:
+    get:
+      operationId: getPerson
+      tags: [personalities]
+      summary: Public profile of a student or employee by ISU number
+      description: An unknown ISU returns HTTP 400 with `error_code` 100.
+      parameters:
+        - name: isu
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Profile
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        $ref: "#/components/schemas/Person"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/personalities/persons:
+    get:
+      operationId: searchPersons
+      tags: [personalities]
+      summary: Search people by name, ISU number and other attributes
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+        - name: offset
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 0
+      responses:
+        "200":
+          description: Page of short profiles; `count` is the total number of matches
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        required: [count, data]
+                        properties:
+                          count:
+                            type: integer
+                          data:
+                            type: array
+                            items:
+                              $ref: "#/components/schemas/PersonShort"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/sport/personal/score:
+    get:
+      operationId: getSportScore
+      tags: [sport]
+      summary: Physical education points and award history
+      parameters:
+        - name: semester_id
+          in: query
+          description: Sports semester id; the current semester when omitted
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Score
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        $ref: "#/components/schemas/SportScore"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/sport/semesters/list:
+    get:
+      operationId: getSportSemesters
+      tags: [sport]
+      summary: Sports semesters for the history selector
+      responses:
+        "200":
+          description: Semesters
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/SportSemesterOption"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/sport/semesters/current:
+    get:
+      operationId: getCurrentSportSemester
+      tags: [sport]
+      summary: Current sports semester with enrollment control dates
+      responses:
+        "200":
+          description: Semester
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        $ref: "#/components/schemas/SportSemester"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/sport/sign/schedule/filters:
+    get:
+      operationId: getSportScheduleFilters
+      tags: [sport]
+      summary: Filter options for the sports schedule (buildings, sections, sport types, teachers)
+      responses:
+        "200":
+          description: Filters
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        $ref: "#/components/schemas/SportFilters"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/sport/sign/schedule:
+    get:
+      operationId: getSportSchedule
+      tags: [sport]
+      summary: Sports lessons available for enrollment in an inclusive date range
+      parameters:
+        - $ref: "#/components/parameters/DateStart"
+        - $ref: "#/components/parameters/DateEnd"
+        - name: building_id
+          in: query
+          schema:
+            type: integer
+            format: int64
+        - name: sport_type_id
+          in: query
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+        - name: teacher_isu
+          in: query
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+      responses:
+        "200":
+          description: Lessons grouped by date
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/SportScheduleDay"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/sport/personal/calendar:
+    get:
+      operationId: getSportCalendar
+      tags: [sport]
+      summary: Personal sports calendar (enrolled lessons, including past ones) for an inclusive date range
+      parameters:
+        - $ref: "#/components/parameters/DateStart"
+        - $ref: "#/components/parameters/DateEnd"
+      responses:
+        "200":
+          description: Lessons grouped by date
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/SportScheduleDay"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/sport/sign/chosen:
+    get:
+      operationId: getSportChosen
+      tags: [sport]
+      summary: Selected sports sections, lesson groups and regular slots
+      responses:
+        "200":
+          description: Chosen sections
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/ChosenSportSection"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/sport/personal/have_attempts:
+    get:
+      operationId: getSportAttempts
+      tags: [sport]
+      summary: Used and remaining sports enrollment attempts
+      responses:
+        "200":
+          description: Attempts
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        $ref: "#/components/schemas/SportAttempts"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/sport/personal/debt:
+    get:
+      operationId: getSportDebt
+      tags: [sport]
+      summary: Physical education debt status
+      responses:
+        "200":
+          description: Debt
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        $ref: "#/components/schemas/SportDebt"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/sport/sport_types:
+    get:
+      operationId: getSportTypes
+      tags: [sport]
+      summary: Sports type catalog
+      responses:
+        "200":
+          description: Sport types
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/IdValuePair"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/finances/scholarship/total:
+    get:
+      operationId: getScholarshipTotal
+      tags: [finances]
+      summary: Scholarship and other accrual totals by category for an inclusive date range
+      parameters:
+        - name: dateFrom
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: dateTo
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Totals in rubles
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/ScholarshipTotal"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/requests/my:
+    get:
+      operationId: getMyRequests
+      tags: [requests]
+      summary: Requests (applications, certificates) submitted by the current user
+      responses:
+        "200":
+          description: Request summaries
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/RequestSummary"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/finances/scholarship/income:
+    get:
+      operationId: getScholarshipIncome
+      tags: [finances]
+      summary: Scholarship and other payouts, one entry per payment date
+      responses:
+        "200":
+          description: Payouts
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/ScholarshipPayout"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/finances/edupayments/contracts:
+    get:
+      operationId: getEduPaymentContracts
+      tags: [finances]
+      summary: Paid-education contracts (empty for state-funded students)
+      responses:
+        "200":
+          description: Contracts
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: [array, "null"]
+                        items:
+                          type: object
+        default:
+          $ref: "#/components/responses/Error"
+  /api/finances/edupayments/payments:
+    get:
+      operationId: getEduPayments
+      tags: [finances]
+      summary: Paid-education payment schedule and history (empty for state-funded students)
+      responses:
+        "200":
+          description: Payments
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: [array, "null"]
+                        items:
+                          type: object
+        default:
+          $ref: "#/components/responses/Error"
+  /api/dormitory/status/full:
+    get:
+      operationId: getDormitoryStatus
+      tags: [dormitory]
+      summary: Dormitory application status, queue place and assigned dormitory
+      responses:
+        "200":
+          description: Status
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        $ref: "#/components/schemas/DormitoryStatus"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/dormitory/payments/contracts/periods:
+    get:
+      operationId: getDormitoryPaymentPeriods
+      tags: [dormitory]
+      summary: Academic-year periods that have dormitory contracts
+      responses:
+        "200":
+          description: Periods
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          type: object
+                          required: [dateFrom, dateTo]
+                          properties:
+                            year:
+                              type: integer
+                            dateFrom:
+                              type: string
+                              format: date
+                            dateTo:
+                              type: string
+                              format: date
+        default:
+          $ref: "#/components/responses/Error"
+  /api/dormitory/payments/contracts:
+    get:
+      operationId: getDormitoryContracts
+      tags: [dormitory]
+      summary: Dormitory contracts with balance and payment schedule for a period
+      parameters:
+        - name: from
+          in: query
+          required: true
+          description: Period `dateFrom` from getDormitoryPaymentPeriods
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          required: true
+          description: Period `dateTo` from getDormitoryPaymentPeriods
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Contracts
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/DormitoryContract"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/booking/bookings/my:
+    get:
+      operationId: getMyRoomBookings
+      tags: [booking]
+      summary: Room bookings created by or shared with the current user
+      responses:
+        "200":
+          description: Bookings
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          count:
+                            type: integer
+                          list:
+                            type: array
+                            items:
+                              $ref: "#/components/schemas/RoomBooking"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/queues/current:
+    get:
+      operationId: getCurrentQueueEntries
+      tags: [queues]
+      summary: Active electronic queue appointments (dean's office, admissions, etc.)
+      responses:
+        "200":
+          description: Appointments
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/QueueEntry"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/queues/archive:
+    get:
+      operationId: getArchivedQueueEntries
+      tags: [queues]
+      summary: Past electronic queue appointments
+      responses:
+        "200":
+          description: Appointments
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/QueueEntry"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/sport/competitions/list:
+    get:
+      operationId: getSportCompetitions
+      tags: [sport]
+      summary: Upcoming university sports competitions with registration status
+      parameters:
+        - name: sport_type_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Competitions
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/SportCompetition"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/sport/personal/health_level:
+    get:
+      operationId: getSportHealthLevel
+      tags: [sport]
+      summary: Assigned medical health group for physical education
+      responses:
+        "200":
+          description: Health level
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          health_level:
+                            type: [object, "null"]
+                            properties:
+                              isu:
+                                type: integer
+                              id:
+                                type: integer
+                              name:
+                                type: string
+        default:
+          $ref: "#/components/responses/Error"
+  /api/election/students/availability:
+    get:
+      operationId: getElectionAvailability
+      tags: [election]
+      summary: Current discipline election (choice) campaign status and dates
+      responses:
+        "200":
+          description: Election campaign
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: [object, "null"]
+                        properties:
+                          id:
+                            type: integer
+                          status:
+                            type: string
+                          semesterStart:
+                            type: string
+                            format: date-time
+                          semesterEnd:
+                            type: string
+                            format: date-time
+                          dateStart:
+                            type: string
+                            format: date-time
+                          dateEnd:
+                            type: string
+                            format: date-time
+                          timeStart:
+                            type: string
+                          timeEnd:
+                            type: string
+                          studyYear:
+                            type: string
+                          semesterId:
+                            type: integer
+                          semester:
+                            type: integer
+        default:
+          $ref: "#/components/responses/Error"
+  /api/sport/sign/schedule/lessons:
+    post:
+      operationId: signInSportLessons
+      tags: [sport]
+      summary: Enroll in single free-attendance sports lessons (section_level 1)
+      description: Uses one enrollment attempt per lesson. A missed lesson burns the attempt; withdraw before it starts.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IdList"
+      responses:
+        "200":
+          description: Enrolled lesson ids
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdListResult"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: signOutSportLessons
+      tags: [sport]
+      summary: Withdraw from single sports lessons
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IdList"
+      responses:
+        "200":
+          description: Withdrawn lesson ids
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdListResult"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/sport/sign/schedule/lesson_groups/{lessonGroupId}:
+    post:
+      operationId: signInSportLessonGroup
+      tags: [sport]
+      summary: Join a whole-semester sports group (section_level 2-4)
+      description: Open classes (type_id 1 in a selection-based section) also send a questionnaire body; this contract omits it.
+      parameters:
+        - $ref: "#/components/parameters/LessonGroupId"
+      responses:
+        "200":
+          description: Joined
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultResponse"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: signOutSportLessonGroup
+      tags: [sport]
+      summary: Leave a whole-semester sports group
+      parameters:
+        - $ref: "#/components/parameters/LessonGroupId"
+      responses:
+        "200":
+          description: Left
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultResponse"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/sport/competitions/list/limits:
+    get:
+      operationId: getSportCompetitionLimits
+      tags: [sport]
+      summary: Places per competition discipline, keyed by discipline id
+      responses:
+        "200":
+          description: Limits
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: [object, "null"]
+                        additionalProperties:
+                          type: object
+                          properties:
+                            competition_id:
+                              type: integer
+                            limit:
+                              type: [integer, "null"]
+                            available:
+                              type: [integer, "null"]
+                            date_start:
+                              type: string
+                              format: date-time
+        default:
+          $ref: "#/components/responses/Error"
+  /api/sport/sign/competitions/{competitionId}:
+    post:
+      operationId: signInSportCompetition
+      tags: [sport]
+      summary: Register for a competition; the body replaces the selected disciplines
+      parameters:
+        - $ref: "#/components/parameters/CompetitionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IdList"
+      responses:
+        "200":
+          description: Registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultResponse"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: signOutSportCompetition
+      tags: [sport]
+      summary: Withdraw from a competition
+      parameters:
+        - $ref: "#/components/parameters/CompetitionId"
+      responses:
+        "200":
+          description: Withdrawn
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultResponse"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/booking/dictionary/rooms/groups:
+    get:
+      operationId: getBookingRoomGroups
+      tags: [booking]
+      summary: Room groups (assembly halls, coworkings, general classroom pool...)
+      responses:
+        "200":
+          description: Groups
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/BookingRoomGroup"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/booking/dictionary/rooms/categories:
+    get:
+      operationId: getBookingRoomCategories
+      tags: [booking]
+      summary: Categories (usually buildings or spaces) of a room group with allowed booking day range
+      parameters:
+        - name: groupId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Categories
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/BookingRoomCategory"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/booking/rooms/roomsInCategory:
+    get:
+      operationId: getBookingRooms
+      tags: [booking]
+      summary: Rooms of a category with capacity and equipment
+      parameters:
+        - name: categoryId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Rooms
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/BookingRoom"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/booking/rooms/roomBookings:
+    get:
+      operationId: getBookingRoomBookings
+      tags: [booking]
+      summary: Existing bookings of every room in a category on one date
+      description: Contains other people's names and ISU numbers; never pass them through.
+      parameters:
+        - name: categoryId
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: status
+          in: query
+          description: Booking status ids to include; the portal sends 1, 2, 5, 6, 8
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: integer
+      responses:
+        "200":
+          description: Rooms with bookings
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          type: object
+                          required: [room_id, bookings]
+                          properties:
+                            room_id:
+                              type: integer
+                            room_name:
+                              type: [string, "null"]
+                            room_number:
+                              type: [string, "null"]
+                            address:
+                              type: [string, "null"]
+                            bookings:
+                              type: array
+                              items:
+                                type: object
+                                required: [booking_id, start_datetime, end_datetime]
+                                properties:
+                                  booking_id:
+                                    type: integer
+                                  booking_name:
+                                    type: [string, "null"]
+                                  start_datetime:
+                                    type: string
+                                    format: date-time
+                                  end_datetime:
+                                    type: string
+                                    format: date-time
+                                  owner_isu:
+                                    type: [integer, "null"]
+                                  owner_fio:
+                                    type: [string, "null"]
+                                  status:
+                                    $ref: "#/components/schemas/BookingStatus"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/booking/rooms/byName:
+    get:
+      operationId: searchBookingRooms
+      tags: [booking]
+      summary: Find bookable rooms by name or number
+      parameters:
+        - name: search
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Rooms
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          type: object
+                          required: [room_id]
+                          properties:
+                            room_id:
+                              type: integer
+                            room_name:
+                              type: [string, "null"]
+                            group:
+                              $ref: "#/components/schemas/BookingRoomGroup"
+                            category:
+                              type: object
+                              properties:
+                                category_id:
+                                  type: integer
+                                category_name:
+                                  type: string
+        default:
+          $ref: "#/components/responses/Error"
+  /api/booking/users/status:
+    get:
+      operationId: getBookingUser
+      tags: [booking]
+      summary: Contact phone used to prefill booking forms
+      responses:
+        "200":
+          description: User
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: [object, "null"]
+                        properties:
+                          phone_number:
+                            type: [string, "null"]
+        default:
+          $ref: "#/components/responses/Error"
+  /api/booking/bookings/:
+    post:
+      operationId: createRoomBooking
+      tags: [booking]
+      summary: Book a room (array with exactly one booking)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              minItems: 1
+              maxItems: 1
+              items:
+                $ref: "#/components/schemas/NewRoomBooking"
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultResponse"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/booking/bookings/{bookingId}:
+    delete:
+      operationId: cancelRoomBooking
+      tags: [booking]
+      summary: Cancel an own booking that has not started yet
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Cancelled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultResponse"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/requests/all:
+    get:
+      operationId: getRequestCatalog
+      tags: [requests]
+      summary: Request and certificate templates grouped by category
+      responses:
+        "200":
+          description: Catalog
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          type: object
+                          required: [id, name, requests]
+                          properties:
+                            id:
+                              type: integer
+                            name:
+                              type: string
+                            order:
+                              type: [integer, "null"]
+                            requests:
+                              type: array
+                              items:
+                                type: object
+                                required: [id, name]
+                                properties:
+                                  id:
+                                    type: integer
+                                  name:
+                                    type: string
+                                  category_id:
+                                    type: integer
+                                  type:
+                                    type: [string, "null"]
+        default:
+          $ref: "#/components/responses/Error"
+  /api/requests/{templateId}:
+    get:
+      operationId: getRequestTemplate
+      tags: [requests]
+      summary: Form schema of a request template
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Template
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        $ref: "#/components/schemas/RequestTemplate"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/requests/dict/{dictionaryId}:
+    get:
+      operationId: getRequestDictionary
+      tags: [requests]
+      summary: Options of a dictionary field
+      parameters:
+        - name: dictionaryId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: field
+          in: query
+          schema:
+            type: integer
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: dep
+          in: query
+          description: Value of the field this dictionary depends on
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Options
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/RequestOption"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/requests/form_update:
+    post:
+      operationId: updateRequestForm
+      tags: [requests]
+      summary: Recompute which fields are visible after a change (no side effects)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [changed_field, current_values]
+              properties:
+                changed_field:
+                  type: [integer, string]
+                current_values:
+                  type: array
+                  items:
+                    type: object
+                    required: [field_id, value]
+                    properties:
+                      field_id:
+                        type: [integer, string]
+                      field_type:
+                        type: string
+                      value:
+                        type: string
+      responses:
+        "200":
+          description: Visibility changes
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: [object, "null"]
+                        properties:
+                          show:
+                            type: array
+                            items:
+                              type: [integer, string]
+                          hide:
+                            type: array
+                            items:
+                              type: [integer, string]
+        default:
+          $ref: "#/components/responses/Error"
+  /api/requests/send:
+    post:
+      operationId: sendRequest
+      tags: [requests]
+      summary: Submit a request (creates real work for a university office)
+      description: |
+        Value encoding by field type: dictionary - option id (comma-joined for multiple choice);
+        date - DD.MM.YYYY; date_time - DD.MM.YYYY HH:mm; other - plain string.
+        Validation errors come back as `result.error_list`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [request_id, values]
+              properties:
+                request_id:
+                  type: integer
+                  description: Template id
+                values:
+                  type: array
+                  items:
+                    type: object
+                    required: [field_id, field_type, value]
+                    properties:
+                      field_id:
+                        type: [integer, string]
+                      field_type:
+                        type: string
+                      value:
+                        type: string
+      responses:
+        "200":
+          description: Submitted
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        type: [object, "null"]
+                        properties:
+                          reqId:
+                            type: [integer, string, "null"]
+                          error_list:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                field_id:
+                                  type: [integer, string]
+                                error_text:
+                                  type: string
+        default:
+          $ref: "#/components/responses/Error"
+  /api/requests/my/{requestId}:
+    get:
+      operationId: getMyRequest
+      tags: [requests]
+      summary: Details of a submitted request
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+      responses:
+        "200":
+          description: Request
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ResultResponse"
+                  - type: object
+                    properties:
+                      result:
+                        $ref: "#/components/schemas/RequestDetails"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: cancelMyRequest
+      tags: [requests]
+      summary: Cancel a submitted request that is not processed or rejected yet (irreversible)
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+      responses:
+        "200":
+          description: Cancelled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultResponse"
+        default:
+          $ref: "#/components/responses/Error"
+components:
+  securitySchemes:
+    itmoId:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: ITMO.ID access token for client `student-personal-cabinet`. Claim `isu` holds the user's ISU number.
+  parameters:
+    LessonGroupId:
+      name: lessonGroupId
+      in: path
+      required: true
+      schema:
+        type: integer
+    CompetitionId:
+      name: competitionId
+      in: path
+      required: true
+      schema:
+        type: integer
+    RequestId:
+      name: requestId
+      in: path
+      required: true
+      schema:
+        type: integer
+    DateStart:
+      name: date_start
+      in: query
+      required: true
+      schema:
+        type: string
+        format: date
+    DateEnd:
+      name: date_end
+      in: query
+      required: true
+      schema:
+        type: string
+        format: date
+  responses:
+    Error:
+      description: Error envelope (`error_code` != 0) or a non-JSON gateway error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ResultResponse"
+  schemas:
+    ResultResponse:
+      type: object
+      properties:
+        error_code:
+          type: [integer, "null"]
+          description: 0 (or null in some newer services) means success
+        error_message:
+          type: [string, "null"]
+        result: {}
+    DataResponse:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: integer
+          description: 0 means success
+        message:
+          type: [string, "null"]
+        data: {}
+    IdValuePair:
+      type: object
+      required: [id, value]
+      properties:
+        id:
+          type: integer
+          format: int64
+        value:
+          type: string
+    HourMinute:
+      type: string
+      pattern: "^\\d{1,2}:\\d{2}$"
+      description: Local time HH:mm (Europe/Moscow)
+    ScheduleTimeSlot:
+      type: object
+      required: [id, time_start, time_end]
+      properties:
+        id:
+          type: integer
+        order:
+          type: integer
+        time_start:
+          $ref: "#/components/schemas/HourMinute"
+        time_end:
+          $ref: "#/components/schemas/HourMinute"
+    ScheduleDay:
+      type: object
+      required: [date, lessons]
+      properties:
+        day_number:
+          type: integer
+          description: ISO weekday, 1 is Monday
+        week_number:
+          type: integer
+          description: Academic week number
+        date:
+          type: string
+          format: date
+        note:
+          type: [string, "null"]
+        type: {}
+        lessons:
+          type: array
+          items:
+            $ref: "#/components/schemas/Lesson"
+    Lesson:
+      type: object
+      required: [pair_id, time_start, time_end]
+      properties:
+        pair_id:
+          type: integer
+          format: int64
+        subject:
+          type: [string, "null"]
+        subject_id:
+          type: [integer, "null"]
+          format: int64
+        note:
+          type: [string, "null"]
+        type:
+          type: [string, "null"]
+        time_start:
+          $ref: "#/components/schemas/HourMinute"
+        time_end:
+          $ref: "#/components/schemas/HourMinute"
+        teacher_id:
+          type: [integer, "null"]
+          description: Teacher ISU number
+        teacher_name:
+          type: [string, "null"]
+        room:
+          type: [string, "null"]
+        building:
+          type: [string, "null"]
+        format:
+          type: [string, "null"]
+          description: In-person, mixed or remote
+        format_id:
+          type: [integer, "null"]
+          description: 1 in-person, 2 mixed, 3 remote
+        work_type:
+          type: [string, "null"]
+          description: Lecture, practice, laboratory, exam...
+        work_type_id:
+          type: [integer, "null"]
+          description: 1 lecture, 2 laboratory, 3 practice, 5 exam, 6 credit, 10 consultation, 11 sport
+        group:
+          type: [string, "null"]
+        flow_type_id:
+          type: [integer, "null"]
+          description: 2 academic, 3 sport, 5 room reservation
+        flow_id:
+          type: [integer, "null"]
+        zoom_url:
+          type: [string, "null"]
+        zoom_password:
+          type: [string, "null"]
+        zoom_info:
+          type: [string, "null"]
+        bld_id:
+          type: [integer, "null"]
+        main_bld_id:
+          type: [integer, "null"]
+    Specialization:
+      type: object
+      required: [main_plan, specialization_name, semesters]
+      properties:
+        main_plan:
+          type: integer
+          format: int64
+          description: Use as `specializationId` in getRecordBook
+        specialization_name:
+          type: string
+        semesters:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecordBookSemester"
+    RecordBookSemester:
+      type: object
+      required: [semester]
+      properties:
+        study_year:
+          type: string
+          description: Academic year, e.g. 2025/2026
+        semester:
+          type: integer
+        course:
+          type: integer
+        actual:
+          type: boolean
+          description: Current period
+    RecordBookTeacher:
+      type: [object, "null"]
+      properties:
+        surname:
+          type: [string, "null"]
+        name:
+          type: [string, "null"]
+        patronymic:
+          type: [string, "null"]
+    RecordBookEntry:
+      type: object
+      required: [name, est_id]
+      properties:
+        name:
+          type: string
+        discipline_id:
+          type: integer
+          format: int64
+        est_id:
+          type: integer
+          format: int64
+          description: Use as `entryId` in getRecordBookControlEntries
+        current_score:
+          type: [number, "null"]
+        rate:
+          type: [string, "null"]
+          description: Grade, e.g. "5/A", "4/B", "Зачёт", "Незачёт"
+        attempt:
+          type: [integer, "null"]
+        control_type:
+          type: [string, "null"]
+          description: Final assessment type, e.g. Экзамен, Зачёт
+        control_type_id:
+          type: [integer, "null"]
+        exam_date:
+          type: [string, "null"]
+          format: date-time
+        have_tree:
+          type: boolean
+        lms_link:
+          type: [string, "null"]
+        teacher:
+          $ref: "#/components/schemas/RecordBookTeacher"
+    ControlEntry:
+      type: object
+      required: [id, control_name]
+      properties:
+        id:
+          type: integer
+          format: int64
+        control_name:
+          type: string
+        parent_id:
+          type: [integer, "null"]
+          format: int64
+        lower_value:
+          type: [number, "null"]
+        min_value:
+          type: [number, "null"]
+        max_value:
+          type: [number, "null"]
+        required:
+          type: [boolean, "null"]
+        rate:
+          type: [number, "null"]
+          description: Actual points; null when not graded yet
+        date:
+          type: [string, "null"]
+          format: date-time
+        teacher:
+          $ref: "#/components/schemas/RecordBookTeacher"
+    StudyPlanPrograms:
+      type: object
+      required: [programs]
+      properties:
+        isu:
+          type: integer
+        programs:
+          type: array
+          items:
+            type: object
+            required: [planId, name]
+            properties:
+              planId:
+                type: integer
+                format: int64
+              specializationId:
+                type: [integer, "null"]
+                format: int64
+              name:
+                type: string
+              isActive:
+                type: boolean
+    StudyPlan:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: integer
+          format: int64
+        currentSemester:
+          type: [integer, "null"]
+        currentSemesterId:
+          type: [integer, "null"]
+        semestersCount:
+          type: [integer, "null"]
+        planInfo:
+          type: [object, "null"]
+          properties:
+            directionCode:
+              type: [string, "null"]
+            directionName:
+              type: [string, "null"]
+            levelQualification:
+              type: [string, "null"]
+            planType:
+              type: [string, "null"]
+            programName:
+              type: [string, "null"]
+            startYear:
+              type: [integer, "null"]
+        semesters:
+          type: array
+          items:
+            type: object
+            properties:
+              semester:
+                type: integer
+              semesterId:
+                type: integer
+              semesterParity:
+                type: integer
+              studyYear:
+                type: string
+        structure:
+          type: array
+          items:
+            $ref: "#/components/schemas/StudyPlanNode"
+    StudyPlanNode:
+      type: object
+      required: [id, name, type]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        type:
+          type: string
+          description: block, module or discipline
+        moduleId:
+          type: [integer, "null"]
+        blockId:
+          type: [integer, "null"]
+        blockName:
+          type: [string, "null"]
+        choiceParameterId:
+          type: [integer, "null"]
+        choiceParameterName:
+          type: [string, "null"]
+        choiceAvailable:
+          type: [boolean, "null"]
+        flowSelectable:
+          type: [boolean, "null"]
+        replaceable:
+          type: [boolean, "null"]
+        startSemesterSelectable:
+          type: [boolean, "null"]
+        creditPoints:
+          type: [integer, "null"]
+        disciplineDuration:
+          type: [integer, "null"]
+        description:
+          type: [string, "null"]
+        langCode:
+          type: [string, "null"]
+        langName:
+          type: [string, "null"]
+        rpdUrl:
+          type: [string, "null"]
+        department:
+          type: [object, "null"]
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            shortName:
+              type: [string, "null"]
+        rules:
+          type: [array, "null"]
+          items:
+            type: integer
+        children:
+          type: [array, "null"]
+          items:
+            $ref: "#/components/schemas/StudyPlanNode"
+        contents:
+          type: [object, "null"]
+          description: Semester number (as string) to workloads
+          additionalProperties:
+            type: array
+            items:
+              $ref: "#/components/schemas/StudyPlanContent"
+    StudyPlanContent:
+      type: object
+      properties:
+        id:
+          type: integer
+        moduleId:
+          type: [integer, "null"]
+        disciplineId:
+          type: [integer, "null"]
+        order:
+          type: [integer, "null"]
+        semester:
+          type: integer
+        creditPoints:
+          type: [number, "null"]
+        activities:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              contentId:
+                type: integer
+              name:
+                type: string
+              volume:
+                type: [number, "null"]
+                description: Academic hours
+              workTypeId:
+                type: integer
+    Person:
+      type: object
+      required: [isu, fio]
+      properties:
+        isu:
+          type: integer
+        fio:
+          type: string
+        gender:
+          type: [string, "null"]
+        photo:
+          type: [string, "null"]
+        contacts:
+          type: array
+          items:
+            type: object
+            properties:
+              contact:
+                type: array
+                items:
+                  type: string
+              contact_alias:
+                type: string
+        rooms:
+          type: array
+          items:
+            type: object
+            properties:
+              room_number:
+                type: [string, "null"]
+              bld_name:
+                type: [string, "null"]
+        positions:
+          type: array
+          items:
+            type: object
+            properties:
+              department_name:
+                type: [string, "null"]
+              department_link:
+                type: [string, "null"]
+              position_name:
+                type: [string, "null"]
+              vacation: {}
+              start_vacation: {}
+              end_vacation: {}
+        education:
+          type: array
+          items:
+            type: object
+            properties:
+              course:
+                type: [string, "null"]
+              faculty_name:
+                type: [string, "null"]
+              group:
+                type: [string, "null"]
+        powers:
+          type: [array, "null"]
+          items:
+            type: object
+            properties:
+              dep_name:
+                type: [string, "null"]
+              dep_link:
+                type: [string, "null"]
+              power_name:
+                type: [string, "null"]
+        levels:
+          type: [object, "null"]
+          properties:
+            rank:
+              type: [string, "null"]
+            degree:
+              type: [string, "null"]
+        activities: {}
+        exchange_training:
+          type: [boolean, "null"]
+    PersonShort:
+      type: object
+      required: [id, fio]
+      properties:
+        id:
+          type: integer
+          description: Usually the ISU number
+        fio:
+          type: string
+        gender:
+          type: [string, "null"]
+        phone:
+          type: [string, "null"]
+        email:
+          type: [string, "null"]
+        work:
+          type: [string, "null"]
+        photo:
+          type: [string, "null"]
+        education: {}
+    SportScore:
+      type: object
+      required: [sum]
+      properties:
+        sum:
+          type: object
+          properties:
+            attendances:
+              type: number
+              description: Points from lesson attendance
+            other:
+              type: number
+              description: Bonus points and other awards
+        attendances:
+          type: [array, "null"]
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                description: lesson or competition
+              name:
+                type: string
+              evaluation_id:
+                type: [integer, "null"]
+              evaluation_name:
+                type: [string, "null"]
+              section_level:
+                type: [integer, "null"]
+              score:
+                type: number
+              date:
+                type: string
+                format: date-time
+              is_competition:
+                type: boolean
+              discipline_name:
+                type: [string, "null"]
+              competition_name:
+                type: [string, "null"]
+              place:
+                type: [string, "null"]
+    SportSemesterOption:
+      type: object
+      required: [id, value]
+      properties:
+        id:
+          type: integer
+        value:
+          type: string
+        comment:
+          type: [string, "null"]
+    SportSemester:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: integer
+        study_year:
+          type: string
+        semester:
+          type: integer
+        date_start:
+          type: string
+          format: date-time
+        date_end:
+          type: string
+          format: date-time
+        hard_date_end:
+          type: string
+          format: date-time
+        choice_start:
+          type: string
+          format: date-time
+        bachelor_bound:
+          type: string
+          format: date-time
+        ppa1_start:
+          type: string
+          format: date-time
+        ppa1_end:
+          type: string
+          format: date-time
+        ppa2_start:
+          type: string
+          format: date-time
+        ppa2_end:
+          type: string
+          format: date-time
+        current:
+          type: boolean
+        sign_duration:
+          type: integer
+    SportFilters:
+      type: object
+      properties:
+        building_id:
+          type: array
+          description: -1 is Online, 0 is Other venues
+          items:
+            $ref: "#/components/schemas/IdValuePair"
+        section_id:
+          type: array
+          items:
+            $ref: "#/components/schemas/IdValuePair"
+        sport_type_id:
+          type: array
+          items:
+            $ref: "#/components/schemas/IdValuePair"
+        teacher_isu:
+          type: array
+          items:
+            $ref: "#/components/schemas/IdValuePair"
+    SportScheduleDay:
+      type: object
+      required: [date]
+      properties:
+        date:
+          type: string
+          format: date
+        lessons:
+          type: [array, "null"]
+          items:
+            $ref: "#/components/schemas/SportLesson"
+    SportLesson:
+      type: object
+      required: [id, date, date_end]
+      properties:
+        id:
+          type: integer
+          format: int64
+        date:
+          type: string
+          format: date-time
+        date_end:
+          type: string
+          format: date-time
+        section_id:
+          type: integer
+        section_name:
+          type: string
+        section_level:
+          type: integer
+          description: 1 free attendance, 2 selection-based section
+        lesson_group_id:
+          type: [integer, "null"]
+        lesson_level:
+          type: [integer, "null"]
+          description: 1 open, 2 training, 3 intermediate, 4 team
+        type_id:
+          type: integer
+          description: 1 open, 2 free attendance, 5 debt, 6 standards, 7 externship, 8 additional
+        building_id:
+          type: [integer, "null"]
+          description: null for Online
+        room_id:
+          type: [integer, "null"]
+          description: -1 is Online
+        room_name:
+          type: [string, "null"]
+        limit:
+          type: integer
+          description: Total places
+        available:
+          type: integer
+          description: Free places
+        comment:
+          type: [string, "null"]
+        time_slot_id:
+          type: [integer, "null"]
+        time_slot_start:
+          $ref: "#/components/schemas/HourMinute"
+        time_slot_end:
+          $ref: "#/components/schemas/HourMinute"
+        intersection:
+          type: boolean
+          description: Overlaps another event of the user
+        can_sign_in:
+          type: object
+          properties:
+            can_sign_in:
+              type: boolean
+            unavailable_reasons:
+              description: Localized refusal reasons; observed as an array, an index-keyed object ({"0":"..."}) or null
+              anyOf:
+                - type: array
+                  items:
+                    type: string
+                - type: object
+                  additionalProperties:
+                    type: string
+                - type: "null"
+        other_lessons:
+          type: [array, "null"]
+          items:
+            type: object
+        signed:
+          type: boolean
+          description: The user is enrolled
+        teacher_isu:
+          type: [integer, "null"]
+        teacher_fio:
+          type: [string, "null"]
+    ChosenSportSection:
+      type: object
+      required: [id, section_name]
+      properties:
+        id:
+          type: integer
+        section_name:
+          type: string
+        level:
+          type: integer
+        lesson_groups:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              level:
+                type: integer
+              level_name:
+                type: string
+              has_future_lessons:
+                type: boolean
+              lessons:
+                type: [array, "null"]
+                items:
+                  $ref: "#/components/schemas/ChosenSportLesson"
+              weekdays:
+                type: [array, "null"]
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/ChosenSportLesson"
+                    - type: object
+                      properties:
+                        weekday:
+                          type: string
+    ChosenSportLesson:
+      type: object
+      properties:
+        id:
+          type: integer
+        date_start:
+          type: [string, "null"]
+          format: date-time
+        date_end:
+          type: [string, "null"]
+          format: date-time
+        time_slot_id:
+          type: [integer, "null"]
+        time_start:
+          $ref: "#/components/schemas/HourMinute"
+        time_end:
+          $ref: "#/components/schemas/HourMinute"
+        room_id:
+          type: [integer, "null"]
+        room_name:
+          type: [string, "null"]
+        teacher_isu:
+          type: [integer, "null"]
+        teacher_fio:
+          type: [string, "null"]
+        type_id:
+          type: [integer, "null"]
+        link_url:
+          type: [string, "null"]
+        comment:
+          type: [string, "null"]
+        intersection:
+          type: boolean
+    SportAttempts:
+      type: object
+      properties:
+        total_attempts:
+          type: integer
+        used_attempts:
+          type: integer
+        free_attempts:
+          type: integer
+        can_sign_in:
+          type: boolean
+    SportDebt:
+      type: object
+      required: [is_having_debt]
+      properties:
+        is_having_debt:
+          type: boolean
+        needed_score:
+          type: [number, "null"]
+        free_attempts:
+          type: [integer, "null"]
+    ScholarshipTotal:
+      type: object
+      required: [category_id, category_name, sum]
+      properties:
+        category_id:
+          type: integer
+        category_name:
+          type: string
+        sum:
+          type: number
+          description: Rubles
+    RequestSummary:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        notice:
+          type: [string, "null"]
+        status:
+          type: integer
+        status_name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    ScholarshipPayout:
+      type: object
+      required: [payment_date, payment]
+      properties:
+        payment_date:
+          type: string
+          format: date-time
+        payment:
+          type: object
+          properties:
+            income:
+              type: array
+              description: Amounts credited to the bank account
+              items:
+                $ref: "#/components/schemas/ScholarshipPayoutItem"
+            income_details:
+              type: array
+              description: Breakdown by accrual type
+              items:
+                $ref: "#/components/schemas/ScholarshipPayoutItem"
+    ScholarshipPayoutItem:
+      type: object
+      properties:
+        item_id:
+          type: integer
+        item_name:
+          type: string
+        sum:
+          type: number
+          description: Rubles
+        account:
+          type: [string, "null"]
+          description: Masked bank account
+        comment:
+          type: [string, "null"]
+    DormitoryStatus:
+      type: [object, "null"]
+      properties:
+        statusId:
+          type: [integer, "null"]
+        queuePlace:
+          type: [integer, "null"]
+        dormType:
+          type: [string, "null"]
+        assignedDormitory:
+          type: [object, "null"]
+          properties:
+            buildingId:
+              type: integer
+            name:
+              type: string
+            address:
+              type: string
+            settlementProcedureText:
+              type: [string, "null"]
+              description: HTML
+    DormitoryContract:
+      type: object
+      required: [contractId, number]
+      properties:
+        contractId:
+          type: string
+        number:
+          type: string
+        name:
+          type: string
+        dateStart:
+          type: string
+          format: date-time
+        dateEnd:
+          type: string
+          format: date-time
+        active:
+          type: boolean
+        balance:
+          type: number
+          description: Rubles; negative means debt
+        payments:
+          type: array
+          items:
+            type: object
+            properties:
+              sum:
+                type: number
+              paid:
+                type: number
+              payUntil:
+                type: string
+                format: date-time
+              period:
+                type: string
+    RoomBooking:
+      type: object
+      required: [booking_id, start_datetime, end_datetime]
+      properties:
+        booking_id:
+          type: integer
+        start_datetime:
+          type: string
+          format: date-time
+        end_datetime:
+          type: string
+          format: date-time
+        name:
+          type: [string, "null"]
+        participants:
+          type: [integer, "null"]
+        owner_isu:
+          type: [integer, "null"]
+        owner_fio:
+          type: [string, "null"]
+        contact_phone:
+          type: [string, "null"]
+        room:
+          type: object
+          properties:
+            room_id:
+              type: integer
+            room_name:
+              type: [string, "null"]
+            room_number:
+              type: [string, "null"]
+            address:
+              type: [string, "null"]
+        equipment:
+          type: array
+        status:
+          type: object
+          properties:
+            status_id:
+              type: integer
+            status_name:
+              type: string
+        category:
+          type: [object, "null"]
+          properties:
+            category_id:
+              type: integer
+            category_name:
+              type: string
+        co_bookers:
+          type: array
+        building_id:
+          type: [integer, "null"]
+        link_to_virtual_room:
+          type: [string, "null"]
+        password_for_virtual_room:
+          type: [string, "null"]
+        password_for_room:
+          type: [string, "null"]
+        created_at:
+          type: [string, "null"]
+    QueueEntry:
+      type: object
+      properties:
+        table_id:
+          type: integer
+        table_name:
+          type: string
+          description: Queue (service point) name
+        table_address:
+          type: [string, "null"]
+        queue_comment:
+          type: [string, "null"]
+        application_id:
+          type: integer
+        type_id:
+          type: integer
+        date:
+          type: string
+          format: date-time
+        phone:
+          type: [string, "null"]
+        comment:
+          type: [string, "null"]
+        consult_id:
+          type: [integer, "null"]
+        consult_fio:
+          type: [string, "null"]
+    SportCompetition:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+        competition_type_id:
+          type: integer
+        competition_type_name:
+          type: string
+        name:
+          type: string
+        sport_type_id:
+          type: integer
+        sport_type_name:
+          type: string
+        building_id:
+          type: [integer, "null"]
+        building_name:
+          type: [string, "null"]
+        date_start:
+          type: string
+          format: date-time
+        date_end:
+          type: string
+          format: date-time
+        free_registration:
+          type: boolean
+        competition_status_id:
+          type: integer
+        competition_status_name:
+          type: string
+        limit:
+          type: [integer, "null"]
+        available:
+          type: [integer, "null"]
+        registration_link:
+          type: [string, "null"]
+        disciplines:
+          type: array
+          items:
+            type: object
+            required: [id, name]
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              signed:
+                type: integer
+                description: Greater than 0 when the student is registered
+        sign_in_info:
+          type: object
+          properties:
+            can_sign_in:
+              type: boolean
+            unavailable_reasons: {}
+        signed:
+          type: integer
+    IdList:
+      type: array
+      items:
+        type: integer
+        format: int64
+    IdListResult:
+      allOf:
+        - $ref: "#/components/schemas/ResultResponse"
+        - type: object
+          properties:
+            result:
+              type: [array, "null"]
+              items:
+                type: integer
+                format: int64
+    BookingStatus:
+      type: object
+      properties:
+        status_id:
+          type: integer
+          description: 1 approved, 2 sent, 3 rejected, 4 draft, 5 needs editing, 6 under review, 7 cancelled, 8 done
+        status_name:
+          type: string
+    BookingRoomGroup:
+      type: object
+      required: [group_id, group_name]
+      properties:
+        group_id:
+          type: integer
+        group_name:
+          type: string
+        can_book_unconfirmed:
+          type: [boolean, "null"]
+    BookingRoomCategory:
+      type: object
+      required: [category_id, category_name]
+      properties:
+        category_id:
+          type: integer
+        category_name:
+          type: string
+        min_days:
+          type: [integer, "null"]
+          description: Earliest bookable date, days from today
+        max_days:
+          type: [integer, "null"]
+          description: Latest bookable date, days from today
+    BookingRoom:
+      type: object
+      required: [room_id]
+      properties:
+        room_id:
+          type: integer
+        room_name:
+          type: [string, "null"]
+        room_number:
+          type: [string, "null"]
+        address:
+          type: [string, "null"]
+        floor:
+          type: [string, "null"]
+        area:
+          type: [string, "null"]
+        building_id:
+          type: [integer, "null"]
+        min_cap:
+          type: [integer, "null"]
+        max_cap:
+          type: [integer, "null"]
+        equipment:
+          type: [array, "null"]
+          items:
+            type: object
+            properties:
+              equipment_id:
+                type: integer
+              equipment_name:
+                type: string
+              count:
+                type: integer
+        category:
+          type: object
+          properties:
+            category_id:
+              type: integer
+            category_name:
+              type: string
+        group:
+          $ref: "#/components/schemas/BookingRoomGroup"
+    NewRoomBooking:
+      type: object
+      required: [name, participants, contact_phone, start_datetime, end_datetime, room_id]
+      properties:
+        name:
+          type: string
+        additional_info:
+          type: [string, "null"]
+        participants:
+          type: integer
+        contact_phone:
+          type: string
+          pattern: "^\\+7 \\(\\d{3}\\) \\d{3}-\\d{2}-\\d{2}$"
+        event_id:
+          type: [integer, "null"]
+        co_bookers:
+          type: array
+          items:
+            type: integer
+        start_datetime:
+          type: string
+          description: Local Moscow time "YYYY-MM-DD HH:mm"
+        end_datetime:
+          type: string
+          description: Local Moscow time "YYYY-MM-DD HH:mm"
+        room_id:
+          type: integer
+        equipment:
+          type: array
+          items:
+            type: object
+        tech_support:
+          type: boolean
+    RequestOption:
+      type: object
+      required: [id, text]
+      properties:
+        id:
+          type: [string, integer]
+        text:
+          type: string
+    RequestTemplate:
+      type: object
+      required: [template_name, fields_data]
+      properties:
+        template_name:
+          type: string
+        template_description:
+          type: [string, "null"]
+          description: HTML
+        template_files:
+          type: [array, "null"]
+          items:
+            type: object
+            properties:
+              file_id:
+                type: [integer, string]
+              file_name:
+                type: string
+        responsible_units:
+          type: [array, "null"]
+          items:
+            type: object
+            properties:
+              dep_name:
+                type: string
+              dep_link:
+                type: [string, "null"]
+        unique_flag:
+          type: [boolean, "null"]
+        user_can_apply_now:
+          type: [boolean, "null"]
+        user_cannot_apply_now_reason:
+          type: [string, "null"]
+        fields_data:
+          type: array
+          items:
+            $ref: "#/components/schemas/RequestField"
+    RequestField:
+      type: object
+      required: [field_id, field_name, field_type]
+      properties:
+        field_id:
+          type: integer
+        field_name:
+          type: string
+        field_type:
+          type: string
+          description: text, number, date, date_time, dictionary, file or multiple_field
+        required_field_flag:
+          type: [boolean, "null"]
+        disabled_field_flag:
+          type: [boolean, "null"]
+        show_condition_flag:
+          type: [boolean, "null"]
+          description: Visible initially
+        dictionary_id:
+          type: [integer, "null"]
+        dependent_field_id:
+          type: [integer, "null"]
+        multiple_choice:
+          type: [boolean, "null"]
+        default_value: {}
+        init_dictionary:
+          oneOf:
+            - $ref: "#/components/schemas/RequestOption"
+            - type: "null"
+        field_note:
+          type: [string, "null"]
+    RequestDetails:
+      type: object
+      required: [request_id]
+      properties:
+        request_id:
+          type: integer
+        request_name:
+          type: string
+        request_state:
+          type: [string, "null"]
+        request_status:
+          type: [string, "null"]
+        request_status_tag:
+          type: [string, "null"]
+          description: processed, rejected or other
+        request_create_date:
+          type: [string, "null"]
+        entered_fields:
+          type: array
+          items:
+            type: object
+            properties:
+              field_id:
+                type: integer
+              name:
+                type: string
+              type:
+                type: string
+              data:
+                type: [string, "null"]
+        print_files:
+          type: [array, "null"]
+          items:
+            type: object
+            properties:
+              print_file_name:
+                type: string
+              print_file_path:
+                type: string

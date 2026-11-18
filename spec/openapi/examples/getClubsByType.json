@@ -1,0 +1,27 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": [
+    {
+      "id": 1000,
+      "name": "synthetic-1",
+      "short_description": "synthetic-2",
+      "card_image": "synthetic-3",
+      "is_member": false
+    },
+    {
+      "id": 1004,
+      "name": "synthetic-5",
+      "short_description": "synthetic-6",
+      "card_image": "synthetic-7",
+      "is_member": false
+    },
+    {
+      "id": 1008,
+      "name": "synthetic-9",
+      "short_description": "synthetic-10",
+      "card_image": "synthetic-11",
+      "is_member": false
+    }
+  ]
+}

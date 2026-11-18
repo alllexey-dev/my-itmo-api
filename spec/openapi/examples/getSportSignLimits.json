@@ -1,0 +1,80 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": {
+    "0": {
+      "0": {
+        "limit": 4648,
+        "available": 4649
+      },
+      "5": {
+        "limit": 4644,
+        "available": 4645
+      },
+      "6": {
+        "limit": 4646,
+        "available": 4647
+      }
+    },
+    "1": {
+      "0": {
+        "limit": 4622,
+        "available": 4623
+      }
+    },
+    "2": {
+      "3": {
+        "limit": 4650,
+        "available": 4651
+      }
+    },
+    "3": {
+      "2": {
+        "limit": 4614,
+        "available": 4615
+      }
+    },
+    "4": {
+      "1": {
+        "limit": 4626,
+        "available": 4627
+      },
+      "2": {
+        "limit": 4628,
+        "available": 4629
+      },
+      "4": {
+        "limit": 4630,
+        "available": 4631
+      },
+      "5": {
+        "limit": 4632,
+        "available": 4633
+      },
+      "6": {
+        "limit": 4634,
+        "available": 4635
+      }
+    },
+    "5": {
+      "0": {
+        "limit": 4636,
+        "available": 4637
+      },
+      "1": {
+        "limit": 4638,
+        "available": 4639
+      },
+      "2": {
+        "limit": 4640,
+        "available": 4641
+      }
+    },
+    "6": {
+      "4": {
+        "limit": 4642,
+        "available": 4643
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": {
+    "brief_id": 1000,
+    "signed": true,
+    "briefs": [
+      {
+        "file_name": "synthetic-1",
+        "semester_id": 1002,
+        "url": "synthetic-3"
+      }
+    ]
+  }
+}

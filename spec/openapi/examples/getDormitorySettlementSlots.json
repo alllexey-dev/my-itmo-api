@@ -1,0 +1,18 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": [
+    {
+      "timeSlotId": 1000,
+      "timeSlot": "2026-09-01T10:00:00+03:00"
+    },
+    {
+      "timeSlotId": 1001,
+      "timeSlot": "2026-09-01T10:00:00+03:00"
+    },
+    {
+      "timeSlotId": 1002,
+      "timeSlot": "2026-09-01T10:00:00+03:00"
+    }
+  ]
+}

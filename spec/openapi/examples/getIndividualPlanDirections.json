@@ -1,0 +1,21 @@
+{
+  "error_code": null,
+  "error_message": null,
+  "result": [
+    {
+      "id": 1000,
+      "code": "synthetic-1",
+      "name": "synthetic-2"
+    },
+    {
+      "id": 1003,
+      "code": "synthetic-4",
+      "name": "synthetic-5"
+    },
+    {
+      "id": 1006,
+      "code": "synthetic-7",
+      "name": "synthetic-8"
+    }
+  ]
+}

@@ -7,8 +7,8 @@
 </p>
 
 <p align="center">
-  <a href="https://central.sonatype.com/artifact/dev.alllexey/my-itmo-api-kmp"><img src="https://img.shields.io/maven-central/v/dev.alllexey/my-itmo-api-kmp?style=flat-square&color=blue" alt="Maven Central" /></a>
-  <a href="https://github.com/alllexey-dev/my-itmo-api/actions/workflows/kmp-ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/alllexey-dev/my-itmo-api/kmp-ci.yml?branch=master&style=flat-square&label=CI" alt="CI" /></a>
+  <a href="https://central.sonatype.com/artifact/dev.alllexey/my-itmo-api"><img src="https://img.shields.io/maven-central/v/dev.alllexey/my-itmo-api?style=flat-square&color=blue" alt="Maven Central" /></a>
+  <a href="https://github.com/alllexey-dev/my-itmo-api/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/alllexey-dev/my-itmo-api/ci.yml?branch=master&style=flat-square&label=CI" alt="CI" /></a>
   <img src="https://img.shields.io/badge/JVM%20%C2%B7%20Android%20%C2%B7%20iOS-7F52FF?style=flat-square&logo=kotlin&logoColor=white" alt="JVM, Android, iOS" />
   <a href="LICENSE"><img src="https://img.shields.io/github/license/alllexey-dev/my-itmo-api?style=flat-square" alt="Лицензия" /></a>
 </p>
@@ -16,41 +16,47 @@
 <p align="center">
   <a href="#быстрый-старт"><strong>Быстрый старт</strong></a> ·
   <a href="#что-умеет">Что умеет</a> ·
-  <a href="docs/advanced.md">Продвинутая настройка</a> ·
-  <a href="#переход-с-1x">Переход с 1.x</a> ·
+  <a href="#документация">Документация</a> ·
+  <a href="spec/README.md">Описание API ИТМО</a> ·
   <a href="CHANGELOG.md">История изменений</a>
 </p>
 
-## Быстрый старт
+В репозитории две вещи:
 
-Два шага: зависимость, затем клиент и вызов.
+- **библиотека** для Kotlin и Java: вход через ITMO.ID, автоматическое обновление токенов и типизированные
+  методы My ITMO и БАРС;
+- **[описание API ИТМО](spec/README.md)**, не привязанное к языку: как устроен вход, какие есть ручки, спецификации
+  OpenAPI и примеры ответов. По нему можно написать свой клиент на Python, Go, TypeScript или чём угодно.
+
+## Быстрый старт
 
 ### 1. Зависимость
 
-Gradle (Kotlin, Android):
+Gradle:
 
 ```kotlin
-implementation("dev.alllexey:my-itmo-api-kmp:2.4.0")
+implementation("dev.alllexey:my-itmo-api:2.5.0")
 ```
 
-Maven (Java):
+Maven:
 
 ```xml
 <dependency>
     <groupId>dev.alllexey</groupId>
-    <artifactId>my-itmo-api-kmp-jvm</artifactId>
-    <version>2.4.0</version>
+    <artifactId>my-itmo-api</artifactId>
+    <version>2.5.0</version>
 </dependency>
 ```
 
-### 2. Клиент и вызов
+Имя одно для всех проектов: Kotlin Multiplatform, Android, Kotlin и Java на JVM.
 
-Kotlin/JVM: расписание на неделю вперёд.
+### 2. Вход и первый запрос
+
+Kotlin: расписание на неделю вперёд.
 
 ```kotlin
 import dev.alllexey.itmoapi.MyItmo
 import dev.alllexey.itmoapi.core.MOSCOW
-import dev.alllexey.itmoapi.core.requireResult
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
@@ -59,7 +65,7 @@ import kotlin.time.Clock
 suspend fun main() {
     MyItmo.login("my_cool_id", "my_strong_password").use { itmo ->
         val today = Clock.System.todayIn(MOSCOW)
-        val week = itmo.schedule.getPersonalSchedule(today, today.plus(6, DateTimeUnit.DAY)).requireResult()
+        val week = itmo.schedule.getPersonalSchedule(today, today.plus(6, DateTimeUnit.DAY))
         for (day in week) {
             println("${day.date}: " + day.lessons.joinToString { "${it.timeStart} ${it.subject}" })
         }
@@ -67,224 +73,98 @@ suspend fun main() {
 }
 ```
 
-Кроме логина и пароля:
+На Kotlin 2.2 этому примеру нужен opt-in для `kotlin.time.Clock`, см. [требования](#требования).
 
-- `MyItmo.fromRefreshToken(token)` - из refresh token (например, сохранённого
-  раньше); токен сразу проверяется;
-- `MyItmo.fromStorage(storage)` - из сессии, уже лежащей в хранилище, без
-  запросов к сети.
-
-Разделы: `schedule`, `recordBook`, `personalities`, `studyplan`, `qr`, `sport`,
-`election`, `finances`, `dormitory`, `requests`, `system` и `bars`. Методы My ITMO
-возвращают ответ-обёртку; `requireResult()` достаёт результат или бросает
-ошибку. `close()` (или `use`) освобождает HTTP-клиент.
-
-Java: любой `suspend`-метод вызывается через `Blocking.call`, последним
-аргументом передаётся `c`. Результат присваивайте переменной с типом.
+Java: то же самое через `BlockingMyItmo`, без корутин.
 
 ```java
-import dev.alllexey.itmoapi.Blocking;
-import dev.alllexey.itmoapi.MyItmo;
-import dev.alllexey.itmoapi.core.DataResponse;
+import dev.alllexey.itmoapi.blocking.BlockingMyItmo;
+import dev.alllexey.itmoapi.myitmo.schedule.Lesson;
 import dev.alllexey.itmoapi.myitmo.schedule.Schedule;
-import kotlinx.datetime.LocalDate;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        try (MyItmo itmo = Blocking.call(c -> MyItmo.login("my_cool_id", "my_strong_password", c))) {
-            LocalDate from = new LocalDate(2026, 1, 5);
-            LocalDate to = new LocalDate(2026, 1, 11);
-            DataResponse<List<Schedule>> week = Blocking.call(c -> itmo.getSchedule().getPersonalSchedule(from, to, c));
-            for (Schedule day : week.getData()) {
-                System.out.println(day.getDate() + ": " + day.getLessons().size() + " пар");
+        try (BlockingMyItmo itmo = BlockingMyItmo.login("my_cool_id", "my_strong_password")) {
+            LocalDate today = LocalDate.now(ZoneId.of("Europe/Moscow"));
+            List<Schedule> week = itmo.getSchedule().getPersonalSchedule(today, today.plusDays(6));
+            for (Schedule day : week) {
+                System.out.println(day.getDate() + ":");
+                for (Lesson lesson : day.getLessons()) {
+                    System.out.println("  " + lesson.getTimeStart() + " " + lesson.getSubject());
+                }
             }
         }
     }
 }
 ```
 
-Android: все методы `suspend` и не блокируют главный поток. Нужно разрешение
-`android.permission.INTERNET`. В приложении лучше не спрашивать пароль самому:
-пусть пользователь входит на странице ITMO.ID (см. [вход в браузере](docs/advanced.md#вход-в-браузере)),
-а токены хранятся в своём `TokenStorage` поверх Keystore.
+Что важно знать сразу:
 
-```kotlin
-import dev.alllexey.itmoapi.MyItmo
-import dev.alllexey.itmoapi.core.MyItmoException
-import dev.alllexey.itmoapi.core.requireResult
-import dev.alllexey.itmoapi.myitmo.schedule.Schedule
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.plus
-
-// scope - viewModelScope или lifecycleScope: запросы не блокируют главный поток.
-// itmo - один на ViewModel (MyItmo.fromStorage(...)), itmo.close() в onCleared().
-fun loadWeek(
-    scope: CoroutineScope,
-    itmo: MyItmo,
-    monday: LocalDate,
-    show: (List<Schedule>) -> Unit,
-    fail: (MyItmoException) -> Unit,
-) {
-    scope.launch {
-        try {
-            show(itmo.schedule.getPersonalSchedule(monday, monday.plus(6, DateTimeUnit.DAY)).requireResult())
-        } catch (error: MyItmoException) {
-            fail(error) // MyItmoException.Auth - нужен повторный вход
-        }
-    }
-}
-```
+- Чтобы не входить заново при каждом запуске, замените `login` на
+  `MyItmo.loginOrResume(логин, пароль, FileTokenStorage(...))`: токены сохранятся в файл. Остальные способы входа,
+  хранение токенов и выход - в [docs/auth.md](docs/auth.md).
+- Все методы в Kotlin - `suspend`. Метод возвращает данные или бросает `MyItmoException`: виды ошибок и что с
+  ними делать - в [docs/errors.md](docs/errors.md).
+- `close()` (или `use`) освобождает HTTP-клиент.
 
 ## Что умеет
 
-- Вход по логину и паролю, refresh token или в браузере через ITMO.ID (OAuth с
-  PKCE) и автоматическое обновление токенов.
-- Сессии ITMO.ID: выход из своей сессии, список и завершение сессий аккаунта,
-  подпись сессии через User-Agent.
-- Личное расписание и временные слоты пар.
-- Зачётка, специализации и дерево контрольных мероприятий.
-- Учебный план.
-- Просмотр и поиск персоналий.
-- Спорт:
-  - расписание, фильтры и временные слоты;
-  - личный календарь и выбранные секции;
-  - запись на занятия и отмена записи, типизированный итог записи;
-  - баллы, попытки, задолженность и медицинская группа;
-  - отборы, экстернат и специальные проекты.
-- Выбор дисциплин и потоков.
-- Главный экран, меню и каталог сервисов My ITMO.
-- Заявки пользователя.
-- Суммарные выплаты по категориям.
-- Оплата обучения: договоры, баланс и график платежей.
-- Общежитие: этап и место в очереди, назначенное общежитие с инструкцией по
-  заселению, документы для заселения, договоры найма с балансом и графиком
-  платежей. Только чтение.
-- QR-пропуск в корпуса в HEX-формате.
-- БАРС: вход через ITMO.ID, выбор учебного периода, каталоги дисциплин и потоков,
-  журнал с баллами и подтверждёнными оценками.
+| Раздел | Свойство | Что внутри |
+|---|---|---|
+| Расписание | `itmo.schedule` | Личное расписание, расписание преподавателя, временные слоты пар |
+| Зачётка | `itmo.recordBook` | Специализации, оценки по семестрам, дерево контрольных мероприятий |
+| Учебный план | `itmo.studyPlan` | Программы и полный план с дисциплинами |
+| Люди | `itmo.personalities` | Профиль по номеру ИСУ и поиск |
+| Спорт | `itmo.sport` | Расписание и фильтры, запись и отмена, личный календарь, баллы, попытки, задолженность, отборы |
+| Выбор дисциплин | `itmo.election` | Состояние кампании, доступные дисциплины и потоки, сохранение выбора |
+| Финансы | `itmo.finances` | Суммы выплат, оплата обучения: договоры, баланс, график платежей |
+| Общежитие | `itmo.dormitory` | Этап и место в очереди, назначенное общежитие, документы, договоры найма. Только чтение |
+| Заявки | `itmo.requests` | Список заявок пользователя |
+| Портал | `itmo.system` | Главный экран, меню и каталог сервисов |
+| QR-пропуск | `itmo.qr` | Пропуск в корпуса в HEX-формате |
+| БАРС | `itmo.bars` | Дисциплины, потоки и журнал с баллами за выбранный учебный период |
+
+Кроме этого: вход в браузере через ITMO.ID (OAuth с PKCE), выход из сессии, список и завершение сессий аккаунта.
+Все методы с запросами, которые они отправляют, перечислены в [docs/api.md](docs/api.md).
+
+## Документация
+
+| Документ | О чём |
+|---|---|
+| [Вход и сессия](docs/auth.md) | Способы входа, хранение токенов, что делать с истёкшей сессией, выход, вход в браузере |
+| [Справочник методов](docs/api.md) | Все разделы и методы: что возвращают и какой запрос отправляют |
+| [Ошибки](docs/errors.md) | `MyItmoException` и его виды, что делать с каждым |
+| [Запись на спорт](docs/sport.md) | Как найти занятие, записаться, разобрать итог и отменить запись |
+| [БАРС](docs/bars.md) | Сессия БАРС, учебный период, свои баллы, вход без пароля |
+| [Java](docs/java.md) | `BlockingMyItmo`, хранение сессии, ошибки, даты, вызов остальных `suspend`-методов |
+| [Android, iOS и тонкая настройка](docs/advanced.md) | Пример для Android, свой HTTP-движок, общий замок обновления токенов, время |
+
+## Свой клиент на другом языке
+
+Библиотека не обязательна. В [spec/](spec/README.md) лежит всё, что нужно для собственной реализации:
+
+- [вход и токены](spec/auth.md): ITMO.ID, PKCE, обновление токена, сессия БАРС, с запросами по шагам;
+- [общие правила ответов](spec/conventions.md): конверты ответов, коды ошибок, даты;
+- [документы по сервисам](spec/services/) и [спецификации OpenAPI](spec/openapi/) с примерами ответов.
 
 ## Требования
 
 - JVM 11 или новее, Android с minSdk 26, iOS (`iosArm64`, `iosSimulatorArm64`).
-- Kotlin 2.2 или новее; из Java - через `Blocking`.
+- Kotlin 2.2 или новее; из Java - через `BlockingMyItmo`.
+- На Kotlin 2.2 `kotlin.time.Clock` из примеров ещё экспериментальный: добавьте в сборку опцию компилятора
+  `-opt-in=kotlin.time.ExperimentalTime` или `@OptIn(ExperimentalTime::class)` у функции.
 
 Основные зависимости: Ktor, kotlinx.serialization, kotlinx-datetime и kotlinx.coroutines.
 
-## Сохранение токена
-
-По умолчанию токены живут в памяти и пропадают с процессом. Чтобы скрипт или
-сервер не входил заново при каждом запуске, сохраните их в файл:
-
-```kotlin
-suspend fun openSession(username: String, password: String): MyItmo {
-    val storage = FileTokenStorage(Path("itmo-tokens.json"))
-    return if (storage.read() != null) MyItmo.fromStorage(storage) else MyItmo.login(username, password, storage)
-}
-```
-
-`FileTokenStorage` (только JVM) пишет файл атомарно и с правами только для
-владельца, `null` удаляет его. В файле refresh token в открытом виде: не кладите
-его в репозиторий. На Android и iOS реализуйте `TokenStorage` поверх Keystore или
-Keychain (пример - в [продвинутой настройке](docs/advanced.md#клиент)).
-
-Выход: `itmo.client.tokens.replaceTokens(null)`.
-
-## Ошибки
-
-Все методы бросают `MyItmoException`:
-
-- `Auth` - нужен вход: неверный логин или пароль, ITMO.ID попросил
-  дополнительный шаг (например, 2FA), сессия закончилась (HTTP 401, в My ITMO -
-  после одной попытки обновить токен), её нет в хранилище или ITMO.ID отклонил
-  refresh token;
-- `Http` - неуспешный HTTP-статус, в том числе 403: сессия действительна, но
-  доступа к ресурсу нет;
-- `Network`, `Decode` - временный сбой;
-- `Api` - My ITMO вернул код ошибки.
-
-При `Network`, `Http` и `Decode` сохранённая сессия не удаляется. В сообщениях
-исключений нет токенов, паролей и ответов сервера; сами тоже не пишите их в логи.
-
-## Спорт
-
-`sport.signInLesson(id)` записывает на одно занятие и не бросает `MyItmoException`,
-а возвращает `SportSignResult`:
-
-- `Booked` - записали;
-- `Full` - нет свободных мест, можно попробовать позже;
-- `Rejected` - My ITMO отказал по другому правилу (лимит, пересечение и т.п.),
-  повтор не поможет; причина в `refusal.serverMessage`, её не логируйте;
-- `RetryLater` - решения по занятию нет (сеть, HTTP-статус, сессия), причина в
-  `cause`; `Auth` значит, что нужен новый вход.
-
-`signInLessons` по-прежнему отдаёт ответ-обёртку и бросает ошибки как раньше.
-
-## Время (Москва)
-
-Время в ответах (`Instant`) абсолютное: показывайте его в часовом поясе ИТМО
-`MOSCOW` (`dev.alllexey.itmoapi.core.MOSCOW`, `Europe/Moscow`), например
-`instant.toLocalDateTime(MOSCOW)`, а не в поясе устройства. "Сегодня" по ИТМО -
-`Clock.System.todayIn(MOSCOW)`. Строки `HH:mm` в расписании и спорте уже заданы
-по Москве. Даты - `kotlinx.datetime.LocalDate`.
-
-## БАРС
-
-`https://bars.itmo.ru` - отдельный сервис с собственной сессией. После
-`MyItmo.login` он доступен сразу как `itmo.bars`: сессия БАРС получается и
-продлевается по cookie того же входа в ITMO.ID, без второго пароля. После
-`fromRefreshToken` и `fromStorage` cookie нет, и `itmo.bars` бросает `Auth`, пока
-вы не войдёте в БАРС сами ([БАРС без пароля](docs/advanced.md#барс-без-пароля)).
-
-Каталоги и журналы читаются в контексте периода, сохранённого на сервере; эта
-настройка общая с веб-версией БАРС.
-
-```kotlin
-suspend fun readBarsDisciplines(bars: BarsClient): List<Discipline> =
-    bars.withPeriod("2026/2027", Term.AUTUMN) {
-        getDisciplines(withCheckpointPlansOnly = true)
-    }
-```
-
-Вызов: `readBarsDisciplines(itmo.bars)`. Идентификаторы БАРС не совпадают с
-`discipline_id` и `est_id` My ITMO.
-
-## Продвинутая настройка
-
-`MyItmo` - тонкая обёртка над `MyItmoClient` (`itmo.client`). Вход в браузере через ITMO.ID, своё
-хранилище токенов, свой HTTP-движок, общий замок обновления токенов, БАРС без пароля и управление
-сессиями ITMO.ID описаны в [docs/advanced.md](docs/advanced.md).
-
-## Переход с 1.x
-
-Java-библиотека `dev.alllexey:my-itmo-api:1.8.2` остаётся в корне репозитория и
-получает только исправления.
-
-| 1.x | 2.x |
-|---|---|
-| `new MyItmo()` + `myItmo.auth(login, password)` | `MyItmo.login(login, password)` |
-| `getStorage().setRefreshToken(token)` + `forceRefreshTokens()` | `MyItmo.fromRefreshToken(token)` |
-| `myItmo.setStorage(storage)` | `MyItmo.login(login, password, storage)`, `MyItmo.fromStorage(storage)` |
-| `getApi().getPersonalSchedule(from, to).execute().body()` | `itmo.schedule.getPersonalSchedule(from, to).requireResult()` |
-| То же из Java | `Blocking.call(c -> itmo.getSchedule().getPersonalSchedule(from, to, c))` |
-| `getApi().getSpecializations()` и другие методы | `itmo.recordBook.getSpecializations()`: методы разнесены по разделам |
-| `forceRefreshTokens()` | `itmo.client.tokens.forceRefresh()` |
-| `new Bars()` + `bars.auth(login, password)`, `authWithSession()` | `itmo.bars` после `MyItmo.login` |
-| `ApiException`, `TokenRefreshException`, `BarsApiException` | `MyItmoException.Api`, `Auth`, `Http`, `Network`, `Decode` |
-| `java.time.LocalDate` | `kotlinx.datetime.LocalDate` (`toKotlinLocalDate()`) |
-
-Подробности - в [docs/migration.md](docs/migration.md).
-
 ## Стабильность
 
-My ITMO не предоставляет публичную документацию для всех используемых сервисов.
-Модели основаны на наблюдаемых ответах API, поэтому сервер может добавлять новые
-поля и справочные значения. Неизвестные, но подтверждённо присутствующие поля
-отмечены в моделях закомментированными объявлениями до уточнения их типов.
+My ITMO не публикует документацию своих сервисов. Модели основаны на наблюдаемых ответах, поэтому сервер может
+добавлять поля и справочные значения без предупреждения: неизвестные поля библиотека пропускает. Поля, которые
+в ответах есть, но тип которых пока не ясен, отмечены в моделях закомментированными объявлениями.
 
 ## Экосистема
 
@@ -303,12 +183,11 @@ My ITMO и БАРС приложение получает через неё.
 ## Разработчикам
 
 ```bash
-./gradlew -p kmp jvmTest                 # 2.x, JDK 17
-./gradlew -p kmp iosSimulatorArm64Test   # 2.x, нужен Xcode
-./mvnw verify -Dgpg.skip=true            # 1.x
+./gradlew jvmTest                 # JDK 17
+./gradlew iosSimulatorArm64Test   # нужен Xcode
 ```
 
-Как добавить эндпоинт, фикстуру и как устроены релизы - в [CONTRIBUTING.md](CONTRIBUTING.md).
+Как добавить ручку и фикстуру и как устроены релизы - в [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Обратная связь
 

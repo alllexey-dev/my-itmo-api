@@ -1,0 +1,13 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": {
+    "statusId": 1000,
+    "queuePlace": null,
+    "dormType": "synthetic-1",
+    "assignedDormitory": {
+      "name": "synthetic-2",
+      "address": "synthetic-3"
+    }
+  }
+}

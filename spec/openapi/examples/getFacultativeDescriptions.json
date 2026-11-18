@@ -1,0 +1,21 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": {
+    "isu": 1000,
+    "description": [
+      {
+        "id": 1001,
+        "description": "synthetic-2"
+      },
+      {
+        "id": 1003,
+        "description": "synthetic-4"
+      },
+      {
+        "id": 1005,
+        "description": "synthetic-6"
+      }
+    ]
+  }
+}

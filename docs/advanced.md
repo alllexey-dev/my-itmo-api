@@ -1,119 +1,76 @@
-# Продвинутая настройка
+# Android, iOS и тонкая настройка
 
-Быстрый старт, хранение токенов и ошибки описаны в [README](../README.md).
+Быстрый старт - в [README](../README.md), вход и хранение токенов - в [auth.md](auth.md).
 
-`MyItmo` - тонкая обёртка над `MyItmoClient` (`itmo.client`). Собирайте
-`MyItmoClient` сами, если нужны вход в браузере, своё хранилище, свой движок
-или общий замок обновления токенов.
+## Android
 
-## Клиент
-
-```kotlin
-class MemoryTokens : TokenStorage {
-    private var snapshot: TokenSet? = null
-    override suspend fun read(): TokenSet? = snapshot
-    override suspend fun write(tokens: TokenSet?) { snapshot = tokens }
-    override fun toString(): String = "MemoryTokens(redacted)"
-}
-```
+Все методы - `suspend` и не блокируют главный поток. Нужно разрешение `android.permission.INTERNET`. Пароль
+лучше не спрашивать самому: пусть пользователь входит на странице ITMO.ID
+([вход в браузере](auth.md#вход-в-браузере)), а токены хранятся в своём `TokenStorage` поверх Keystore.
 
 ```kotlin
-fun createClient(
-    storage: TokenStorage,
-    engine: HttpClientEngine,
-    clock: Clock,
-    configuration: MyItmoConfiguration = MyItmoConfiguration.DEFAULT,
-): MyItmoClient = MyItmoClient(configuration, storage, engine, clock)
-```
+import dev.alllexey.itmoapi.MyItmo
+import dev.alllexey.itmoapi.core.MyItmoException
+import dev.alllexey.itmoapi.myitmo.schedule.Schedule
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.plus
 
-Движок `defaultEngine()` создаёт OkHttp на JVM и Android и Darwin на iOS. Движок
-принадлежит вызывающему: закройте сначала клиент (`client.close()`), потом движок.
-
-## Вход в браузере
-
-Пользователь вводит пароль только на странице ITMO.ID:
-
-1. Создайте `Pkce.newVerifier()` и `Pkce.newState()` и сохраните их до callback.
-2. Откройте `client.identity.loginUrl(Pkce.challenge(verifier), state)` в WebView
-   и перехватите переход на `https://my.itmo.ru/login/callback`.
-3. Обменяйте callback на токены:
-
-```kotlin
-suspend fun completeLogin(
-    client: MyItmoClient,
-    callbackUrl: String,
-    expectedState: String,
-    verifier: String,
-): Boolean {
-    val configuration = client.configuration.itmoId
-    val callback = CallbackUrl(configuration.redirectUri, configuration.issuer)
-    val code = callback.extractCode(callbackUrl, expectedState) ?: return false
-    client.tokens.replaceTokens(client.identity.exchange(code, verifier))
-    return true
-}
-```
-
-Дальше access token обновляется автоматически.
-
-Если одно хранилище токенов делят несколько клиентов или процессов (например,
-приложение и виджет или расширение iOS), передайте им всем один
-`TokenRefreshGuard` (параметр `refreshGuard` у `MyItmoClient`) с межпроцессной
-блокировкой, например файловой в App Group. Без неё ITMO.ID может отклонить
-второе одновременное обновление; `TokenManager` тогда перечитывает хранилище и
-берёт сессию, сохранённую соседом, но это страховка, а не замена блокировке.
-
-## Вызовы через клиент
-
-```kotlin
-suspend fun readSchedule(client: MyItmoClient): List<Schedule> =
-    client.schedule.getPersonalSchedule(
-        LocalDate(2026, 1, 5), LocalDate(2026, 1, 11),
-    ).requireResult()
-```
-
-## БАРС без пароля
-
-`BarsClient` можно создать отдельно. Вход: `BarsLogin.loginUrl(state)` в
-браузере, затем `extractCode(callbackUrl, state)` и `bars.login(code)`. Сессия
-живёт около 30 минут, refresh token не выдаётся. Для тихого продления передайте
-`BarsCodeSupplier`: при HTTP 401 клиент один раз запросит новый код и повторит
-запрос. Если сессия ITMO.ID живёт в cookie WebView, код можно получить без
-браузера:
-
-```kotlin
-suspend fun replayBarsLogin(
-    login: BarsLogin,
-    bars: BarsClient,
-    state: String,
-    cookieHeader: String?,
-    saveCookies: suspend (List<String>) -> Unit,
-): BarsSessionCode.Outcome {
-    val result = login.requestCodeWithCookies(state, cookieHeader)
-    saveCookies(result.setCookies)
-    when (result.outcome) {
-        BarsSessionCode.Outcome.CODE -> bars.login(requireNotNull(result.code))
-        BarsSessionCode.Outcome.LOGIN_REQUIRED -> Unit
-        BarsSessionCode.Outcome.REJECTED -> Unit
-        BarsSessionCode.Outcome.HTTP_ERROR -> Unit
+// scope - viewModelScope или lifecycleScope: запросы не блокируют главный поток.
+// itmo - один на ViewModel (MyItmo.fromStorage(...)), itmo.close() в onCleared().
+fun loadWeek(
+    scope: CoroutineScope,
+    itmo: MyItmo,
+    monday: LocalDate,
+    show: (List<Schedule>) -> Unit,
+    fail: (MyItmoException) -> Unit,
+) {
+    scope.launch {
+        try {
+            show(itmo.schedule.getPersonalSchedule(monday, monday.plus(6, DateTimeUnit.DAY)))
+        } catch (error: MyItmoException) {
+            fail(error) // MyItmoException.Auth - нужен повторный вход
+        }
     }
-    return result.outcome
 }
 ```
 
-## Сессии ITMO.ID
+## iOS
 
-Каждый вход по паролю - отдельная сессия ITMO.ID на 90 дней, она видна на
-`https://id.itmo.ru/activity`. `ItmoIdClient.logout(refreshToken)` завершает
-ровно сессию этого токена, остальные живут. `TokenSet.sessionId` - её `sid`.
+Цели `iosArm64` и `iosSimulatorArm64` подключаются из общего Kotlin-модуля (`commonMain` или `iosMain`) той же
+зависимостью `dev.alllexey:my-itmo-api`. HTTP-движок по умолчанию - Darwin. `FileTokenStorage` есть только на
+JVM: на iOS храните токены в Keychain через свой `TokenStorage`.
 
-Список и завершение любых сессий аккаунта идут через `ItmoIdSessions` с токеном
-клиента `profile` (страницы id.itmo.ru), токен My ITMO для этого не подходит:
-`profileToken(cookieHeader)` получает его по живой cookie ITMO.ID без пароля
-(`null`, если cookie мертва), `list(bearer)` возвращает `ItmoIdSession`, а
-`end(bearer, sid)` завершает сессию (уже завершённая - тоже успех). Cookie
-ITMO.ID - это весь аккаунт: не передавайте её дальше устройства.
+## MyItmo и MyItmoClient
 
-Подпись строки на `/activity` задаёт User-Agent входа, и потом она не меняется.
-`ItmoSessionLabel.browserUserAgent(platform)` - обычный десктопный Chrome,
-`ItmoSessionLabel.botUserAgent(client, name, version, platform)` - честная
-подпись вида `Linux, Browser: ITMO Widgets agent nas bot/1.2`.
+`MyItmo` (`dev.alllexey.itmoapi`) - короткий путь: сам создаёт HTTP-движок, умеет вход по паролю и подключает БАРС. Под ним лежит
+`MyItmoClient` (`dev.alllexey.itmoapi.myitmo`, доступен как `itmo.client`), которому всё передаётся явно: конфигурация, хранилище, движок, часы.
+Собирайте `MyItmoClient` сами, если нужны вход в браузере, свой движок или общий замок обновления токенов.
+Разделы у обоих одни и те же.
+
+`MyItmoConfiguration.DEFAULT` - боевой My ITMO, `MyItmoConfiguration.DEV` - тестовое окружение ИТМО. Язык
+ответов задаёт `acceptLanguage` (по умолчанию `ru`).
+
+## Свой HTTP-движок
+
+`defaultEngine()` создаёт OkHttp на JVM и Android и Darwin на iOS. Свой движок Ktor передаётся в конструктор
+`MyItmoClient`. Он принадлежит вызывающему: закройте сначала клиент (`client.close()`), потом движок.
+
+## Общий замок обновления токенов
+
+ITMO.ID меняет refresh token при каждом обновлении, и старый перестаёт работать. Если одно хранилище делят
+несколько клиентов или процессов (приложение и виджет, расширение iOS), передайте им всем один
+`TokenRefreshGuard` (параметр `refreshGuard` у `MyItmoClient`): замок, общий для всех процессов, например
+файловый в App Group.
+
+Без общего замка ITMO.ID может отклонить второе одновременное обновление. `TokenManager` в таком случае
+перечитывает хранилище и берёт сессию, которую сохранил сосед, но это страховка, а не замена замку.
+
+## Время (Москва)
+
+Время в ответах (`Instant`) абсолютное. Показывайте его в часовом поясе ИТМО `MOSCOW`
+(`dev.alllexey.itmoapi.core.MOSCOW`, `Europe/Moscow`), а не в поясе устройства:
+`instant.toLocalDateTime(MOSCOW)`. "Сегодня" по ИТМО - `Clock.System.todayIn(MOSCOW)`. Строки `HH:mm` в
+расписании и спорте уже заданы по Москве. Даты - `kotlinx.datetime.LocalDate`.

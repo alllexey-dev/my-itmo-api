@@ -1,0 +1,1274 @@
+openapi: 3.1.0
+info:
+  title: ITMO service backends (unofficial research)
+  version: 0.1.0
+  summary: Read-only subset of ITMO backends used by the my.itmo mobile app, outside the my.itmo.ru proxy.
+  description: |
+    Unofficial contract of separate ITMO backends that the my.itmo Android app calls directly. They accept the
+    same ITMO.ID access token as my.itmo.ru (client `student-personal-cabinet`) as `Authorization: Bearer`
+    ([auth.md](../auth.md)). Every path has its own `servers` entry: the backends live on different hosts
+    ([hosts.md](../hosts.md)). Envelopes differ per backend, see [conventions.md](../conventions.md).
+
+    Verification status: research. Responses were taken live on one student account (2026-10-05) and
+    matched these schemas; where a response was empty the model comes from the client code and says
+    "Observed empty". The anonymized responses are in `examples/<operationId>.json` and are validated
+    against these schemas.
+  license:
+    name: MIT
+    identifier: MIT
+servers:
+  - url: https://api.itmo.su
+security:
+  - itmoId: []
+tags:
+  - name: semester
+  - name: occupancy
+  - name: schedule
+  - name: recordbook
+  - name: events
+  - name: actual
+  - name: clubs
+  - name: achievements
+  - name: help
+  - name: checklist
+  - name: dormitory
+  - name: finances
+  - name: mathelp
+paths:
+  /isapp/buildings/:
+    servers:
+      - url: https://api.cctv.la.itmo.su
+    get:
+      operationId: getOccupancyBuildings
+      tags:
+        - occupancy
+      summary: Buildings with room occupancy tracking
+      responses:
+        "200":
+          description: Buildings
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        required:
+                          - buildings
+                        properties:
+                          buildings:
+                            type: array
+                            items:
+                              type: object
+                              required:
+                                - id
+                                - humanreadable_name
+                              properties:
+                                id:
+                                  type: integer
+                                humanreadable_name:
+                                  type: string
+        default:
+          $ref: "#/components/responses/Error"
+  /isapp/rooms:
+    servers:
+      - url: https://api.cctv.la.itmo.su
+    get:
+      operationId: getOccupancyPlaces
+      tags:
+        - occupancy
+      summary: Current occupancy of public places (coworkings, halls) in a building, estimated by cameras
+      parameters:
+        - name: building_id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Places
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        required:
+                          - places
+                        properties:
+                          places:
+                            type: array
+                            items:
+                              $ref: "#/components/schemas/OccupancyPlace"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/v3/teacher/{isu}:
+    servers:
+      - url: https://api.schedule.itmo.su
+    get:
+      operationId: getTeacherSchedule
+      tags:
+        - schedule
+      summary: Timetable of a teacher for an inclusive date range
+      parameters:
+        - name: isu
+          in: path
+          required: true
+          description: Teacher ISU number
+          schema:
+            type: integer
+        - $ref: my-itmo.yaml#/components/parameters/DateStart
+        - $ref: my-itmo.yaml#/components/parameters/DateEnd
+      responses:
+        "200":
+          description: One entry per day
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: my-itmo.yaml#/components/schemas/DataResponse
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: my-itmo.yaml#/components/schemas/ScheduleDay
+        default:
+          $ref: "#/components/responses/Error"
+  /api/record_book/history:
+    servers:
+      - url: https://recordbook.itmo.su
+    get:
+      operationId: getRecordBookHistory
+      tags:
+        - recordbook
+      summary: Recent changes of record book points, newest first
+      parameters:
+        - name: offset
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 0
+        - name: count
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: Changes
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/RecordBookChange"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/v2/events:
+    servers:
+      - url: https://rate.itmo.su
+    get:
+      operationId: getUniversityEvents
+      tags:
+        - events
+      summary: University events that can be rated in the app
+      responses:
+        "200":
+          description: Events
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                            - id
+                            - name
+                            - date_start
+                          properties:
+                            id:
+                              type: integer
+                            event_id:
+                              type:
+                                - string
+                                - "null"
+                            name:
+                              type: string
+                            date_start:
+                              type: string
+                              format: date-time
+                            date_end:
+                              type:
+                                - string
+                                - "null"
+                              format: date-time
+        default:
+          $ref: "#/components/responses/Error"
+  /v1/misc/relevant:
+    servers:
+      - url: https://actual.itmo.su
+    get:
+      operationId: getActual
+      tags:
+        - actual
+      summary: '"Актуальное": current announcements and important notices'
+      responses:
+        "200":
+          description: Announcements
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - code
+                properties:
+                  code:
+                    type: integer
+                    description: 0 means success
+                  message:
+                    type:
+                      - string
+                      - "null"
+                  result:
+                    type: object
+                    properties:
+                      attention:
+                        type: array
+                        description: Important notices; observed empty
+                        items:
+                          $ref: "#/components/schemas/Announcement"
+                      actual:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Announcement"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/v1/clubs/types:
+    servers:
+      - url: https://clubs.itmo.su
+    get:
+      operationId: getClubTypes
+      tags:
+        - clubs
+      summary: Student club categories
+      responses:
+        "200":
+          description: Club types
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                            - id
+                            - club_type
+                          properties:
+                            id:
+                              type: integer
+                            club_type:
+                              type: string
+                            image:
+                              type:
+                                - string
+                                - "null"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/v1/clubs/types/{typeId}:
+    servers:
+      - url: https://clubs.itmo.su
+    get:
+      operationId: getClubsByType
+      tags:
+        - clubs
+      summary: Clubs of one category
+      parameters:
+        - name: typeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Clubs
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/ClubCard"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/v1/clubs/my_clubs:
+    servers:
+      - url: https://clubs.itmo.su
+    get:
+      operationId: getMyClubs
+      tags:
+        - clubs
+      summary: Clubs the student belongs to or owns
+      responses:
+        "200":
+          description: Clubs
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/ClubCard"
+        default:
+          $ref: "#/components/responses/Error"
+  /api/v1/clubs/{clubId}:
+    servers:
+      - url: https://clubs.itmo.su
+    get:
+      operationId: getClub
+      tags:
+        - clubs
+      summary: Club details with links and meetings
+      parameters:
+        - name: clubId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Club
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        $ref: "#/components/schemas/Club"
+        default:
+          $ref: "#/components/responses/Error"
+  /achievements/api/v1/achievements/my:
+    servers:
+      - url: https://api.itmo.su
+    get:
+      operationId: getMyAchievements
+      tags:
+        - achievements
+      summary: Achievements and progress
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            type_id:
+                              type: integer
+                            achievement_id:
+                              type: integer
+                            au_id:
+                              type:
+                                - integer
+                                - "null"
+                            name:
+                              type: string
+                            level:
+                              type: integer
+                            current_progress:
+                              type:
+                                - integer
+                                - "null"
+                            needed_progress:
+                              type: integer
+                            last_progress:
+                              type:
+                                - string
+                                - "null"
+                              format: date
+                            completed_at:
+                              type:
+                                - string
+                                - "null"
+                              format: date
+                            description:
+                              type: string
+                            description_short:
+                              type: string
+                            icon_link:
+                              type: string
+                            started_at:
+                              type:
+                                - string
+                                - "null"
+                              format: date
+                            tag_id:
+                              type: integer
+                            tag:
+                              type: string
+                          required:
+                            - type_id
+                            - achievement_id
+                            - au_id
+                            - name
+                            - level
+                            - current_progress
+                            - needed_progress
+                            - last_progress
+                            - completed_at
+                            - description
+                            - description_short
+                            - icon_link
+                            - started_at
+                            - tag_id
+                            - tag
+        default:
+          $ref: "#/components/responses/Error"
+  /achievements/api/v1/achievements/status:
+    servers:
+      - url: https://api.itmo.su
+    get:
+      operationId: getAchievementStatus
+      tags:
+        - achievements
+      summary: New, not yet seen achievements
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        description: Observed empty; same item model as getMyAchievements
+                        items:
+                          type: object
+        default:
+          $ref: "#/components/responses/Error"
+  /api/v1/category:
+    servers:
+      - url: https://help.itmo.su
+    get:
+      operationId: getHelpCategories
+      tags:
+        - help
+      summary: Categories of student help requests
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            name:
+                              type: string
+                          required:
+                            - id
+                            - name
+        default:
+          $ref: "#/components/responses/Error"
+  /api/v1/tasks/my:
+    servers:
+      - url: https://help.itmo.su
+    get:
+      operationId: getMyHelpTasks
+      tags:
+        - help
+      summary: Help requests where the student is the helper
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        description: "Observed empty; app model: id, name, description, category, status, owner and answers with fio and contact of other students"
+                        items:
+                          type: object
+        default:
+          $ref: "#/components/responses/Error"
+  /api/v1/tasks/created:
+    servers:
+      - url: https://help.itmo.su
+    get:
+      operationId: getCreatedHelpTasks
+      tags:
+        - help
+      summary: Help requests created by the student
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        description: Observed empty; same model as getMyHelpTasks
+                        items:
+                          type: object
+        default:
+          $ref: "#/components/responses/Error"
+  /api/v1/bypass:
+    servers:
+      - url: https://checklist.itmo.su
+    get:
+      operationId: getChecklist
+      tags:
+        - checklist
+      summary: "Clearance checklist (обходной лист): departments and their decisions"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        required:
+                          - student
+                          - departments
+                        properties:
+                          student:
+                            type: array
+                            items:
+                              type: object
+                            description: Observed empty
+                          departments:
+                            type: array
+                            description: "Observed empty; app model: name, decision, decision_id, problem, comment, actions[] {action_id, url}, contact_person_name"
+                            items:
+                              type: object
+        default:
+          $ref: "#/components/responses/Error"
+  /api/v2/buildings:
+    servers:
+      - url: https://rate.itmo.su
+    get:
+      operationId: getRateBuildings
+      tags:
+        - events
+      summary: University buildings directory
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            name:
+                              type: string
+                            bld_type:
+                              type: string
+                              description: Building kind
+                          required:
+                            - id
+                            - name
+                            - bld_type
+        default:
+          $ref: "#/components/responses/Error"
+  /api/v2/rooms/{buildingId}:
+    servers:
+      - url: https://rate.itmo.su
+    get:
+      operationId: getRateRooms
+      tags:
+        - events
+      summary: Rooms of a building for infrastructure feedback
+      parameters:
+        - name: buildingId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: array
+                        description: "Observed empty for the probed building; app model: room_number, floor, room_type"
+                        items:
+                          type: object
+        default:
+          $ref: "#/components/responses/Error"
+  /api/v2/tags/{type}:
+    servers:
+      - url: https://rate.itmo.su
+    get:
+      operationId: getRateTags
+      tags:
+        - events
+      summary: Feedback tags per rating value; type is numeric (1, 3 and 4 return tags, 2 returns null)
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Rating kind
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type:
+                          - array
+                          - "null"
+                        items:
+                          type: object
+                          properties:
+                            mark:
+                              type: integer
+                              description: Rating value the tags belong to
+                            tags:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  emoji:
+                                    type: string
+                                    description: Emoji shown next to the tag
+                                  id:
+                                    type: integer
+                                  text:
+                                    type: string
+                                required:
+                                  - emoji
+                                  - id
+                                  - text
+                          required:
+                            - mark
+                            - tags
+        default:
+          $ref: "#/components/responses/Error"
+  /api/v2/rating:
+    servers:
+      - url: https://rate.itmo.su
+    get:
+      operationId: getMyRatings
+      tags:
+        - events
+      summary: Ratings left by the student
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type:
+                          - array
+                          - "null"
+                        description: Observed null (no ratings yet)
+                        items:
+                          type: object
+        default:
+          $ref: "#/components/responses/Error"
+  /dormitory/v1/status/short:
+    servers:
+      - url: https://updaters.api.itmo.su
+    get:
+      operationId: getDormitoryStatusShort
+      tags:
+        - dormitory
+      summary: Short dormitory status used by the app home screen
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          statusId:
+                            type: integer
+                          queuePlace:
+                            description: Observed only null
+                          dormType:
+                            type: string
+                          assignedDormitory:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                              address:
+                                type: string
+                            required:
+                              - name
+                              - address
+                        required:
+                          - statusId
+                          - queuePlace
+                          - dormType
+                          - assignedDormitory
+        default:
+          $ref: "#/components/responses/Error"
+  /api/v1/form:
+    servers:
+      - url: https://scholarship.itmo.pro
+    get:
+      operationId: getStudyForm
+      tags:
+        - finances
+      summary: Form of study (budget or contract) used by the scholarship service
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          study_form:
+                            type: string
+                        required:
+                          - study_form
+        default:
+          $ref: "#/components/responses/Error"
+  /api/v1/public/is/mathelp/reasons:
+    servers:
+      - url: https://itmostudents.ru
+    get:
+      operationId: getMaterialHelpReasons
+      tags:
+        - mathelp
+      summary: Reasons for material help with required documents
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                    documents:
+                      type: string
+                    priority:
+                      type: integer
+                    visible:
+                      type: boolean
+                    short_name:
+                      type: string
+                    is_multiple_in_half_year:
+                      type: boolean
+                  required:
+                    - id
+                    - name
+                    - documents
+                    - priority
+                    - visible
+                    - short_name
+                    - is_multiple_in_half_year
+        default:
+          $ref: "#/components/responses/Error"
+  /api/v1/public/is/mathelp/applicants/me:
+    servers:
+      - url: https://itmostudents.ru
+    get:
+      operationId: getMyMaterialHelp
+      tags:
+        - mathelp
+      summary: The student's material help profile and applications
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  username:
+                    type: string
+                  surname:
+                    type: string
+                  name:
+                    type: string
+                  patronymic:
+                    type: string
+                  is_member:
+                    type: boolean
+                  is_active:
+                    type: boolean
+                  pending_applications:
+                    type: array
+                    items:
+                      description: Observed empty
+                  applications:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        user_id:
+                          type: integer
+                        status_id:
+                          type: integer
+                        money:
+                          type: integer
+                        other_reason:
+                          description: Observed only null
+                        reason_id:
+                          type: integer
+                        comment:
+                          description: Observed only null
+                        additional_info:
+                          description: Observed only null
+                        payment_date:
+                          description: Observed only null
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        archived_at:
+                          type: string
+                          format: date-time
+                        order_at:
+                          type: string
+                          format: date-time
+                        reason:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            name:
+                              type: string
+                            documents:
+                              type: string
+                            priority:
+                              type: integer
+                            visible:
+                              type: boolean
+                            short_name:
+                              type: string
+                            is_multiple_in_half_year:
+                              type: boolean
+                            default_money:
+                              type: integer
+                          required:
+                            - id
+                            - name
+                            - documents
+                            - priority
+                            - visible
+                            - short_name
+                            - is_multiple_in_half_year
+                            - default_money
+                      required:
+                        - id
+                        - user_id
+                        - status_id
+                        - money
+                        - other_reason
+                        - reason_id
+                        - comment
+                        - additional_info
+                        - payment_date
+                        - created_at
+                        - updated_at
+                        - archived_at
+                        - order_at
+                        - reason
+                  payment_type:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      user_id:
+                        type: integer
+                      is_budget:
+                        type: boolean
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+                      deleted_at:
+                        description: Observed only null
+                    required:
+                      - id
+                      - user_id
+                      - is_budget
+                      - created_at
+                      - updated_at
+                      - deleted_at
+                  membership:
+                    description: Observed only null
+                required:
+                  - id
+                  - username
+                  - surname
+                  - name
+                  - patronymic
+                  - is_member
+                  - is_active
+                  - pending_applications
+                  - applications
+                  - payment_type
+                  - membership
+        default:
+          $ref: "#/components/responses/Error"
+  /api/v1/user/plashka:
+    servers:
+      - url: https://itmostudents.ru
+    get:
+      operationId: getAlertBanners
+      tags:
+        - actual
+      summary: Alert banners shown above the news feed
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: ISU number
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      plashki:
+                        type: array
+                        items:
+                          description: Observed empty
+                    required:
+                      - plashki
+                required:
+                  - success
+                  - data
+        default:
+          $ref: "#/components/responses/Error"
+  /:
+    servers:
+      - url: https://semester.itmo.su
+    get:
+      operationId: getCurrentSemester
+      tags:
+        - semester
+      summary: Current academic semester (public, no authentication)
+      security: []
+      responses:
+        "200":
+          description: Semester
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: my-itmo.yaml#/components/schemas/ResultResponse
+                  - type: object
+                    properties:
+                      result:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                          number:
+                            type: integer
+                          date_start:
+                            type: string
+                            format: date-time
+                          date_end:
+                            type: string
+                            format: date-time
+                          st_year:
+                            type: string
+                          sem_id:
+                            type: integer
+        default:
+          $ref: "#/components/responses/Error"
+components:
+  securitySchemes:
+    itmoId:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: ITMO.ID access token for client `student-personal-cabinet`, the same as in my-itmo.yaml.
+  responses:
+    Error:
+      description: Error envelope or a non-JSON gateway error
+      content:
+        application/json:
+          schema:
+            $ref: my-itmo.yaml#/components/schemas/ResultResponse
+  schemas:
+    OccupancyPlace:
+      type: object
+      required:
+        - id
+        - name
+        - occupancy_rate
+      properties:
+        id:
+          type: integer
+        building_id:
+          type: integer
+        name:
+          type: string
+        location_name:
+          type:
+            - string
+            - "null"
+          description: Floor or wing
+        image_url:
+          type:
+            - string
+            - "null"
+        occupancy_rate:
+          type: number
+          description: Estimated occupancy, percent
+    RecordBookChange:
+      type: object
+      required:
+        - discipline_name
+        - date
+      properties:
+        discipline_name:
+          type: string
+        name:
+          type:
+            - string
+            - "null"
+          description: Assessment that changed
+        date:
+          type: string
+          format: date-time
+        old_value:
+          type:
+            - number
+            - "null"
+        new_value:
+          type:
+            - number
+            - "null"
+        teacher:
+          $ref: my-itmo.yaml#/components/schemas/RecordBookTeacher
+    Announcement:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        admin_name:
+          type:
+            - string
+            - "null"
+        short_description:
+          type:
+            - string
+            - "null"
+        long_description:
+          type:
+            - string
+            - "null"
+          description: HTML
+        date_start:
+          type:
+            - string
+            - "null"
+          format: date
+        date_end:
+          type:
+            - string
+            - "null"
+          format: date
+        date_start_show:
+          type:
+            - string
+            - "null"
+          format: date
+        date_end_show:
+          type:
+            - string
+            - "null"
+          format: date
+        photo:
+          type:
+            - string
+            - "null"
+        category: {}
+        type_actual:
+          type:
+            - integer
+            - "null"
+        pages:
+          type: array
+    ClubCard:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        short_description:
+          type:
+            - string
+            - "null"
+        card_image:
+          type:
+            - string
+            - "null"
+        is_member:
+          type:
+            - boolean
+            - "null"
+        is_owner:
+          type:
+            - boolean
+            - "null"
+    Club:
+      allOf:
+        - $ref: "#/components/schemas/ClubCard"
+        - type: object
+          properties:
+            long_description:
+              type:
+                - string
+                - "null"
+            vk:
+              type:
+                - string
+                - "null"
+            instagram:
+              type:
+                - string
+                - "null"
+            website:
+              type:
+                - string
+                - "null"
+            background:
+              type:
+                - string
+                - "null"
+            meetings:
+              type: array
+              description: Observed empty

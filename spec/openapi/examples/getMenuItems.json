@@ -1,0 +1,35 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": {
+    "menu": [
+      {
+        "to": "synthetic-0",
+        "icon": "synthetic-1",
+        "title": "synthetic-2",
+        "name": "synthetic-3",
+        "exact": true,
+        "description": "synthetic-4",
+        "multicolor_icon": "synthetic-5"
+      },
+      {
+        "to": "synthetic-6",
+        "icon": "synthetic-7",
+        "title": "synthetic-8",
+        "name": "synthetic-9",
+        "exact": false,
+        "description": "synthetic-10",
+        "multicolor_icon": "synthetic-11"
+      },
+      {
+        "to": "synthetic-12",
+        "icon": "synthetic-13",
+        "title": "synthetic-14",
+        "name": "synthetic-15",
+        "exact": false,
+        "description": "synthetic-16",
+        "multicolor_icon": "synthetic-17"
+      }
+    ]
+  }
+}

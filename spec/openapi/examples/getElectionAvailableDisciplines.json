@@ -1,0 +1,29 @@
+{
+  "error_code": 0,
+  "error_message": "synthetic-0",
+  "result": [
+    {
+      "dcId": 1001,
+      "discId": 1002,
+      "langId": 1003,
+      "depName": "synthetic-4",
+      "discName": "synthetic-5",
+      "langCode": "synthetic-6",
+      "required": true,
+      "semesters": [
+        {
+          "semester": 1007,
+          "statusId": 1008,
+          "groupFlow": "synthetic-9",
+          "statusName": "synthetic-10"
+        }
+      ],
+      "description": "synthetic-11",
+      "depNameShort": "synthetic-12",
+      "notCompatibleWith": [
+        1013,
+        1014
+      ]
+    }
+  ]
+}

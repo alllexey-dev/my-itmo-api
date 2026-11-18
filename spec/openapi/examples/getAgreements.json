@@ -1,0 +1,66 @@
+{
+  "error_code": null,
+  "error_message": null,
+  "result": [
+    {
+      "id": 1000,
+      "title": "synthetic-1",
+      "code": "synthetic-2",
+      "is_bilateral": false,
+      "versions": [
+        {
+          "id": 1003,
+          "version_number": 1004,
+          "date": "2026-09-01",
+          "status_id": 1005,
+          "status_name": "synthetic-6",
+          "date_signed": null,
+          "date_revoked": null,
+          "task_id": null,
+          "signature_id": null,
+          "sign_type": "synthetic-7"
+        }
+      ]
+    },
+    {
+      "id": 1008,
+      "title": "synthetic-9",
+      "code": "synthetic-10",
+      "is_bilateral": false,
+      "versions": [
+        {
+          "id": 1011,
+          "version_number": 1012,
+          "date": "2026-09-01",
+          "status_id": 1013,
+          "status_name": "synthetic-14",
+          "date_signed": null,
+          "date_revoked": null,
+          "task_id": null,
+          "signature_id": null,
+          "sign_type": "synthetic-15"
+        }
+      ]
+    },
+    {
+      "id": 1016,
+      "title": "synthetic-17",
+      "code": "synthetic-18",
+      "is_bilateral": false,
+      "versions": [
+        {
+          "id": 1019,
+          "version_number": 1020,
+          "date": "2026-09-01",
+          "status_id": 1021,
+          "status_name": "synthetic-22",
+          "date_signed": null,
+          "date_revoked": null,
+          "task_id": null,
+          "signature_id": null,
+          "sign_type": "synthetic-23"
+        }
+      ]
+    }
+  ]
+}

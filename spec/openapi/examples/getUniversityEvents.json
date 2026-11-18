@@ -1,0 +1,27 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": [
+    {
+      "id": 1000,
+      "date_start": "2026-09-01T10:00:00+03:00",
+      "date_end": "2026-09-01T10:00:00+03:00",
+      "name": "synthetic-1",
+      "event_id": "synthetic-2"
+    },
+    {
+      "id": 1003,
+      "date_start": "2026-09-01T10:00:00+03:00",
+      "date_end": "2026-09-01T10:00:00+03:00",
+      "name": "synthetic-4",
+      "event_id": "synthetic-5"
+    },
+    {
+      "id": 1006,
+      "date_start": "2026-09-01T10:00:00+03:00",
+      "date_end": "2026-09-01T10:00:00+03:00",
+      "name": "synthetic-7",
+      "event_id": "synthetic-8"
+    }
+  ]
+}
