@@ -138,7 +138,7 @@
 
 | Метод | Возвращает | Запрос |
 |---|---|---|
-| `qr.getQrCode()` | `QrData`: пропуск в HEX-формате (`qrHex`) | `GET https://qr.itmo.su/v1/user/pass` |
+| `qr.getQrCode()` | `QrData?`: пропуск в HEX-формате (`qrHex`); `null`, если сервис ответил без пропуска. Часто помогает обновить токен: `itmo.client.tokens.forceRefresh()` | `GET https://qr.itmo.su/v1/user/pass` |
 
 ## БАРС: `itmo.bars`
 

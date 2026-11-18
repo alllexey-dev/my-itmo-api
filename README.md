@@ -35,7 +35,7 @@
 Gradle:
 
 ```kotlin
-implementation("dev.alllexey:my-itmo-api:2.5.0")
+implementation("dev.alllexey:my-itmo-api:2.5.1")
 ```
 
 Maven:
@@ -44,7 +44,7 @@ Maven:
 <dependency>
     <groupId>dev.alllexey</groupId>
     <artifactId>my-itmo-api</artifactId>
-    <version>2.5.0</version>
+    <version>2.5.1</version>
 </dependency>
 ```
 

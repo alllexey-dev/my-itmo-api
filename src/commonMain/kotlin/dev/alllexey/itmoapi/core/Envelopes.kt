@@ -52,17 +52,17 @@ public data class CountWrapper<T>(public val count: Int = 0, public val data: T)
 @Serializable
 public data class IdValuePair(public val id: Long = 0, public val value: String = "")
 
-/** Unwraps a result or throws a typed API/decode error; status is supplied by the transport when known. */
+/** Unwraps a result or throws a typed API error, or Empty without a result; status is supplied by the transport when known. */
 internal fun <T : Any> ResultResponse<T>.unwrap(status: Int = 200): T {
     if (errorCode != 0) throw MyItmoException.Api(status, errorCode, errorMessage)
-    return result ?: throw MyItmoException.Decode()
+    return result ?: throw MyItmoException.Empty()
 }
 
 /** Unwraps the schedule data, honoring its own code rather than ResultResponse's error_code. */
 internal fun <T : Any> DataResponse<T>.unwrap(status: Int = 200): T {
     if (code != 0) throw MyItmoException.Api(status, code, message)
-    return data ?: throw MyItmoException.Decode()
+    return data ?: throw MyItmoException.Empty()
 }
 
-/** Unwraps an external-service payload or throws Decode when response is absent/null. */
-internal fun <T : Any> SimpleResponse<T>.unwrap(): T = response ?: throw MyItmoException.Decode()
+/** Unwraps an external-service payload or throws Empty when response is absent/null. */
+internal fun <T : Any> SimpleResponse<T>.unwrap(): T = response ?: throw MyItmoException.Empty()

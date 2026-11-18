@@ -47,6 +47,24 @@ class ItmoTransportTest {
     }
 
     @Test
+    fun aSuccessWithoutItsPayloadIsEmptyAndNullWhereNothingIsAnAnswer() = runTest {
+        for (body in listOf("""{"error_code":0,"result":null}""", """{"error_code":0}""")) {
+            assertFailsWith<MyItmoException.Empty> {
+                exchange(body, 200) { it.result(Int.serializer(), HttpMethod.Get, "sample") }
+            }
+            assertNull(exchange(body, 200) { it.resultOrNull(Int.serializer(), HttpMethod.Get, "sample") })
+        }
+        assertFailsWith<MyItmoException.Empty> {
+            exchange("""{"code":0,"data":null}""", 200) { it.data(Int.serializer(), HttpMethod.Get, "sample") }
+        }
+        assertNull(exchange("""{"response":null}""", 200) { it.responseOrNull(Int.serializer(), HttpMethod.Get, "sample") })
+        // A body that is not the expected shape stays a decode failure.
+        assertFailsWith<MyItmoException.Decode> {
+            exchange("""{"error_code":0,"result":"text"}""", 200) { it.result(Int.serializer(), HttpMethod.Get, "sample") }
+        }
+    }
+
+    @Test
     fun dataEnvelopeSuccessDecodes() = runTest {
         val result = exchange("""{"code":0,"data":7}""", 200) {
             it.execute(DataResponse.serializer(Int.serializer()), HttpMethod.Get, "sample")

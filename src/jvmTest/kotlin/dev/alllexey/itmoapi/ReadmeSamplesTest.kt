@@ -98,7 +98,7 @@ class ReadmeSamplesTest {
     } catch (error: MyItmoException.Api) {
         null // My ITMO отказал: error.errorCode
     } catch (error: MyItmoException) {
-        null // Network, Http, Decode: можно повторить позже
+        null // Network, Http, Decode, Empty: можно повторить позже
     }
     // README errors end
 

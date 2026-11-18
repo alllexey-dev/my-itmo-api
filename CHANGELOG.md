@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.5.1 - 2026-11-19
+
+A successful answer without its payload is no longer reported as a decode
+failure.
+
+- Add `MyItmoException.Empty`: the server answered success without the payload
+  the call returns (for example `result: null` where an object is expected).
+  2.5.0 threw `Decode` for this, the same as for an unreadable body; `Decode`
+  now means only that the body could not be decoded.
+- `qr.getQrCode()` returns `QrData?`: null when the service answers without a
+  pass (no `response`, or an empty `qr_hex`) instead of throwing.
+
 ## 2.5.0 - 2026-11-18
 
 Breaking: My ITMO calls return the payload, not an envelope.

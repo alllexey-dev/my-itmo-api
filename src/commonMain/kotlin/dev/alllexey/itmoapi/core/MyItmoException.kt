@@ -30,8 +30,14 @@ public sealed class MyItmoException protected constructor(message: String, cause
      */
     public class Auth(public val status: Int) : MyItmoException("Authentication required (status=$status)")
 
-    /** A successful body cannot be decoded or its required payload is absent.
-     * Parser causes are not attached: they can echo the response or a secret field.
+    /** A successful body cannot be decoded. Parser causes are not attached: they can echo the response
+     * or a secret field. A readable answer that merely has no payload is [Empty], not this.
      */
     public class Decode : MyItmoException("Response could not be decoded")
+
+    /** The server answered success without the payload this call returns, for example `result: null`
+     * where an object is expected. The body was readable, unlike [Decode]. Calls for which "nothing" is
+     * a normal answer return null or an empty list instead of throwing this.
+     */
+    public class Empty : MyItmoException("Response has no payload")
 }

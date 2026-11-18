@@ -11,5 +11,5 @@ import kotlinx.coroutines.runBlocking
 public class BlockingQr internal constructor(private val api: QrApi) {
     /** Blocking [QrApi.getQrCode]. */
     @Throws(MyItmoException::class)
-    public fun getQrCode(): QrData = runBlocking { api.getQrCode() }
+    public fun getQrCode(): QrData? = runBlocking { api.getQrCode() }
 }

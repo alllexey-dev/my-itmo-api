@@ -29,7 +29,7 @@ public sealed interface SportSignResult {
 
     /**
      * No decision about the lesson: a network failure, a non-2xx status (an error envelope on HTTP 400 included),
-     * a session or access envelope code (401, 403, 404), or a success without `result`. [cause] tells which;
+     * a session or access envelope code (401, 403, 404), or a success without `result` ([MyItmoException.Empty]). [cause] tells which;
      * [MyItmoException.Auth] means the user must sign in again.
      */
     public class RetryLater(public val cause: MyItmoException) : SportSignResult

@@ -4,7 +4,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /** Digital pass payload from qr.itmo.su; qr_hex is a hexadecimal string, not an integer.
- * No null variant is documented; absent fields use an empty default. Never log the pass.
+ * Absent fields use an empty default; [QrApi.getQrCode] returns null instead of a pass without `qr_hex`.
+ * Never log the pass.
  */
 @Serializable
 public data class QrData(

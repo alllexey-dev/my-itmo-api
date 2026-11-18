@@ -8,15 +8,17 @@ import kotlinx.coroutines.CancellationException
 
 /** Digital passes from the separate QR service, authenticated with the MyITMO bearer. */
 public interface QrApi {
-    /** GET https://qr.itmo.su/v1/user/pass; response contains the hexadecimal digital pass.
+    /** GET https://qr.itmo.su/v1/user/pass; the hexadecimal digital pass, or null when the service answers
+     * without one (no `response`, or an empty `qr_hex`). A missing pass is often cured by a fresh access
+     * token: call `tokens.forceRefresh()` and ask again.
      * Uses the absolute QR host, independent of the configured MyITMO base URL.
      */
     @Throws(MyItmoException::class, CancellationException::class)
-    public suspend fun getQrCode(): QrData
+    public suspend fun getQrCode(): QrData?
 }
 
 internal class QrApiImpl(private val transport: ItmoTransport) : QrApi {
-    override suspend fun getQrCode(): QrData = transport.response(
+    override suspend fun getQrCode(): QrData? = transport.responseOrNull(
         QrData.serializer(), HttpMethod.Get, "v1/user/pass",
-    ) { url("https://qr.itmo.su/v1/user/pass") }
+    ) { url("https://qr.itmo.su/v1/user/pass") }?.takeIf { it.qrHex.isNotBlank() }
 }

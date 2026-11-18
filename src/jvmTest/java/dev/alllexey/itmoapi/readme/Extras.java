@@ -26,7 +26,7 @@ public class Extras {
         } catch (MyItmoException.Auth e) {
             return null; // сессия закончилась: нужен новый вход
         } catch (MyItmoException e) {
-            return null; // Api, Http, Network, Decode
+            return null; // Api, Http, Network, Decode, Empty
         }
     }
     // README javaerrors end
