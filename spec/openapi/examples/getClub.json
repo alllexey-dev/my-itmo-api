@@ -1,0 +1,18 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": {
+    "id": 1000,
+    "name": "synthetic-1",
+    "short_description": "synthetic-2",
+    "long_description": "synthetic-3",
+    "vk": "synthetic-4",
+    "instagram": "synthetic-5",
+    "card_image": "synthetic-6",
+    "background": "synthetic-7",
+    "is_member": false,
+    "is_owner": false,
+    "website": "synthetic-8",
+    "meetings": []
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "error_code": null,
+  "error_message": null,
+  "result": [
+    {
+      "status_id": 1000,
+      "status_name": "synthetic-1"
+    },
+    {
+      "status_id": 1002,
+      "status_name": "synthetic-3"
+    },
+    {
+      "status_id": 1004,
+      "status_name": "synthetic-5"
+    }
+  ]
+}

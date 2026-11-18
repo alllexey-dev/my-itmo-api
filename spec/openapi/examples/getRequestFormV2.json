@@ -1,0 +1,24 @@
+{
+  "error_code": null,
+  "error_message": null,
+  "result": {
+    "id": 1000,
+    "name": "synthetic-1",
+    "description": "synthetic-2",
+    "htmlNote": "synthetic-3",
+    "category": {
+      "id": 1004,
+      "code": "synthetic-5",
+      "name": "synthetic-6",
+      "icon": "synthetic-7",
+      "color": "synthetic-8",
+      "sortOrder": 1009
+    },
+    "version": 1010,
+    "schemaJson": "synthetic-11",
+    "alias": "synthetic-12",
+    "accessCodes": [
+      "synthetic-13"
+    ]
+  }
+}

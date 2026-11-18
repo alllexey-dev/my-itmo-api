@@ -1,0 +1,12 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": {
+    "id": 1000,
+    "number": 1001,
+    "date_start": "2026-09-01T10:00:00.024+03:00",
+    "date_end": "2026-09-01T10:00:59.579+03:00",
+    "st_year": "2026/2027",
+    "sem_id": 1002
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": {
+    "semester": {
+      "choice_status": 1000,
+      "date_end": "2026-09-01T10:00:00.098+03:00",
+      "date_start": "2026-09-01T10:00:00.026+03:00",
+      "semester": 1001,
+      "study_year": "2026/2027"
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": {
+    "places": [
+      {
+        "id": 1000,
+        "building_id": 1001,
+        "name": "synthetic-2",
+        "location_name": "100003",
+        "image_url": "synthetic-4",
+        "occupancy_rate": 1005
+      },
+      {
+        "id": 1006,
+        "building_id": 1007,
+        "name": "synthetic-8",
+        "location_name": "100009",
+        "image_url": "synthetic-10",
+        "occupancy_rate": 1011
+      },
+      {
+        "id": 1012,
+        "building_id": 1013,
+        "name": "synthetic-14",
+        "location_name": "100015",
+        "image_url": "synthetic-16",
+        "occupancy_rate": 1017
+      }
+    ]
+  }
+}

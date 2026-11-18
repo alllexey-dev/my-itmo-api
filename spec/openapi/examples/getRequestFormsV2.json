@@ -1,0 +1,23 @@
+{
+  "error_code": null,
+  "error_message": null,
+  "result": [
+    {
+      "id": 1000,
+      "code": "synthetic-1",
+      "name": "synthetic-2",
+      "icon": "synthetic-3",
+      "color": "synthetic-4",
+      "sortOrder": 1005,
+      "forms": [
+        {
+          "id": 1006,
+          "name": "synthetic-7",
+          "description": "synthetic-8",
+          "version": 1009,
+          "alias": "synthetic-10"
+        }
+      ]
+    }
+  ]
+}

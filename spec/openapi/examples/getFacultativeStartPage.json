@@ -1,0 +1,58 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": {
+    "isu": 1000,
+    "description": [
+      {
+        "id": 1001,
+        "name": "synthetic-2",
+        "type": "synthetic-3",
+        "variants": [
+          {
+            "id": 1004,
+            "name": "synthetic-5",
+            "type": "synthetic-6",
+            "variants": [
+              {
+                "id": 1007,
+                "url": null,
+                "name": "synthetic-8",
+                "type": "synthetic-9",
+                "description": "synthetic-10"
+              }
+            ]
+          },
+          {
+            "id": 1011,
+            "name": "synthetic-12",
+            "type": "synthetic-13",
+            "variants": [
+              {
+                "id": 1014,
+                "url": null,
+                "name": "synthetic-15",
+                "type": "synthetic-16",
+                "description": "synthetic-17"
+              },
+              {
+                "id": 1018,
+                "url": null,
+                "name": "synthetic-19",
+                "type": "synthetic-20",
+                "description": "synthetic-21"
+              },
+              {
+                "id": 1022,
+                "url": null,
+                "name": "synthetic-23",
+                "type": "synthetic-24",
+                "description": "synthetic-25"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

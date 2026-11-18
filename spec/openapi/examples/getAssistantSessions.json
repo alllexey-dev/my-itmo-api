@@ -1,0 +1,23 @@
+[
+  {
+    "id": "synthetic-0",
+    "workspace_id": "synthetic-1",
+    "title": "synthetic-2",
+    "created_at": "2026-09-01T10:00:19.241264Z",
+    "updated_at": "2026-09-01T10:00:19.427210Z"
+  },
+  {
+    "id": "synthetic-3",
+    "workspace_id": "synthetic-4",
+    "title": "synthetic-5",
+    "created_at": "2026-09-01T10:00:07.820380Z",
+    "updated_at": "2026-09-01T10:00:07.949998Z"
+  },
+  {
+    "id": "synthetic-6",
+    "workspace_id": "synthetic-7",
+    "title": "synthetic-8",
+    "created_at": "2026-09-01T10:00:56.247585Z",
+    "updated_at": "2026-09-01T10:00:00.421685Z"
+  }
+]

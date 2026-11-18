@@ -1,0 +1,11 @@
+{
+  "error_code": null,
+  "error_message": null,
+  "result": {
+    "items": [],
+    "totalElements": 1000,
+    "totalPages": 1001,
+    "page": 1002,
+    "size": 1003
+  }
+}

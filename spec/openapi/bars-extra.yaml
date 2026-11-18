@@ -1,0 +1,178 @@
+openapi: 3.1.0
+info:
+  title: bars.itmo.ru, additional student endpoints (unofficial research)
+  version: 0.1.0
+  summary: Read-only BARS endpoints that are not in the verified contract bars.yaml.
+  description: |
+    Same host, session and conventions as `bars.yaml`: the BARS session from `barsLogin` as
+    `Authorization` ([auth.md](https://github.com/alllexey-dev/my-itmo-api/blob/master/spec/auth.md)), bare JSON responses
+    ([conventions.md](https://github.com/alllexey-dev/my-itmo-api/blob/master/spec/conventions.md)).
+
+    Verification status: research. Schemas come from live responses of one student account and,
+    where they were empty, from the BARS frontend code; those places say "Observed empty". The
+    anonymized responses are in `examples/<operationId>.json` and are validated against these
+    schemas.
+  license:
+    name: MIT
+    identifier: MIT
+servers:
+  - url: https://bars.itmo.ru/backend/rest
+security:
+  - barsSession: []
+tags:
+  - name: journal
+  - name: users
+paths:
+  /journal/checkpoint-plans:
+    get:
+      operationId: getCheckpointPlans
+      tags:
+        - journal
+      summary: Checkpoint plans of a discipline
+      parameters:
+        - name: disciplineId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                    terms:
+                      type: array
+                      items:
+                        type: integer
+                    programs:
+                      type: array
+                      items:
+                        description: Observed empty
+                  required:
+                    - id
+                    - name
+                    - terms
+                    - programs
+        default:
+          $ref: "#/components/responses/Error"
+  /deadline:
+    get:
+      operationId: getMyDeadlines
+      tags:
+        - journal
+      summary: Checkpoint deadlines of the user
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                description: Observed empty; the BARS frontend reads plan_identifier, discipline_name, checkpoint.type, deadline_date
+                items:
+                  type: object
+                  properties:
+                    plan_identifier:
+                      type: string
+                    discipline_name:
+                      type: string
+                    checkpoint:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                    deadline_date:
+                      type:
+                        - string
+                        - integer
+        default:
+          $ref: "#/components/responses/Error"
+  /config/personal:
+    get:
+      operationId: getPersonalConfig
+      tags:
+        - users
+      summary: Personal settings overriding the global ones (selected year and term); empty when not overridden
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                description: Observed empty; items are Setting objects {id, name, value}
+                items:
+                  $ref: bars.yaml#/components/schemas/Setting
+        default:
+          $ref: "#/components/responses/Error"
+  /marks/{checkpointPlanId}/{type}/{identifier}/student/{studentId}/history:
+    get:
+      operationId: getMarkHistory
+      tags:
+        - journal
+      summary: History of the student's marks and approvals in a journal
+      parameters:
+        - name: checkpointPlanId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: student_id from the student journal
+        - name: checkpointId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                description: Observed empty
+                items:
+                  type: object
+        default:
+          $ref: "#/components/responses/Error"
+components:
+  securitySchemes:
+    barsSession:
+      type: http
+      scheme: bearer
+      description: |
+        BARS session from barsLogin in bars.yaml. The `authorization` response header of barsLogin already has
+        the form `Bearer <token>`; the bearer token of this scheme is the part after `Bearer `. A hand-written
+        client sends the header value back unchanged as `Authorization`. A generated client that adds
+        `Bearer ` itself must be given the value without that prefix.
+  responses:
+    Error:
+      description: Spring error body
+      content:
+        application/json:
+          schema:
+            type: object

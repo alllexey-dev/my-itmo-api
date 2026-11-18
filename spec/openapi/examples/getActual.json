@@ -1,0 +1,54 @@
+{
+  "code": 0,
+  "message": null,
+  "result": {
+    "attention": [],
+    "actual": [
+      {
+        "id": 1000,
+        "name": "synthetic-1",
+        "admin_name": "synthetic-2",
+        "short_description": "synthetic-3",
+        "long_description": "synthetic-4",
+        "date_start": "2026-09-01",
+        "date_end": "2026-09-01",
+        "photo": "synthetic-5",
+        "category": null,
+        "type_actual": 1006,
+        "pages": [],
+        "date_start_show": "2026-09-01",
+        "date_end_show": "2026-09-01"
+      },
+      {
+        "id": 1007,
+        "name": "synthetic-8",
+        "admin_name": "synthetic-9",
+        "short_description": "synthetic-10",
+        "long_description": "synthetic-11",
+        "date_start": "2026-09-01",
+        "date_end": "2026-09-01",
+        "photo": "synthetic-12",
+        "category": null,
+        "type_actual": 1013,
+        "pages": [],
+        "date_start_show": "2026-09-01",
+        "date_end_show": "2026-09-01"
+      },
+      {
+        "id": 1014,
+        "name": "synthetic-15",
+        "admin_name": "synthetic-16",
+        "short_description": "synthetic-17",
+        "long_description": "synthetic-18",
+        "date_start": "2026-09-01",
+        "date_end": "2026-09-01",
+        "photo": "synthetic-19",
+        "category": null,
+        "type_actual": 1020,
+        "pages": [],
+        "date_start_show": "2026-09-01",
+        "date_end_show": "2026-09-01"
+      }
+    ]
+  }
+}

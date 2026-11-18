@@ -1,0 +1,10 @@
+{
+  "error_code": null,
+  "error_message": null,
+  "result": {
+    "is_admin": false,
+    "can_create": false,
+    "edu_levels": null,
+    "forbidden": true
+  }
+}

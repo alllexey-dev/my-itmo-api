@@ -1,0 +1,11 @@
+{
+  "error_code": 0,
+  "error_message": "synthetic-0",
+  "result": {
+    "00a /+&?": {
+      "limitMax": 1001,
+      "occupied": 1002,
+      "free": 1003
+    }
+  }
+}

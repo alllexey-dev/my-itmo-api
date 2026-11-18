@@ -1,0 +1,8 @@
+extends:
+  - recommended
+rules:
+  # Upstream BARS paths really end with a slash.
+  no-path-trailing-slash: off
+  # Errors are described by `default` responses.
+  operation-4xx-response: off
+  tag-description: off

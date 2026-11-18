@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1000,
+    "name": "synthetic-1",
+    "documents": "synthetic-2",
+    "priority": 1003,
+    "visible": true,
+    "short_name": "synthetic-4",
+    "is_multiple_in_half_year": false
+  },
+  {
+    "id": 1005,
+    "name": "synthetic-6",
+    "documents": "synthetic-7",
+    "priority": 1008,
+    "visible": true,
+    "short_name": "synthetic-9",
+    "is_multiple_in_half_year": false
+  },
+  {
+    "id": 1010,
+    "name": "synthetic-11",
+    "documents": "synthetic-12",
+    "priority": 1013,
+    "visible": true,
+    "short_name": "synthetic-14",
+    "is_multiple_in_half_year": false
+  }
+]

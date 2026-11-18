@@ -1,5 +1,47 @@
 # Changelog
 
+## 2.5.0 - unreleased
+
+Breaking: My ITMO calls return the payload, not an envelope.
+
+- Every method of the My ITMO areas returns its payload directly:
+  `schedule.getPersonalSchedule(from, to)` is a `List<Schedule>`, not a
+  `DataResponse<List<Schedule>>`. `ResultResponse`, `DataResponse` and
+  `SimpleResponse` are internal now. Errors are unchanged: the call itself
+  already threw `MyItmoException.Api` for a nonzero error code.
+- "Nothing" is a value, not a decode failure: `dormitory.getDormitoryStatus()`
+  returns `DormitoryStatus?` (null without a dormitory application), and
+  `getTuitionContracts`, `getTuitionPayments`, `getDormitoryContractPeriods` and
+  `getDormitoryContracts` return an empty list for a null result.
+- `election.changeSelectedFlows`, `clearAllSelectedFlows` and
+  `changeSelectedDisciplines` return `Unit`; their result had no stable shape.
+- Add `MyItmo.logout()` and `TokenManager.logout()`: end the ITMO.ID session of
+  the stored refresh token and clear the stored snapshot (`MyItmo.logout()` also
+  clears the BARS session and the sign-in cookies). The local session is cleared
+  even when the server call fails; that failure is rethrown.
+- Add `MyItmo.hasSession()`: a stored session with an unexpired refresh token,
+  without a network call.
+- Add `MyItmo.loginOrResume(username, password, storage)`: uses the stored
+  session while it can still be refreshed, otherwise signs in with the password.
+- Add `BlockingMyItmo` (JVM, package `blocking`): the same areas, methods and
+  BARS without coroutines, for Java. Date parameters are `java.time.LocalDate`.
+  `Blocking.call` stays for everything else.
+- Rename `MyItmo.studyplan` and `MyItmoClient.studyplan` to `studyPlan`.
+- Merge `SportRemainingApi` into `SportApi`; the methods are the same.
+- Remove `requireResult()`: there is no envelope to unwrap, drop the call.
+- Rename the artifact from `dev.alllexey:my-itmo-api-kmp` to
+  `dev.alllexey:my-itmo-api`, the coordinates of the removed 1.x library.
+  Versions up to 2.4.0 stay under the old name.
+- Maven projects can depend on `my-itmo-api` itself: its POM now depends on
+  `my-itmo-api-jvm`, so the `-jvm` suffix is not needed there. Gradle consumers
+  resolve the same name through module metadata, as before.
+- Remove the 1.x Java library (`dev.alllexey:my-itmo-api`) from the repository.
+  Its versions up to 1.8.2 stay on Maven Central and its sources in the `1.8.2` tag. The 2.x build
+  moved from `kmp/` to the repository root.
+- Add `spec/`: a language-neutral description of the ITMO APIs (sign-in, hosts,
+  conventions, services, OpenAPI specifications with examples), moved here from
+  itmo-mcp.
+
 ## 2.4.0 - 2026-11-08
 
 Additive: read-only dormitory and tuition calls on my.itmo.ru. Settlement

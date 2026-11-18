@@ -1,0 +1,42 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": [
+    {
+      "id": 1000,
+      "name": "synthetic-1",
+      "description": "synthetic-2",
+      "signed": false,
+      "limit": 1003,
+      "available": 1004,
+      "instruction_link": "synthetic-5",
+      "instruction_description": "synthetic-6",
+      "requisite_available": true,
+      "link": null
+    },
+    {
+      "id": 1007,
+      "name": "synthetic-8",
+      "description": "synthetic-9",
+      "signed": false,
+      "limit": 1010,
+      "available": 1011,
+      "instruction_link": "synthetic-12",
+      "instruction_description": "synthetic-13",
+      "requisite_available": true,
+      "link": null
+    },
+    {
+      "id": 1014,
+      "name": "synthetic-15",
+      "description": "synthetic-16",
+      "signed": false,
+      "limit": 1017,
+      "available": 1018,
+      "instruction_link": "synthetic-19",
+      "instruction_description": "synthetic-20",
+      "requisite_available": false,
+      "link": null
+    }
+  ]
+}

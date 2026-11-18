@@ -1,0 +1,63 @@
+package dev.alllexey.itmoapi.myitmo.system
+
+import dev.alllexey.itmoapi.core.*
+import dev.alllexey.itmoapi.testing.mockExchange
+import dev.alllexey.itmoapi.testing.fixture
+import kotlinx.coroutines.test.runTest
+import kotlin.test.*
+
+class SystemApiTest {
+    @Test
+    fun dashboardKeepsGridConstraintsAndObservedOptionalFields() = runTest {
+        val dashboard = mockExchange("/api/system/dashboard", fixture("system/dashboard.json")) {
+            SystemApiImpl(it).getDashboard()
+        }
+        assertEquals(DashboardItem("synthetic-widget", 1, 2, 3, 4, "synthetic", true, 1, 6, 2, 8,
+            false, true, false, ".handle", ".button", ".locked"), dashboard.first())
+        assertEquals(DashboardItem("minimal", 0, 0, 1, 1, "synthetic-minimal", false), dashboard.last())
+    }
+
+    @Test
+    fun navigationRetainsNestedLeafAndServiceCatalogColor() = runTest {
+        val section = mockExchange("/api/system/v1/menu/items", fixture("system/items.json")) {
+            SystemApiImpl(it).getMenuItems()
+        }.menu.single()
+        assertEquals("Synthetic section", section.title)
+        assertNull(section.color)
+        assertFalse(section.exact)
+        val leaf = section.children!!.single()
+        assertEquals(MenuItem("Synthetic leaf", "Leaf description", "/section/leaf", "leaf", "leaf-color", true), leaf)
+        val service = mockExchange("/api/system/v1/menu/services", fixture("system/services.json")) {
+            SystemApiImpl(it).getServices()
+        }.menu.single()
+        assertEquals(MenuItem("Synthetic service", "Service description", "https://example.invalid/service",
+            "service", "service-color", false, "#123456", emptyList()), service)
+    }
+
+    @Test
+    fun eachEndpointPreservesEmptyCollectionsAndHttp400Api100() = runTest {
+        for (path in listOf("dashboard", "v1/menu/items", "v1/menu/services")) {
+            val empty = mockExchange("/api/system/$path", fixture(if (path == "dashboard") "system/empty-dashboard.json" else "system/empty-menu.json")) {
+                val api = SystemApiImpl(it)
+                when (path) {
+                    "dashboard" -> api.getDashboard()
+                    "v1/menu/items" -> api.getMenuItems().menu
+                    else -> api.getServices().menu
+                }
+            }
+            assertTrue(empty.isEmpty())
+            val failure = assertFailsWith<MyItmoException.Api> {
+                mockExchange("/api/system/$path", fixture("system/error.json"), status = 400) {
+                    val api = SystemApiImpl(it)
+                    when (path) {
+                        "dashboard" -> api.getDashboard()
+                        "v1/menu/items" -> api.getMenuItems()
+                        else -> api.getServices()
+                    }
+                }
+            }
+            assertEquals(400, failure.status)
+            assertEquals(100, failure.errorCode)
+        }
+    }
+}

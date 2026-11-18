@@ -1,0 +1,16 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": {
+    "buildings": [
+      {
+        "id": 1000,
+        "humanreadable_name": "synthetic-1"
+      },
+      {
+        "id": 1002,
+        "humanreadable_name": "synthetic-3"
+      }
+    ]
+  }
+}

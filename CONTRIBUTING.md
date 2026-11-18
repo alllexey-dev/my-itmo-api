@@ -2,32 +2,44 @@
 
 ## Layout
 
-| Line | Where | Artifact | Status |
-|---|---|---|---|
-| 1.x | repository root (`src/`, `pom.xml`) | `dev.alllexey:my-itmo-api` | Java 8, Retrofit/OkHttp/Gson; compatible fixes only |
-| 2.x | `kmp/` | `dev.alllexey:my-itmo-api-kmp` | Kotlin Multiplatform (JVM/Android, iOS), Ktor; all new work |
+| Path | What |
+|---|---|
+| `src/` | The library: Kotlin Multiplatform (JVM/Android, iOS), Ktor. Artifact `dev.alllexey:my-itmo-api` |
+| `fixtures/` | Synthetic test fixtures, see `fixtures/README.md` |
+| `docs/` | Library guides (Russian). Their code samples are compiled in `src/jvmTest` |
+| `spec/` | Language-neutral description of the ITMO APIs: guides, service documents, OpenAPI specifications, examples |
+| `scripts/verify.sh` | The checks CI runs |
 
-2.x packages live under `dev.alllexey.itmoapi`: `itmoid` (ITMO.ID OAuth/PKCE and
+Packages live under `dev.alllexey.itmoapi`: `itmoid` (ITMO.ID OAuth/PKCE and
 tokens), `myitmo.<area>` (My ITMO endpoints by area), `bars` (BARS), `core`
-(transport, envelopes, errors). Test fixtures are in `kmp/fixtures/`.
+(transport, envelopes, errors), `blocking` (JVM only: the blocking view for
+Java).
+
+The 1.x Java library was removed in 2.5.0; its last sources are in the `1.8.2`
+tag.
 
 ## Running tests
 
-JDK 17 for both lines.
+JDK 17.
 
 ```bash
-./gradlew -p kmp jvmTest                 # 2.x on JVM; includes README samples
-./gradlew -p kmp iosSimulatorArm64Test   # 2.x on the iOS simulator, needs Xcode
-./mvnw -B verify -Dgpg.skip=true         # 1.x
+./gradlew jvmTest                 # JVM; includes the documentation samples
+./gradlew iosSimulatorArm64Test   # iOS simulator, needs Xcode
 ```
 
-`scripts/verify.sh [all|maven|kmp|kmp-jvm|kmp-ios]` runs the same commands, as CI
-does. Tests use injected Ktor `MockEngine`s or local servers, never the real
-ITMO.ID, My ITMO or BARS.
+`scripts/verify.sh [all|jvm|ios]` runs the same commands, as CI does. Tests use
+injected Ktor `MockEngine`s or local servers, never the real ITMO.ID, My ITMO
+or BARS.
 
-## Adding an endpoint (2.x)
+Specifications and examples have their own checks:
 
-1. Model: a `@Serializable` class in `kmp/src/commonMain/.../myitmo/<area>/`
+```bash
+cd spec/tools && npm ci && npm run lint && npm run examples
+```
+
+## Adding an endpoint
+
+1. Model: a `@Serializable` class in `src/commonMain/.../myitmo/<area>/`
    (or `bars/model/`) with English KDoc on the class and every property:
    - the observed wire shape and what the field means;
    - units (seconds, milliseconds, rubles, points) and time zone;
@@ -38,25 +50,31 @@ ITMO.ID, My ITMO or BARS.
    declaration, never `Any?` or `JsonElement`. Do not infer a type from a
    single sample.
 2. Endpoint: a method on the area interface with KDoc (HTTP method and path,
-   purpose) and `@Throws(MyItmoException::class, CancellationException::class)`;
-   the implementation calls `transport.execute(serializer, method, "api/...")`.
-3. Fixture: a synthetic `kmp/fixtures/<area>/<case>.json`, see
-   `kmp/fixtures/README.md`, and its entry in `FixtureDecodeTest`.
-4. Test: a common test using `mockExchange` that checks the method, path, query,
+   purpose) and `@Throws(MyItmoException::class, CancellationException::class)`.
+   It returns the payload, not the envelope: the implementation calls
+   `transport.result(serializer, method, "api/...")` (`data` for the schedule
+   envelope, `response` for external services). Use `resultOrNull` only where a
+   successful null result was observed, and say in the KDoc what null means.
+3. Blocking twin: the same method on the `blocking/Blocking<Area>` class;
+   `BlockingParityTest` fails without it.
+4. Fixture: a synthetic `fixtures/<area>/<case>.json`, see
+   `fixtures/README.md`, and its entry in `FixtureDecodeTest`.
+5. Test: a common test using `mockExchange` that checks the method, path, query,
    body and the decoded model, plus the empty and error cases you have.
-5. A line in `CHANGELOG.md`.
+6. A row in `docs/api.md` (`ReadmeSamplesTest` fails without it), the endpoint
+   in `spec/` (the service document, and the specification once the answer has
+   been checked), and a line in `CHANGELOG.md`.
 
-1.x models follow the same documentation rules with Javadoc; use wrapper types
-where null was observed and keep Java 8 compatibility.
+## Documentation samples
+
+Code blocks in `README.md` and `docs/*.md` that show library calls are copied
+from compiled sources in `src/jvmTest` (`ReadmeSamplesTest.kt`, `readme/`),
+between `// README <name> begin` and `// README <name> end`. Change the source
+and the document together; the test compares them.
 
 ## Releases
 
-Releases are made only by the owner, by pushing a tag on a `master` commit:
-
-- `1.x.y` tag: `release.yml` publishes the root Maven project to Maven Central;
-  the tag must equal the `pom.xml` version.
-- `2.x.y` tag: `release-kmp.yml` publishes `kmp/` to Maven Central; the tag must
-  equal `VERSION_NAME` in `kmp/gradle.properties`.
-
-Both workflows then create a draft GitHub release. Pull requests never push
-tags or run publishing tasks.
+Releases are made only by the owner, by pushing a `2.x.y` tag on a `master`
+commit: `release.yml` publishes to Maven Central and creates a draft GitHub
+release. The tag must equal `VERSION_NAME` in `gradle.properties`. Pull requests
+never push tags or run publishing tasks.

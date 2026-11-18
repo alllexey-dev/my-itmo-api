@@ -1,0 +1,21 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": [
+    {
+      "id": 1000,
+      "club_type": "synthetic-1",
+      "image": "synthetic-2"
+    },
+    {
+      "id": 1003,
+      "club_type": "synthetic-4",
+      "image": "synthetic-5"
+    },
+    {
+      "id": 1006,
+      "club_type": "synthetic-7",
+      "image": "synthetic-8"
+    }
+  ]
+}

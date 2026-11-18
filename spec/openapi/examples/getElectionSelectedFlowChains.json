@@ -1,0 +1,47 @@
+{
+  "error_code": 0,
+  "error_message": null,
+  "result": {
+    "selectedBy": 1000,
+    "flowChains": [
+      {
+        "disciplineId": 1001,
+        "discName": "synthetic-2",
+        "flows": [
+          {
+            "flowId": 1003,
+            "flowName": "synthetic-4"
+          }
+        ]
+      },
+      {
+        "disciplineId": 1005,
+        "discName": "synthetic-6",
+        "flows": [
+          {
+            "flowId": 1007,
+            "flowName": "synthetic-8"
+          },
+          {
+            "flowId": 1009,
+            "flowName": "synthetic-10"
+          }
+        ]
+      },
+      {
+        "disciplineId": 1011,
+        "discName": "synthetic-12",
+        "flows": [
+          {
+            "flowId": 1013,
+            "flowName": "synthetic-14"
+          },
+          {
+            "flowId": 1015,
+            "flowName": "synthetic-16"
+          }
+        ]
+      }
+    ]
+  }
+}
